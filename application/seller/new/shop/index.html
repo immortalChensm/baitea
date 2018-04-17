@@ -1,0 +1,108 @@
+<include file="public/head"/>
+<div class="ncsc-layout wrapper">
+	<include file="public/left"/>
+	<div id="layoutRight" class="ncsc-layout-right">
+		<div class="ncsc-path"><i class="icon-desktop"></i>商家管理中心<i class="icon-angle-right"></i>门店<i class="icon-angle-right"></i>门店管理
+		</div>
+		<div class="main-content" id="mainContent">
+			<div class="tabmenu">
+				<ul class="tab pngFix">
+					<li class="active"><a href="{:U('Shop/index')}">门店列表</a></li>
+				</ul>
+				<a href="{:U('Shop/info')}" class="ncbtn ncbtn-mint" title="新增门店"><i class="icon-plus-sign"></i>新增门店</a>
+
+			</div>
+			<div class="alert alert-block mt10">
+				<ul class="mt5">
+					<li>1、点击新增门店按钮可以添加门店</li>
+				</ul>
+			</div>
+			<table class="ncsc-default-table">
+				<thead>
+				<tr>
+					<th class="w80">编号</th>
+					<th class="w100">登录名</th>
+					<th class="w100">门店名称</th>
+					<th class="w200">所在地区</th>
+					<th class="w50">实景图片</th>
+					<th class="w80">状态</th>
+					<th class="w210">操作</th>
+				</tr>
+				</thead>
+				<empty name="list">
+			  		<tbody>
+			  		<tr>
+			      		<td colspan="20" class="norecord"><div class="warning-option"><i class="icon-warning-sign"></i><span>暂无符合条件的数据记录</span></div></td>
+			    	</tr>
+			      </tbody>
+			  <else/> 
+				<tbody>
+				<volist name="list" id="shop">
+					<tr class="bd-line">
+						<td>{$shop.shop_id}</td>
+						<td>{$shop.shopper_name|getSubstr=0,20}</td>
+						<td>{$shop.shop_name|getSubstr=0,20}</td>
+						<td>[{$shop.address_region}] {$shop.shop_address} <br/>{$shop.shop_phone}</td>
+						<td>
+							<div class="pic-thumb">
+								<a href="{$shop.live_picture}" target="_blank">
+									<img style="width:32px;height:32px" src="{$shop.live_picture}">
+								</a>
+							</div>
+						</td>
+						<td>
+							<if condition="$shop.shop_status eq 1">
+								<img width="20" height="20" src="__PUBLIC__/images/yes.png" onclick="changeTableVal2('shop','shop_id',{$shop[shop_id]},'shop_status',this)"/>
+								<else/>
+								<img src="/public/images/cancel.png" onclick="changeTableVal2('shop','shop_id',{$shop[shop_id]},'shop_status',this)" width="20" height="20">
+							</if>
+						</td>
+						<td class="nscs-table-handle">
+							<span><a href="{:U('Shop/info',array('shop_id'=>$shop['shop_id']))}" class="btn-bluejeans"><i class="icon-edit"></i><p>编辑</p></a></span>
+							<span><a data-url="{:U('Team/delete')}" data-id="{$team.team_id}" onclick="delfun(this)" class="btn-grapefruit"><i class="icon-trash"></i><p>删除</p></a></span>
+						</td>
+					</tr>
+				</volist>
+				</tbody>
+				</empty>
+				<tfoot>
+				<tr>
+					<td colspan="20">
+						{$page}
+					</td>
+				</tr>
+				</tfoot>
+			</table>
+		</div>
+	</div>
+</div>
+<include file="public/foot"/>
+<script>
+	function delfun(obj) {
+		layer.confirm('确认删除？', {
+					btn: ['确定', '取消'] //按钮
+				}, function () {
+					$.ajax({
+						type: 'post',
+						url: $(obj).attr('data-url'),
+						data: {team_id: $(obj).attr('data-id')},
+						dataType: 'json',
+						success: function (data) {
+							layer.closeAll();
+							if (data.status == 1) {
+								layer.msg(data.msg, {icon: 1});
+								$(obj).parent().parent().parent().remove();
+							} else {
+								layer.msg(data.msg, {icon: 2, time: 2000});
+							}
+						}
+					})
+				}, function (index) {
+					layer.close(index);
+				}
+		);
+	}
+
+</script>
+</body>
+</html>

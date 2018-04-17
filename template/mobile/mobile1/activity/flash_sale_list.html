@@ -1,0 +1,109 @@
+<include file="public/new_header" title="秒杀"/>
+
+<header>
+    <div class="h-left"><a href="javascript:;" onclick="history.go(-1)"><img src="__STATIC__/newskin/images/return.png"></a></div>
+    <div class="h-con">掌心全球购</div>
+    <div class="h-right"><a href="{:U('Goods/ajaxSearch')}"><img src="__STATIC__/newskin/images/search-icon.png"></a></div>
+</header>
+<div class="main main-bg">
+    <!--秒杀活动-->
+    <div class="f-turntable">
+        <div class="m-top content30">
+            <ul>
+        	<volist name="time_space" id="vo">
+				<li onclick="reload_flash_sale_list(this);" <if condition="(time() egt $vo['start_time']) AND (time() lt $vo['end_time'])">class="red active"</if> start-data="{$vo['start_time']|date="Y/m/d H:i:s",###}" end-data="{$vo['end_time']|date="Y/m/d H:i:s",###}" data-start-time="{$vo['start_time']}" data-end-time="{$vo['end_time']}">
+					<div>
+						<span>{$vo['font']}</span><br>
+						<if condition="time() lt $vo['start_time']">即将开场<elseif condition="(time() egt $vo['start_time']) AND (time() lt $vo['end_time'])"/>秒杀中<else />已经结束</if>
+					</div>
+				</li>
+			</volist>
+            </ul>
+        </div>
+        <div class="m-bottom nowkill">
+            <div class="b-left fl"><if condition="time() lt $time_space[0]['start_time']">秒杀活动即将开场~<else/>正在秒杀，先下单先得哦~</if></div>
+            <div class="b-right fr"></div>
+        </div>
+        <div class="m-warp" id='flash_sale_list'>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    $(".main-bg").css("min-height",$(window).height());
+    function GetRTime2(){
+			var start_time_data = $('.content30').find('.red').attr('data-start-time');
+			var timestamp   = Date.parse(new Date()).toString().substring(0,10);
+			if(start_time_data > timestamp){
+				var start_time = GetRTime($('.content30').find('.red').attr('start-data'));
+				var start_time_index =  start_time.indexOf("天");
+				$('.nowkill').find(".fl").text("秒杀活动即将开场~");
+				$('.nowkill').find(".fr").html('距离开始'+start_time.substr(start_time_index+1));
+			}else{
+				var end_time = GetRTime($('.content30').find('.red').attr('end-data'));
+				var end_time_index =  end_time.indexOf("天");
+				$('.nowkill').find(".fl").text("正在秒杀，先下单先得哦~");
+				$('.nowkill').find(".fr").html('距离结束'+end_time.substr(end_time_index+1));
+			}
+
+		}
+	setInterval(GetRTime2,1000);
+</script>
+<script type="text/javascript">
+	$(function () {
+		ajax_sourch_submit();
+	});
+	var page = 0;//页数
+	var start_time = $('.content30').find('.red').attr('data-start-time');
+	var end_time = $('.content30').find('.red').attr('data-end-time');
+	function reload_flash_sale_list(obj)
+	{
+		page = 0;
+		$(obj).parent().children().removeClass('red').removeClass('active');
+		$(obj).addClass('red').addClass('active');
+		start_time = $(obj).attr('data-start-time');
+		end_time = $(obj).attr('data-end-time');
+		console.log(start_time);
+		console.log(end_time);
+		setInterval(GetRTime2,1000);
+		$("#flash_sale_list").empty();
+		ajax_sourch_submit();
+	}
+
+	/**
+	 * 加载店铺
+	 */
+	function ajax_sourch_submit() {
+        page++;
+		$('.get_more').show();
+		$.ajax({
+			type: "get",
+			url: "/index.php?m=Mobile&c=Activity&a=ajax_flash_sale&p=" + page + "&start_time=" + start_time + "&end_time=" + end_time,
+			success: function (data) {
+				if (data) {
+					$("#flash_sale_list").append(data);
+					$('.get_more').hide();
+				} else {
+					$('.get_more').hide();
+					$('#getmore').remove();
+				}
+			}
+		});
+	}
+</script>
+<div class="floor_body2">
+	<div id="J_ItemList">
+		<ul class="product single_item info">
+		</ul>
+		<a href="javascript:;" class="get_more" style="text-align:center; display:block;">
+			<img src='__STATIC__/images/category/loader.gif' width="12" height="12"> </a>
+	</div>
+</div>
+<div style="height: .9rem"></div> 
+<!--底部导航-start-->
+<include file="public/footer_nav"/>
+<script src="__STATIC__/js/swipeSlide.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="__STATIC__/js/style.js" type="text/javascript" charset="utf-8"></script>
+</body>
+</html>

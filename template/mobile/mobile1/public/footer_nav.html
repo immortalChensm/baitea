@@ -1,0 +1,109 @@
+<style type="text/css">
+  footer {
+    width: 100%;
+    height: 1rem;
+    background-color: #fff;
+    border-top: 1px solid #f2f2f2;
+    position: fixed;
+    bottom: -1px;
+    left: 0;
+    z-index: 999;
+  }
+  footer ul {
+    width: 100%;
+    height: 100%;
+  }
+  footer ul li {
+    width: 25%;
+    height: 100%;
+    float: left;
+  }
+  footer ul li .b-icon {
+    width: .42rem;
+    height: .42rem;
+    margin: .1rem auto 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+  footer ul li .b-wen {
+    width: 100%;
+    font-size: .24rem;
+    color: #989898;
+    text-align: center;
+  }
+  footer ul li:nth-child(1) .b-icon {
+    background-image: url(__STATIC__/images/icon_home.png);
+  }
+  footer ul li:nth-child(2) .b-icon {
+    background-image: url(__STATIC__/images/icon_position.png);
+  }
+  footer ul li:nth-child(3) .b-icon {
+    background-image: url(__STATIC__/images/icon_zhushou.png);
+  }
+  footer ul li:nth-child(4) .b-icon {
+    background-image: url(__STATIC__/images/icon_wode.png);
+  }
+  footer ul .active .b-icon1 {
+    background-image: url(__STATIC__/images/ico_home.png) !important;
+  }
+  footer ul .active .b-icon2 {
+    background-image: url(__STATIC__/images/ico_position.png) !important;
+  }
+  footer ul .active .b-icon3 {
+    background-image: url(__STATIC__/images/ico_zhushou.png) !important;
+  }
+  footer ul .active .b-icon4 {
+    background-image: url(__STATIC__/images/ico_wode.png) !important;
+  }
+  footer ul .active .b-wen {
+    color: #fe6601;
+  }
+</style>
+<footer>
+    <ul class="clear">
+        <li class="[icon1]">
+            <a <if condition="CONTROLLER_NAME eq 'Index'">class="yello" </if>  href="{:U('Index/index')}">
+                <div class="b-icon b-icon1"></div>
+                <div class="b-wen">首页</div>
+            </a>
+        </li>
+        <li class="[icon2]">
+            <a href="{:U('Goods/categoryList')}">
+                <div class="b-icon b-icon2"></div>
+                <div class="b-wen">分类</div>
+            </a>
+        </li>
+        <li class="[icon3]">
+           <a href="{:U('Cart/index')}">
+                <div class="b-icon b-icon3"></div>
+                <div class="b-wen">购物车</div>
+            </a>
+        </li>
+        <li class="[icon4]">
+            <a <if condition="CONTROLLER_NAME eq 'User'">class="yello" </if> href="{:U('User/index')}">
+                <div class="b-icon b-icon4"></div>
+                <div class="b-wen">我的</div>
+            </a>
+        </li>
+    </ul>
+</footer>
+<script type="text/javascript">
+$(document).ready(function(){
+	  var cart_cn = getCookie('cn');
+	  if(cart_cn == ''){
+		$.ajax({
+			type : "GET",
+			url:"/index.php?m=Home&c=Cart&a=header_cart_list",//+tab,
+			success: function(data){								 
+				cart_cn = getCookie('cn');
+				$('#cart_quantity').html(cart_cn);						
+			}
+		});	
+	  }
+	  $('#cart_quantity').html(cart_cn);
+});
+</script>
+<!-- 微信浏览器 调用微信 分享js-->
+<include file="public/wx_share"/>
+<!-- 微信浏览器 调用微信 分享js  end-->

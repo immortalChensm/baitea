@@ -1,0 +1,131 @@
+<include file="public/layout" />
+<script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate.js"></script>
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+	<div class="fixed-bar">
+		<div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+			<div class="subject">
+				<h3>实体店铺管理 - 编辑店铺</h3>
+				<h5>网站系统编辑店铺</h5>
+			</div>
+		</div>
+	</div>
+	<form class="form-horizontal" method="post" id="store_info">
+
+		<div class="ncap-form-default" id="tab_info">
+		<table>
+		<tbody>
+				<tr>
+					<th>店铺负责人身份证：</th>
+					<td colspan="20">
+						<a href="{$apply.store_person_cert}" target="_blank">
+							<if condition="$apply[store_person_cert] eq ''">
+								<img id="store_person_cert" src="__PUBLIC__/images/not_adv.jpg" height="120">
+								<else/>
+								<img id="store_person_cert" src="{$apply.store_person_cert}" height="120">
+							</if>
+						</a>
+						<input type="hidden" name="store_person_cert" value="{$apply.store_person_cert}">
+						<input type="button" class="btn btn-default" onClick="upload_img('store_person_cert')"  value="上传图片"/>
+					</td>
+				</tr>
+				
+				<tr>
+					<th>企业营业执照副本：</th>
+					<td colspan="20">
+						<a target="_blank" href="{$apply.business_licence_cert}">
+							<if condition="$apply[business_licence_cert] eq ''">
+								<img id="business_licence_cert" src="__PUBLIC__/images/not_adv.jpg" height="120">
+								<else/>
+								<img id="business_licence_cert" src="{$apply.business_licence_cert}" height="120">
+							</if>
+						</a>
+						<input type="hidden" name="business_licence_cert" value="{$apply.business_licence_cert}">
+						<input type="button" class="btn btn-default" onClick="upload_img('business_licence_cert')"  value="上传图片"/>
+					</td>
+				</tr>
+				
+				</tbody>
+			</table>
+			<div class="bot"><a href="JavaScript:void(0);" onclick="actsubmit();" class="ncap-btn-big ncap-btn-green">确认提交</a></div>
+		</div>
+		
+		<input type="hidden" name="store[user_id]" value="{$store.user_id}">
+		<input type="hidden" name="store_id" value="{$store.store_id}">
+		
+	</form>
+</div>
+<script type="text/javascript">
+	$(document).ready(function(){
+
+		/*
+		// 加载默认选中
+		var province_id = $('#province').val();
+		if(province_id != 0){
+			$('#province').trigger('blur');
+		}
+		var bank_province_id = $('#bank_province').val();
+		if(bank_province_id != 0){
+			$('#bank_province').trigger('blur');
+		}
+		// 加载默认选中
+		<if condition='$apply[company_district] gt 0'>
+				set_area('{$apply[company_city]}','{$apply[company_district]}');
+		</if>
+		*/
+		
+	});
+	
+	$('#store_end_time').layDate();
+	
+	/**
+	 * 获取地区
+	 */
+	function set_area(parent_id,selected){
+		if(parent_id <= 0){
+			return;
+		}
+		$('#district').empty().css('display','inline');
+		var url = '/index.php?m=Home&c=Api&a=getRegion&level=3&parent_id='+ parent_id+"&selected="+selected;
+		$.ajax({
+			type : "GET",
+			url  : url,
+			error: function(request) {
+				layer.alert('服务器繁忙, 请联系管理员', {icon: 2});
+				return;
+			},
+			success: function(v) {
+				v = '<option>选择区域</option>'+ v;
+				$('#district').empty().html(v);
+			}
+		});
+	}
+	var flag = true;
+	function actsubmit(){
+		if($('input[name=store_name]').val() == ''){
+			layer.msg("店铺名称不能为空", {icon: 2,time: 2000});
+			return;
+		}
+		if(flag){
+			$('#store_info').submit();
+		}else{
+			layer.msg("请检查店铺名称和卖家账号", {icon: 2,time: 2000});
+		}
+	}
+
+	var tmp_type = '';
+	function upload_img(cert_type){
+		tmp_type = cert_type;
+		GetUploadify(1,'store','cert','callback');
+	}
+
+	function callback(img_str){
+		$('#'+tmp_type).attr('src',img_str);
+		$('input[name='+tmp_type+']').val(img_str);
+	}
+</script>
+</body>
+</html>

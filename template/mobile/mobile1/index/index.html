@@ -1,0 +1,382 @@
+<include file="public/new_header" title='首页'/>
+<header>
+    <div class="h-left"><a href="javascript:;"><img src="__STATIC__/images/qr-code-icon.png"></a></div>
+    <div class="h-con">掌心全球购</div>
+    <div class="h-right"><a href="{:U('Goods/ajaxSearch')}"><img src="__STATIC__/images/search-icon.png"></a></div>
+</header> 
+<div class="main">
+    <!--banner模块-->
+    <div class="f-banner">
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+                <adv pid="2" limit="5" item="v">
+                   <div class="swiper-slide"><a href="{$v.ad_link}"> <img src="{$v[ad_code]}" title="{$v[title]}" style="{$v[style]}" alt=""></a></div>
+
+                </adv>
+            </div>
+        </div>
+    </div>
+    <!--分类模块-->
+    <div class="f-classify">
+        <ul class="clear">
+            <li><a href="{:U('Activity/coupon_list')}"><img src="__STATIC__/images/icon_1@2x.png"><span>领优惠券</span></a></li>
+            <li><a href="{:U('Team/index')}"><img src="__STATIC__/images/icon_2@2x.png"><span>我要拼团</span></a></li>
+            <li><a href="{:U('Mobile/Activity/flash_sale_list')}"><img src="__STATIC__/images/icon_3@2x.png"><span>秒杀</span></a></li> 
+            <li><a href=""><img src="__STATIC__/images/icon_4@2x.png"><span>热销</span></a></li>
+            <li><a href="{:U('Activity/promote_goods')}"><img src="__STATIC__/images/icon_5@2x.png"><span>优惠活动</span></a></li>
+            <li><a href="{:U('Index/street')}"><img src="__STATIC__/images/icon_6@2x.png"><span>店铺街</span></a></li>
+            <li><a href="{:U('Index/brand')}"><img src="__STATIC__/images/icon_7@2x.png"><span>品牌街</span></a></li>
+            <li><a href="{:U('Activity/group_list')}"><img src="__STATIC__/images/icon_8@2x.png"><span>团购</span></a></li>
+            <li>  <a href="{:U('Goods/integralMall')}"><img src="__STATIC__/images/icon_9@2x.png"><span>积分商城</span></a></li>
+            <li><a href="{:U('Goods/categoryList')}"><img src="__STATIC__/images/icon_10@2x.png"><span>全部分类</span></a></li>
+        </ul>
+    </div>
+    <!--品牌活动模块-->
+    <div class="f-brand-activity">
+        <div class="brand-top">
+            <div class="brand-l">
+                <img src="__STATIC__/images/icon_pinpai.png">品牌<span>活动</span>
+            </div>
+            <a href="{:U('Activity/promote_goods')}" class="brand-r" >
+                品牌专区 <img src="__STATIC__/images/icon_next.png">
+            </a>
+        </div>
+        <div class="brand-content">
+            <div class="brand-c-warp">
+                <div class="swiper-container1">
+                    <div class="swiper-wrapper">
+                        <tpshop sql="select id,title,prom_img,end_time from __PREFIX__prom_goods where status=1  limit 4" item="prom" key="promote_key">
+                               <div class="swiper-slide">
+                             <a href="{:U('Activity/promote_goods')}"><img src="{$prom.prom_img}" /></a>
+                            <div class="slider-bottom">
+<!--                                <img src="image/logo_1.png">-->
+                                <div class="brand-time"><a class="t_d"></a>天<a class="t_h"></a>时<a class="t_m"></a>分<a class="t_s"></a>秒</div>
+                                <span class="slider-r">{$prom.title}<i>折起</i></span>
+                            </div>
+                        </div>
+                      </tpshop>
+                      
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--每日必抢-->
+    <div class="f-daily-robbing">
+        <div class="daily-top">
+            <div class="daily-l">
+                <img src="__STATIC__/images/icon_clock.png">每日必抢&nbsp;<span>{:date('H',$start_time)}点场</span>&nbsp;&nbsp;&nbsp;
+                <span><i id="t_h">00</i><i id='t_m'>00</i><i id="t_s">00</i></span>
+            </div>
+           <a href="{:U('Mobile/Activity/flash_sale_list')}" class="daily-r">
+                进入必抢专场 <img src="__STATIC__/images/icon_next.png">
+            </a>
+        </div>
+        <div class="daily-content">
+            <div class="daily-c-warp">
+                <div class="swiper-container2">
+                    <div class="swiper-wrapper">
+                        <if condition="count($flash_sale_list) eq nll">
+                            <div style="text-align: center;font-size: .3rem;">暂无抢购商品。。。。</div>
+                        </if>
+                         <foreach name="flash_sale_list" item="v">
+                              <div class="swiper-slide">
+                            <a href="{:U('Mobile/Goods/goodsInfo',array('id'=>$v[goods_id],'item_id'=>$v[item_id]))}"><img src="{$v[goods_id]|goods_thum_images=136,126}"/></a>
+                            <div class="slider-bottom">
+                                <div class="daily-money">￥{$v[price]}</div>
+                                <div class="no-money">￥{$v[shop_price]}</div>
+                            </div>
+                        </div>
+                     </foreach>
+                      
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--新品上市-->
+    <div class="f-new-arrival">
+        <div class="arrival-top">
+            <img src="__STATIC__/images/arriver.png" class="font-img">
+            <a class="arr-top-r" href="{:U('Index/brand')}">
+                更多新品 <img src="__STATIC__/images/icon_next.png">
+            </a>
+        </div>
+        <div class="arrival-bottom">
+          <div class="arrival">
+                <tpshop sql="select goods_id,goods_name,original_img,shop_price from __PREFIX__goods where is_new=1 and is_on_sale=1 limit 0,2" item="goods" key="promote_key">
+                        <div class="arr-con">
+                          <a  href="{:U('mobile/Goods/goodsInfo',array('id'=>$goods[goods_id]))}" target="_blank">
+                        <div class="arr-name">{$goods.goods_name}</div>
+                        <div class="arr-money">￥{$goods.shop_price}</div>
+                        <img src="{$goods.original_img}">
+                        </a>
+                     </div>
+                  </tpshop>
+            </div>
+            <div class="arrival">
+                   <tpshop sql="select goods_id,goods_name,original_img,shop_price from __PREFIX__goods where is_new=1 and is_on_sale=1 limit 3,2" item="goods" key="promote_key">
+                        <div class="arr-con">
+                          <a  href="{:U('mobile/Goods/goodsInfo',array('id'=>$goods[goods_id]))}" target="_blank">
+                        <div class="arr-name">{$goods.goods_name}</div>
+                        <div class="arr-money">￥{$goods.shop_price}</div>
+                        <img src="{$goods.original_img}">
+                        </a>
+                     </div>
+                  </tpshop>
+            </div>
+        </div>
+    </div>
+    <!--广告位-->
+    <div class="f-adsense">
+        <a href=""><img src="__STATIC__/images/adsense.png"></a>
+    </div>
+    <!--热销精品-->
+    <div class="f-new-arrival">
+        <div class="arrival-top">
+            <img src="__STATIC__/images/arriver-two.png" class="font-img">
+            <a class="arr-top-r">
+                更多热销产品 <img src="__STATIC__/images/icon_next.png">
+            </a>
+        </div>
+        <div class="arrival-bottom">
+             <div class="arrival">
+                <tpshop sql="select goods_id,goods_name,original_img,shop_price from __PREFIX__goods where is_hot=1 and is_hot=1 limit 0,2" item="goods" key="promote_key">
+                        <div class="arr-con">
+                          <a  href="{:U('mobile/Goods/goodsInfo',array('id'=>$goods[goods_id]))}" target="_blank">
+                        <div class="arr-name">{$goods.goods_name}</div>
+                        <div class="arr-money">￥{$goods.shop_price}</div>
+                        <img src="{$goods.original_img}">
+                        </a>
+                     </div>
+                  </tpshop>
+            </div>
+            <div class="arrival">
+                   <tpshop sql="select goods_id,goods_name,original_img,shop_price from __PREFIX__goods where is_hot=1 and is_hot=1 limit 3,2" item="goods" key="promote_key">
+                        <div class="arr-con">
+                          <a  href="{:U('mobile/Goods/goodsInfo',array('id'=>$goods[goods_id]))}" target="_blank">
+                        <div class="arr-name">{$goods.goods_name}</div> 
+                        <div class="arr-money">￥{$goods.shop_price}</div>
+                        <img src="{$goods.original_img}">
+                        </a>
+                     </div>
+                  </tpshop>
+            </div>
+        </div>
+    </div>
+    <!--猜你喜欢-->
+    <div class="f-likegoods">
+        <div class="goods-top">
+            <div class="title"><span>猜你喜欢</span></div>
+        </div>
+        <div class="goods-warp clear">
+          
+
+        </div>
+    </div>
+    <div id="scroller">加载中...</div>
+    <!--防止底部不足-->
+    <div style="height: .88rem;background-color: #f8f8f8;"></div>
+</div>
+<!--底部-->
+<input type="hidden" name="" value="<?php echo date('Y-m-d H:m:s',$end_time); ?>" id='time-end'>
+
+ <!--底部导航-start-->
+    <include file="public/footer_nav" icon1='active'/>
+    <!--底部导航-end-->
+<script type="text/javascript" src="__STATIC__/js/sourch_submit.js"></script>
+<link rel="stylesheet" href="__STATIC__/css/swiper.min.css">
+<script src="__STATIC__/js/swiper.min.js"></script>
+<script>
+    //banner图
+    $(".swiper-container").swiper({
+        autoplay: 3000
+    });
+    //自适应滚动
+    $(".swiper-container1").swiper({
+        slidesPerView :'auto'
+    });
+    $(".swiper-container2").swiper({
+        slidesPerView :'auto',
+        spaceBetween : '3%'
+    });
+</script>
+<!--按需加载-->
+<script>
+//    var move = true;
+//    var numtime,t;
+//    $(document).bind("scroll", function(event){
+//        if($(document).scrollTop() >= ($(document).height()-$(window).height()) ){
+//            if(move){
+//                move = false;
+//                GetAjaxData();
+//            }
+//        }
+//    });
+        var before_request = 1; // 上一次请求是否已经有返回来, 有才可以进行下一次请求
+        var page = 0;
+    function GetAjaxData(){
+      
+        if(before_request == 0)// 上一次请求没回来 不进行下一次请求
+             return false;
+         before_request = 0;
+         ++page;
+        $.ajax({
+           // async: true,//异步
+            type:"get",
+           // dataType: "json",//返回json格式的数据
+            url:"/index.php?m=Mobile&c=Index&a=ajaxGetMore&p="+page,
+            success: function (data) {
+               // showLoader();
+                if(data){
+                    $(".goods-warp").append(data);
+                    
+                     before_request = 1;
+                }
+//                setTimeout(function () {
+//                    $(".goods-warp").append('<div class="goods-list">\n' +
+//                        '                <a href="">\n' +
+//                        '                    <div class="goods-img" style="background-image: url(image/img-4.png)"></div>\n' +
+//                        '                    <div class="goods-name">苹果6sP4100mAh超长续航多彩金属+1</div>\n' +
+//                        '                    <div class="goods-money">￥5999</div>\n' +
+//                        '                </a>\n' +
+//                        '            </div>\n' +
+//                        '            <div class="goods-list">\n' +
+//                        '                <a href="">\n' +
+//                        '                    <div class="goods-img" style="background-image: url(image/img-5.png)"></div>\n' +
+//                        '                    <div class="goods-name">苹果6sP4100mAh超长续航多彩金属+2</div>\n' +
+//                        '                    <div class="goods-money">￥5999</div>\n' +
+//                        '                </a>\n' +
+//                        '            </div>');
+//                    hideLoader();
+//                    move = true;
+//                },2000)
+            },
+
+        });
+    }
+    function showLoader() {
+        //显示加载器
+        $("#scroller").show();
+        numtime=0;
+        t=setInterval(function () {
+            numtime++;
+            switch (numtime){
+                case 1 :
+                    $("#scroller").html('加载中.');
+                    break;
+                case 2 :
+                    $("#scroller").html('加载中..');
+                    break;
+                case 3 :
+                    $("#scroller").html('加载中...');
+                    break;
+                case 4 :
+                    numtime=0;
+                    break;
+            }
+        },500);
+    }
+    function hideLoader(){
+        //隐藏加载器
+        $("#scroller").hide();
+        clearInterval(t);
+    }
+</script>
+<!--按需加载-->
+<!--滑动倒计时计时器-->
+<script>
+    var domElement=$(".brand-c-warp").find(".swiper-slide");
+    var num=domElement.length;
+    console.log('定时器个数='+num);
+    //倒计时放置存储
+    var timeArr=["2017-12-06 14:16","2017-12-07 15:16","2017-12-08 16:16","2017-12-09 17:16"];
+    /*
+    * 倒计时器
+    * */
+    function getRTime(times) {
+        for(var i=0;i<num;i++){
+            var times = timeArr[i];
+            var EndTime = new Date(Date.parse(times.replace(/-/g, "/"))); //截止时间
+            var NowTime = new Date();
+            var t = EndTime.getTime() - NowTime.getTime();
+            var days = parseInt(t / 1000 / 60 / 60 / 24 , 10); //计算剩余的天数
+            var h = Math.floor(t / 1000 / 60 / 60 % 24);
+            var m = Math.floor(t / 1000 / 60 % 60);
+            var s = Math.floor(t / 1000 % 60);
+            if(days<=0){
+                domElement.eq(i).find(".brand-time .t_d").html("0");
+            }else{
+                domElement.eq(i).find(".brand-time .t_d").html(days);
+            }
+            if (t <= 0) {
+                domElement.eq(i).find(".brand-time .t_h").html("0" + 0);
+                domElement.eq(i).find(".brand-time .t_m").html("0" + 0);
+                domElement.eq(i).find(".brand-time .t_s").html("0" + 0);
+            } else {
+                domElement.eq(i).find(".brand-time .t_h").html(h);
+                domElement.eq(i).find(".brand-time .t_m").html(m);
+                domElement.eq(i).find(".brand-time .t_s").html(s);
+                if (h < 10) {
+                    domElement.eq(i).find(".brand-time .t_h").html("0" + h);
+                }
+                if (m < 10) {
+                    domElement.eq(i).find(".brand-time .t_m").html("0" + m);
+                }
+                if (s < 10) {
+                    domElement.eq(i).find(".brand-time .t_s").html("0" + s);
+                }
+            }
+        }
+
+    }
+    setInterval(function () {
+        getRTime();
+    }, 1000);
+</script>
+<script>
+    function getRTime1(times) {
+        var times = times;
+        var EndTime = new Date(Date.parse(times.replace(/-/g, "/"))); //截止时间
+        var NowTime = new Date();
+        var t = EndTime.getTime() - NowTime.getTime();
+        var h = Math.floor(t / 1000 / 60 / 60 % 24);
+        var m = Math.floor(t / 1000 / 60 % 60);
+        var s = Math.floor(t / 1000 % 60);
+        if (t <= 0) {
+            document.getElementById("t_h").innerHTML = 0 + "0";
+            document.getElementById("t_m").innerHTML = 0 + "0";
+            document.getElementById("t_s").innerHTML = 0 + "0";
+        } else {
+            document.getElementById("t_h").innerHTML = h + "";
+            document.getElementById("t_m").innerHTML = m + "";
+            document.getElementById("t_s").innerHTML = s + "";
+            if (h < 10) {
+                document.getElementById("t_h").innerHTML = "0" + h;
+            }
+            if (m < 10) {
+                document.getElementById("t_m").innerHTML = "0" + m;
+            }
+            if (s < 10) {
+                document.getElementById("t_s").innerHTML = "0" + s;
+            }
+        }
+    }
+    console.log($("#time-end").val())
+    setInterval(function () {
+
+        getRTime1($("#time-end").val());
+    }, 1000);
+
+       function GetRTime2(){
+        var text = GetRTime('{$end_time}');
+        if (text== 0){
+            $(".daily-l span").text('活动已结束');
+        }else{
+            $(".daily-l span").text(text);
+        }
+    }
+   /* setInterval(getRTime1,1000);*/
+</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<include file="public/layout" />
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+            <div class="subject">
+                <h3>实体店铺管理 - 查看会员“{$store.realname}”的实体店铺信息</h3>
+            </div>
+        </div>
+    </div>
+   
+    <table class="store-joinin" cellspacing="0" cellpadding="0" border="0">
+        <thead>
+        <tr>
+            <th colspan="20">申请信息</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th class="w150">申请人：</th>
+            <td>{$store.realname}</td>
+        </tr>
+        <tr>
+            <th class="w150">店铺名称：</th>
+            <td>{$store.shop_name}</td>
+        </tr>
+        
+        <tr>
+            <th>负责人手机号码：</th>
+            <td>{$store.mobile}</td>
+        </tr>
+        
+        <tr>
+            <th>店铺图片：</th>
+            <td><img src="{$store.shop_licence_img}"/></td>
+        </tr>
+        
+        <tr>
+            <th>主营商品：</th>
+            <td>{$store.shop_products}</td>
+        </tr>
+        
+        <tr>
+            <th>注册号：</th>
+            <td>{$store.shop_licence_cert}</td>
+        </tr>
+        
+        <tr>
+            <th>线下店铺地址：</th>
+            <td>{$store.shop_address}</td>
+        </tr>
+        
+        <tr>
+            <th>店铺简介：</th>
+            <td>{$store.shop_desc}</td>
+        </tr>
+        
+        </tbody>
+    </table>
+
+    <table class="store-joinin" cellspacing="0" cellpadding="0" border="0">
+        <thead>
+        <tr>
+            <th colspan="20">证件信息：</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th>企业营业执照副本：</th>
+            <td colspan="20"><a nctype="nyroModal" href="{$store.shop_licence_img}"> <img src="{$store.shop_licence_img}" alt=""> </a></td>
+        </tr>
+        
+        <tr>
+            <th>店铺负责人身份证：</th>
+            <td colspan="20"><a nctype="nyroModal" href="__ROOT__/{$store.idcard_fpic}"> <img src="__ROOT__/{$store.idcard_fpic}" alt=""> </a></td>
+        </tr>
+        
+        <tr>
+            <th>国家认证证书：</th>
+            <td colspan="20"><a nctype="nyroModal" href="__ROOT__/{$store.shop_cert}"> <img src="__ROOT__/{$store.shop_cert}" alt=""> </a></td>
+        </tr>
+        
+        </tbody>
+    </table>
+    
+     <table class="store-joinin" cellspacing="0" cellpadding="0" border="0">
+            <thead>
+            <tr>
+                <th colspan="20">操作信息</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th>备注说明：</th>
+                <td colspan="20">
+                    <textarea name="review_msg" placeholder="请输入操作备注" rows="3" class="form-control">{$store.review_msg}</textarea>
+                </td>
+            </tr>
+            <tr>
+                <th>商家信息审核：</th>
+                <td colspan="20">
+                    <input name="shop_state" value="1" <if condition="$store.shop_state eq 1">checked="checked"</if> type="radio">未审核
+                    <input name="shop_state" value="2" <if condition="$store.shop_state eq 2">checked="checked"</if> type="radio">通过
+                    <input name="shop_state" value="3" <if condition="$store.shop_state eq 3">checked="checked"</if> type="radio">未通过
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        
+</div>
+ 		<div class="bot" style="margin-left:200px;">
+            <a href="JavaScript:void(0);" onclick="revise(this);" data-id="{$store.id}" class="ncap-btn-big ncap-btn-green">确认提交</a>
+        </div>
+        
+<script type="text/javascript">
+
+	function revise(obj){
+		var url = '/index.php?m=Admin&c=Store&a=shop_revise';
+		
+		shop_state = 0;
+		for(var i=0;i<$(":input[name=shop_state]").length;i++){
+			if($(":input[name=shop_state]").eq(i).is(":checked")){
+				shop_state = $(":input[name=shop_state]").eq(i).val();
+			}
+		}
+		$.ajax({
+			type: 'post',
+			url: url,
+			data : {
+				id:$(obj).attr('data-id'),
+				review_msg:$(":input[name=review_msg]").val(),
+				shop_state:shop_state,
+				},
+			dataType: 'json',
+			success: function (data) {
+				//layer.closeAll();
+				if (data.status == 1) {
+					//$(obj).parent().parent().parent().remove();
+					layer.msg(data.msg, {icon: 1});
+				} else {
+					layer.alert(data.msg, {icon: 2});
+				}
+			}
+		})
+	}
+
+</script>
+</body>
+</html>

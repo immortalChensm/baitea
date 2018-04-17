@@ -1,0 +1,9 @@
+<foreach name="favourite_goods" item="v">  
+        <div class="goods-list">
+                <a href="{:U('Mobile/Goods/goodsInfo',array('id'=>$v[goods_id]))}" title="{$v.goods_name}">
+                    <div class="goods-img" style="background-image: url({$v[goods_id]|goods_thum_images=310,310})"></div>
+                    <div class="goods-name">{$v[goods_name]}</div>
+                    <div class="goods-money">￥{$v[shop_price]}</div>
+                </a>
+       </div>
+</foreach>

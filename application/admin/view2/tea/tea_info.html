@@ -1,0 +1,147 @@
+<include file="public/layout" />
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+            <div class="subject">
+                <h3>茶艺师管理 - 查看茶艺师“{$list.realname}”的信息</h3>
+            </div>
+        </div>
+    </div>
+   
+    <table class="store-joinin" cellspacing="0" cellpadding="0" border="0">
+        <thead>
+        <tr>
+            <th colspan="20">申请信息</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th class="w150">申请人：</th>
+            <td>{$list.realname}</td>
+        </tr>
+        <tr>
+            <th class="w150">茶艺师名称：</th>
+            <td>{$list.teart_name}</td>
+        </tr>
+        
+        <tr>
+            <th>负责人手机号码：</th>
+            <td>{$list.mobile}</td>
+        </tr>
+        
+        <tr>
+            <th>茶艺师图片：</th>
+            <td><img src="__ROOT__/{$list.teart_logo}"/></td>
+        </tr>
+        
+        <tr>
+            <th>注册号：</th>
+            <td>{$list.teart_cert_num}</td>
+        </tr>
+        
+        <tr>
+            <th>地址：</th>
+            <td>{$list.address}</td>
+        </tr>
+        
+        <tr>
+            <th>茶艺师简介：</th>
+            <td>{$list.teart_desc}</td>
+        </tr>
+        
+        </tbody>
+    </table>
+
+    <table class="store-joinin" cellspacing="0" cellpadding="0" border="0">
+        <thead>
+        <tr>
+            <th colspan="20">证件信息：</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th>茶艺师照片正面副本：</th>
+            <td colspan="20"><a nctype="nyroModal" href="__ROOT__/{$list.teart_fcert}"> <img src="__ROOT__/{$list.teart_fcert}" alt=""> </a></td>
+        </tr>
+        
+        <tr>
+            <th>茶艺师照片背面副本：</th>
+            <td colspan="20"><a nctype="nyroModal" href="__ROOT__/{$list.teart_bcert}"> <img src="__ROOT__/{$list.teart_bcert}" alt=""> </a></td>
+        </tr>
+        
+        <tr>
+            <th>申请人身份证：</th>
+            <td colspan="20"><a nctype="nyroModal" href="__ROOT__/{$list.idcard_fpic}"> <img src="__ROOT__/{$list.idcard_fpic}" alt=""> </a></td>
+        </tr>
+        
+        </tbody>
+    </table>
+    
+     <table class="store-joinin" cellspacing="0" cellpadding="0" border="0">
+            <thead>
+            <tr>
+                <th colspan="20">操作信息</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th>备注说明：</th>
+                <td colspan="20">
+                    <textarea name="review_msg" placeholder="请输入操作备注" rows="3" class="form-control">{$list.review_msg}</textarea>
+                </td>
+            </tr>
+            <tr>
+                <th>商家信息审核：</th>
+                <td colspan="20">
+                    <input name="teart_state" value="1" <if condition="$list.teart_state eq 1">checked="checked"</if> type="radio">未审核
+                    <input name="teart_state" value="2" <if condition="$list.teart_state eq 2">checked="checked"</if> type="radio">通过
+                    <input name="teart_state" value="3" <if condition="$list.teart_state eq 3">checked="checked"</if> type="radio">未通过
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        
+</div>
+ 		<div class="bot" style="margin-left:200px;">
+            <a href="JavaScript:void(0);" onclick="revise(this);" data-id="{$list.teart_id}" class="ncap-btn-big ncap-btn-green">确认提交</a>
+        </div>
+        
+<script type="text/javascript">
+
+	function revise(obj){
+		var url = '/index.php?m=Admin&c=Tea&a=tea_info';
+		
+		teart_state = 0;
+		for(var i=0;i<$(":input[name=teart_state]").length;i++){
+			if($(":input[name=teart_state]").eq(i).is(":checked")){
+				teart_state = $(":input[name=teart_state]").eq(i).val();
+			}
+		}
+		$.ajax({
+			type: 'post',
+			url: url,
+			data : {
+				teart_id:$(obj).attr('data-id'),
+				review_msg:$(":input[name=review_msg]").val(),
+				teart_state:teart_state,
+				},
+			dataType: 'json',
+			success: function (data) {
+				//layer.closeAll();
+				if (data.status == 1) {
+					//$(obj).parent().parent().parent().remove();
+					layer.msg(data.msg, {icon: 1});
+				} else {
+					layer.alert(data.msg, {icon: 2});
+				}
+			}
+		})
+	}
+
+</script>
+</body>
+</html>

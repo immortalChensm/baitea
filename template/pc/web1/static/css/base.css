@@ -1,0 +1,38 @@
+body, p, h1, h2, h3, h4, h5, h6, ul, li, ol, dl, dt, dd, input, textarea, select, option, form, div, img {
+    margin: 0;padding: 0;
+    font-size: 14px;list-style: none;
+    text-decoration: none;border: 0;color: #333;font-family: "微软雅黑";
+}
+section,article,aside,header,footer,nav,dialog,figure {  display: block;  }
+h1,h2,h3,h4,h5,h6 {  font-size: 100%;  }
+address,cite,dfn,em,var {  font-style: normal;  }
+code,kbd,pre,samp {  font-family: courier new, courier, monospace;  }
+small {  font-size: 12px;  }
+ol,ul {  list-style: none;  margin: 0;  padding: 0;  }
+a {  text-decoration: none; color: #666; }
+a:hover {  text-decoration: none;  }
+a:link, a:visited { color: #333;text-decoration: none;}
+b { font-weight: 600; }
+sup { vertical-align: text-top; }
+sub { vertical-align: text-bottom;  }
+
+legend {  color: #000;  }
+fieldset,img {  border: 0 none;  }
+
+button,input,select,textarea {  font-size: 100%;  }
+table {  border-collapse: collapse;  border-spacing: 0;  }
+input{  border:0;  }
+input:focus {  outline: none;  }
+input::-webkit-search-cancel-button {  display: none; }
+input::-ms-clear { display: none; }
+.clear:after {
+    content: "";display: block;height: 0;line-height: 0;font-size: 0;clear: both;
+}
+*{box-sizing: border-box}
+
+/*右侧边栏*/
+.s:before{
+    content: "";
+    position: absolute;right: 0;top: 0;bottom: 0;margin: auto;
+    width: 2px;height: 16px;border-right: 1px solid #999;
+}

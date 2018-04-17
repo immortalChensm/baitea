@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>首页-{$tpshop_config['shop_info_store_title']}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="keywords" content="{$tpshop_config['shop_info_store_keyword']}"/>
+	<meta name="description" content="{$tpshop_config['shop_info_store_desc']}"/>
+	<link rel="shortcut  icon" type="image/x-icon" href="{$tpshop_config['shop_info_store_ico']}" media="screen"/>
+	<link rel="stylesheet" type="text/css" href="__STATIC__/css/tpshop.css"/>
+    <link rel="stylesheet" type="text/css" href="__STATIC__/css/base.css"/>
+    <link rel="stylesheet" type="text/css" href="__STATIC__/css/function.css"/>
+    <link rel="stylesheet" type="text/css" href="__STATIC__/css/idangerous.swiper.css"/>
+	<script src="__STATIC__/js/jquery-1.11.3.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="__PUBLIC__/js/global.js"></script>
+    <script src="__STATIC__/js/idangerous.swiper.min.js"></script>
+</head>
+<body>
+	<!--顶部广告-s-->
+<!-- 	<adv pid="1" limit="1" item="v">
+		<div class="topic-banner" style="background: #f37c1e;">
+			<div class="w1224">
+				<a href="{$v.ad_link}" <if condition="$v['target'] eq 1">target="_blank"</if>>
+					<img src="{$v[ad_code]}"/>
+				</a>
+				<i onclick="$('.topic-banner').hide();"></i>
+			</div>
+		</div>
+	</adv> -->
+	<!--顶部广告-e-->
+	<!--header-s-->
+	<include file="public/header" w="w1224"/>
+	<!--edit-start-->
+            
+	<div id="myCarousel" class="carousel slide p header-tp tpshop2_0_carousel">
+		<ol class="carousel-indicators"></ol>
+                <div class="l-f-banner">    
+		<div class="carousel-inner">
+                            <div class="swiper-container">
+                                <div class="swiper-wrapper">
+                                    <adv limit="6" item="v" pid="10">
+                                        <div class="swiper-slide" style="background-image: url({$v[ad_code]})"><a href="{$v.ad_link}" style="display: block;width: 100%;height: 100%;"></a></div>
+                                    </adv>
+                                </div>
+                                <div class="pagination"></div>
+                            </div>
+<!--				<adv limit="6" item="v" pid="10">
+				<div class="item <if condition='$key eq 0'>active</if>" style="background-color:{$v.bgcolor|default=gray};" >
+					<a class="item-image" href="{$v.ad_link}" <if condition="$v['target'] eq 1">target="_blank"</if> ><img src="{$v[ad_code]}" alt="" /></a>
+				</div>
+			</adv>-->
+		</div>
+		<div class="right-sidebar p">
+			<div class="usertpshop">
+				<div class="head_index">
+					<a href="{:U('Home/User/index')}" target="_blank">
+						<img class="head_pic" src="{$user.had_pic|default='__STATIC__/images/default.jpg'}" alt="" />
+					</a>
+				</div>
+				<p class="welcome nologin">您好，欢迎来到掌心商城！</p>
+				<p class="welcome islogin">HI，<span class="userinfo"></span></p>
+				<div class="login_index">
+					<a class="nologin" href="{:U('Home/User/login')}" target="_blank">请登录</a>
+					<a class="add_newperson" href="{:U('Home/Activity/coupon_list')}">新人有礼</a>
+					<a class="islogin add_newperson" href="{:U('Home/User/index')}" target="_blank">会员中心</a>
+				</div>
+			</div>
+			<div class="bulletin">
+				<div class="tit_notice">
+					<div class="bn_box">
+						<tpshop sql="select * from `__PREFIX__article` where cat_id = 6 and is_open=1 limit 4" result_name="box_ad"></tpshop>
+						<tpshop sql="select * from `__PREFIX__article` where cat_id = 20 and is_open=1 limit 4" result_name="box_prom"></tpshop>
+						<notempty name="box_ad">
+							<em class="action box_ad">公告</em>
+						</notempty>
+						<notempty name="box_prom">
+							<em class="box_prom">促销</em>
+						</notempty>
+					</div>
+				</div>
+				<div class="content box_ad_content">
+					<volist name="box_ad" id="v">
+						<a href="{:U('Home/Article/detail',array('article_id'=>$v[article_id]))}" target="_blank">{$v[title]}</a>
+					</volist>
+				</div>
+				<div class="content box_prom_content" style="display: none">
+					<volist name="box_prom" id="v">
+						<a href="{:U('Home/Article/detail',array('article_id'=>$v[article_id]))}" target="_blank">{$v[title]}</a>
+					</volist>
+				</div>
+				<div class="tit_notice">
+					<div class="bn_box">
+						<em>快捷入口</em>
+					</div>
+				</div>
+				<div class="six_entrance">
+					<table border="" cellspacing="0" cellpadding="0">
+						<tr>
+							<td>
+								<div class="access">
+									<a href="{:U('Home/User/visit_log')}" target="_blank">
+										<i class="mybrowse"></i>
+										<span>我的浏览</span>
+									</a>
+								</div>
+							</td>
+							<td>
+								<div class="access">
+									<a href="{:U('Home/User/goods_collect')}" target="_blank">
+										<i class="mycollect"></i>
+										<span>我的收藏</span>
+									</a>
+								</div>
+							</td>
+							<td class="lastcol">
+								<div class="access">
+									<a href="{:U('Home/Order/order_list')}" target="_blank">
+										<i class="myorders"></i>
+										<span>我的订单</span>
+									</a>
+								</div>
+							</td>
+						</tr>
+						<tr class="lastcow">
+							<td>
+								<div class="access">
+									<a href="{:U('Home/User/safety_settings')}" target="_blank">
+										<i class="account_security"></i>
+										<span>账号安全</span>
+									</a>
+								</div>
+							</td>
+							<td>
+								<div class="access">
+									<a href="{:U('Home/User/recharge')}" target="_blank">
+										<i class="myshares"></i>
+										<span>账户余额</span>
+									</a>
+								</div>
+							</td>
+							<td class="lastcol">
+								<div class="access">
+									<a href="{:U('Home/Newjoin/index')}" target="_blank">
+										<i class="seller_enter"></i>
+										<span>商家入驻</span>
+									</a>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+        </div>
+	    </div>
+	</div>
+            
+           <!-- content_start-->
+                <div class="main">
+                    <!--品牌活动-->
+                    <div class="m-brand">
+                        <div class="brand-top clear">
+                            <span class="b-title">品牌活动</span>
+                            <div class="brand-r clear">
+<!--                                    <span><a href="">品牌女装</a> &gt; <a href="">品质家居</a> &gt; <a href="">品牌母婴</a></span>-->
+                                <ul class="clear" id="pinpai-active">
+                                    <li class="active"></li>
+                                    <li></li>
+                                    <li></li>
+                                </ul>
+                            </div>
+                            <div class="brand-bottom">
+                               <ul class="clear active">
+                                 <tpshop sql="select  id,title,prom_img,end_time from tp_prom_goods where status=1  limit 0,3" item="prom" key="promote_key">
+                                    <li>
+                                        <a href="{:U('activity/promoteList')}"><img src="{$prom.prom_img}" /></a>
+                                        <div class="li-bottom clear">
+                                            <span class="prize-ys">{$prom.title}</span>
+                                            <span class="time-ys">{$prom.endtime}2天 18时16分34秒 </span>
+                                            <a class="go-active" href="{:U('activity/promoteList',['id'=>$prom['id']])}">进入活动</a>
+                                        </div>
+                                    </li>
+                                    <?php ?>
+                                 </tpshop>  
+                               </ul>
+                                <ul class="clear ">
+                                 <tpshop sql="select id,title,prom_img,end_time from __PREFIX__prom_goods where status=1  limit 4,3" item="prom" key="promote_key">
+
+                                    <li>
+                                        <a href="{:U('activity/promoteList')}"><img src="{$prom.prom_img}" /></a>
+                                        <div class="li-bottom clear">
+                                            <span class="prize-ys">{$prom.title}</span>
+                                            <span class="time-ys">{$prom.endtime} </span>
+                                            <a class="go-active" href="">进入活动</a>
+                                        </div>
+                                    </li>
+                                 </tpshop>  
+                               </ul>
+                                <ul class="clear">
+                                 <tpshop sql="select id,title,prom_img,end_time from __PREFIX__prom_goods where status=1  limit 7,3" item="prom" key="promote_key">
+
+                                    <li>
+                                        <a href="{:U('activity/promoteList')}"><img src="{$prom.prom_img}" /></a>
+                                        <div class="li-bottom clear">
+                                            <span class="prize-ys">{$prom.title}</span>
+                                            <span class="time-ys">{$prom.endtime}</span>
+                                            <a class="go-active" href="">进入活动</a>
+                                        </div>
+                                    </li>
+                                 </tpshop>  
+                               </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!--热销商品-->
+                    <div class="m-selling clear">
+                        <div class="a-left">
+                            <dl class="clear selling-top" >
+                                <dt>
+                                    <span>热销精品榜</span>
+                                    <ul class="clear" id="rex-active">
+                                        <li class="active"></li>
+                                        <li></li>
+                                        <li></li>
+                                    </ul>
+                                </dt>
+                            </dl>
+                            <div class="m-selling-bottom">
+					
+                                  <dl class="clear act-show">
+                                  <tpshop sql="select goods_id,goods_name,original_img,shop_price from __PREFIX__goods where is_hot=1 and is_on_sale=1 limit 0,4" item="goods" key="promote_key">
+                                    <dd style="border: 1px solid #f8f8f8;">
+                                        <a  href="{:U('Home/Goods/goodsInfo',array('id'=>$goods[goods_id]))}" target="_blank"> <div class="selling-img" style="background-image: url({$goods.original_img});background-size: cover;background-color: #f8f8f8;width: 228px;"></div></a>
+                                        <div class="selling-show">
+                                            <p style="padding-top: 5px;"><a href="{:U('Home/Goods/goodsInfo',array('id'=>$goods[goods_id]))}" target="_blank">{$goods.goods_name|mb_substr=0,36}</a></p>
+                                            <i>￥{$goods.shop_price}</i>
+                                        </div>
+                                    </dd> </tpshop>
+                                  </dl>
+			 
+					
+                                  <dl class="clear ">
+                                 <tpshop sql="select goods_id,goods_name,original_img,shop_price from __PREFIX__goods where is_hot=1 and is_on_sale=1 limit 5,4" item="goods" key="promote_key">
+                                    <dd style="border: 1px solid #f8f8f8;">
+                                        <a  href="{:U('Home/Goods/goodsInfo',array('id'=>$goods[goods_id]))}" target="_blank"> <div class="selling-img" style="background-image: url({$goods.original_img});background-size: cover;background-color: #f8f8f8;width: 228px;"></div></a>
+                                        <div class="selling-show">
+                                            <p style="padding-top: 5px;"><a href="{:U('Home/Goods/goodsInfo',array('id'=>$goods[goods_id]))}" target="_blank">{$goods.goods_name|mb_substr=0,36}</a></p>
+                                            <i>￥{$goods.shop_price}</i>
+                                        </div>
+                                    </dd>
+                                     </tpshop>
+                                  </dl>
+			 
+                                 <dl class="clear ">
+                                 <tpshop sql="select goods_id,goods_name,original_img,shop_price from __PREFIX__goods where is_hot=1 and is_on_sale=1 limit 9,4" item="goods" key="promote_key">
+
+                                    <dd style="border: 1px solid #f8f8f8;">
+                                        <a  href="{:U('Home/Goods/goodsInfo',array('id'=>$goods[goods_id]))}" target="_blank"> <div class="selling-img" style="background-image: url({$goods.original_img});background-size: cover;background-color: #f8f8f8;width: 228px;"></div></a>
+                                        <div class="selling-show">
+                                            <p style="padding-top: 5px;"><a href="{:U('Home/Goods/goodsInfo',array('id'=>$goods[goods_id]))}" target="_blank">{$goods.goods_name|mb_substr=0,36}</a></p>
+                                            <i>￥{$goods.shop_price}</i>
+                                        </div>
+                                    </dd>
+                                     </tpshop>
+                                  </dl>
+                            </div>
+                        </div>
+                        <div class="selling-right">
+                            <div class="sell-r-top">
+                                <span class="sell-l"><i style="background-image: url(__STATIC__/images/time.png)"></i>每日必抢</span>
+                                <span class="sell-r">8:00场</span>
+                            </div>
+                            <a href=""><img src="__STATIC__/images/m-selling-right.jpg"></a>
+                        </div>
+                    </div>
+                    <!--广告位-->
+                    <div class="m-adsense">
+                        <adv pid="1" limit="1" item="v">
+				<a href="{$v.ad_link}" <if condition="$v['target'] eq 1">target="_blank"</if>>
+					<img src="{$v[ad_code]}" style="width:1199px;height:110px;"/>
+				</a>
+	           </adv>
+                  
+                    </div>
+                    <!--广告位-->
+                    <!--楼层一-->
+                    <?php $wk=1;?>
+                  <foreach name="web_list" item="wb" key="wk">
+                    <div class="floor-{$wk} floor-style">
+                        <div class="floor-title">
+                            <span>{$wb[tit][floor]} {$wb[tit][title]}</span>
+                            <ul class="clear">
+                                <li class="active"><a href="">精选热卖</a></li>
+                                <foreach name="wb[category_list][goods_class]" item="gc">
+                                    <li><a href="{:U('Goods/goodsList',array('id'=>$gc[gc_id]))}">{$gc.gc_name}</a></li>
+			    </foreach>
+                            </ul>
+                            <a href="" class="f-more">更多</a>
+                        </div>
+                        <div class="floor-content clear">
+                            <div class="f_l-1">
+                                <a href="{$wb[act][url]}"  target="_blank">
+				<img src="{$wb[act][pic]}" alt="" title="{$wb[act][title]}">
+			    </a>
+                            </div>
+                            <div class="f_l-2">
+                                
+                                <div class="f_1-t">
+                                    <foreach name="wb[adv]"  item="ad" key="ak">
+                                        <if condition="$ad[adv_type] eq 'upload_advbig'">
+                                            <volist name="ad[adv_info]" id="sd" offset="0" length="1" >
+                                                 <a href="{$sd.pic_url}">
+                                                 <img src="{$sd.pic_img|default='/public/images/icon_goods_thumb_empty_300.png'}">
+                                                 </a>
+                                            
+                                            </volist>
+                                        </if>
+                                       
+                                    </foreach>
+                                </div>
+                                <div class="f_1-b clear">
+                     
+                                    <volist name="wb[brand_list]" id="bd" offset="1" length="3" >
+                                        <a href="{:U('Goods/goodsList',array('brand_id'=>$bd[brand_id]))}"><img class="lazy" data-original="{$bd.brand_pic|default='/public/images/icon_goods_thumb_empty_300.png'}" src="" title="{$bd.brand_name}"/></a>
+                                    </volist>
+                                </div>
+                            </div>
+                            <div class="f_l-3">
+                                <div class="f_1-t clear">
+                                    <volist name="wb[adv]" id="ad" offset="0" length="5" >
+                                        <if condition="$ad[adv_type] eq 'upload_advbig'"><else />
+                                                    <a href="{$ad.adv_info[pic_url]}">
+                                                    <img data-original="{$ad[adv_info][pic_img]|default='/public/images/icon_goods_thumb_empty_300.png'}" class="lazy" width="229" height="145"/>
+                                             </a>
+                                        </if>
+                                      </volist>
+                                
+                                </div>
+                                <div class="f_1-b clear">
+                                     <volist name="wb[brand_list]" id="bd" offset="4" length="3" >
+                                        <a href="{:U('Goods/goodsList',array('brand_id'=>$bd[brand_id]))}"><img class="lazy" data-original="{$bd.brand_pic|default='/public/images/icon_goods_thumb_empty_300.png'}" src="" title="{$bd.brand_name}"/></a>
+                                    </volist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  </foreach>
+                  
+                    <!--楼层-->
+                </div>
+           <!-- content_end-->
+            
+	<!--左侧边栏-->
+	<div class="sideleft-nav" id="sideleft">
+		<div class="first-l">楼层导航</div>
+		<ul>
+			<foreach name="web_list" item="vo" key="k">
+				<li class="<if condition='$k eq 0'>sid-red</if>">
+                    <if condition="!empty($vo[tit][title])">
+					    <a href="javascript:;"><i></i>{$vo[tit][title]}</a>
+                    <else/>
+                        <a style="background-image: url({$vo.tit['pic']});background-size:100% 31px;" href="javascript:;"><i></i></a>
+                    </if>
+				</li>
+			</foreach>
+		</ul>
+	</div>
+<!--左侧边栏-->
+<include file="public/footer"/>
+<include file="public/sidebar_cart" />
+<script src="__STATIC__/js/lazyload.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="__STATIC__/js/headerfooter.js" type="text/javascript" charset="utf-8"></script>
+<script src="__STATIC__/js/carousel.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    $("#catgory-show").show(); 
+    var mySwiper = new Swiper('.swiper-container',{
+        loop : true,
+        autoplay : 3000,
+        calculateHeight : true,
+        pagination : '.pagination',
+        paginationClickable :true
+    });
+    function sidebarRollChange() {
+        //首页侧边栏滚动改变楼层
+        var $_floorList=$('.floor-style');
+        var $_sidebar=$('#sideleft');
+        $_sidebar.find('li').click(function () {
+            //点击切换楼层
+            $('html,body').animate({'scrollTop':$_floorList.eq($(this).index()).offset().top},500);
+        });
+        $(window).scroll(function(){
+            var scrollTop=$(window).scrollTop();
+            //显示左边侧边栏
+            if(scrollTop<$_floorList.eq(0).offset().top-$(window).height()/2){
+                //还没滚到到楼层或向上滚出楼层隐藏侧边栏
+                $_sidebar.hide();
+                return;
+            }
+            $_sidebar.show(); //左边侧边栏显示
+            /*滚动改变侧边栏的状态*/
+            for(var j=0; j<$_floorList.length;j++){
+                if(scrollTop>$_floorList.eq(j).offset().top-$(window).height()/2){
+                    $_sidebar.find('li').eq(j).addClass('sid-red').siblings().removeClass('sid-red');
+                }
+            }
+        })
+    }
+    sidebarRollChange();
+    $(function () {
+        $("#hd-my-cart").hover(function () {
+            $("#show_minicart").show();
+        },function () {
+            $("#show_minicart").hide();
+        });
+        $(".search-select-h").mouseover(function () {
+            $("#select-h").show();
+        });
+        $("#select-h").mouseout(function () {
+            $("#select-h").hide();
+        });
+
+        //品牌活动
+        $("#pinpai-active li").mouseover(function () {
+            var index=$(this).index();
+            $("#pinpai-active li").removeClass("active").eq(index).addClass("active");
+            $(".brand-bottom ul").removeClass("active").eq(index).addClass("active");
+        });
+        //热销活动
+        $("#rex-active li").mouseover(function () {
+            var index=$(this).index();
+            $("#rex-active li").removeClass("active").eq(index).addClass("active");
+            $(".m-selling-bottom dl").removeClass("act-show").eq(index).addClass("act-show");
+        })
+    })
+</script>
+<script type="text/javascript">
+	//品牌logo
+	$(function() {
+		var op = 500;
+		$('.tpshop2_0_brand ul li').hover(function() {
+			if(!$(this).hasClass('b')) {
+				$(this).stop().animate({
+					opacity: "1"
+				}, op).siblings().stop().animate({
+					opacity: "0.5"
+				}, op);
+			}
+		}, function() {
+			if(!$(this).hasClass('b')) {
+				$(this).stop().animate({
+					opacity: "1"
+				}, op).siblings().stop().animate({
+					opacity: "1"
+				}, op);
+			}
+		})
+	})
+	//楼层横向导航
+	$(function(){
+		$('ul.f-tab li').hover(function(){
+			$(this).addClass('z-select').siblings().removeClass('z-select');
+			var page_id = $(this).data('id');
+			var floot_page = $(this).data('floot');
+			$('.'+floot_page).hide();
+			$('#'+page_id).show();
+		})
+	})
+	//公告/促销切换
+	$(function(){
+		$('.bn_box span').hover(function(){
+			$(this).addClass('action').siblings().removeClass('action');
+			$('.bulletin .content').hide();
+			if($(this).hasClass('box_prom')){
+				$('.box_prom_content').show();
+			}else{
+				$('.box_ad_content').show();
+			}
+		})
+	})
+
+	function showul(obj){
+		var fid = $(obj).attr('fid');
+		var nky = $(obj).attr('rel');
+		$('#floor'+fid).find('.content_goods_sh').hide();
+		$('#floor'+fid).find('#wbg'+nky).show();
+	}
+</script>
+</body>
+</html>

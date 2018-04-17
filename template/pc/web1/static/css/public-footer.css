@@ -1,0 +1,115 @@
+body .footer {
+    padding-bottom: 0 !important;
+    margin-top: 0;
+}
+body .footer .right-contact-us {
+    text-align: center;
+    padding-top: 15px;
+    position: relative;
+}
+body .footer .right-contact-us .phone {
+    color: #fd6600;
+    font-size: 22px;
+}
+body .footer .right-contact-us .tips {
+    text-align: center;
+}
+body .footer .right-contact-us .go-tel {
+    display: inline-block;
+    width: 160px;
+    height: 34px;
+    line-height: 34px;
+    color: #fd6600;
+    border: 1px solid #fd6600;
+}
+body .footer .right-contact-us .go-tel:hover {
+    background: #fd6600;
+    color: #fff;
+    border: 1px solid #fd6600;
+}
+body .footer .right-contact-us:after {
+    content: "";
+    position: absolute;
+    left: -30px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: 1px;
+    height: 80%;
+    background-color: #ddd;
+}
+body .footer .mod_copyright {
+    position: relative;
+    padding-top: 10px;
+}
+body .footer .mod_copyright .s-f-left {
+    position: relative;
+}
+body .footer .mod_copyright .s-f-left img {
+    position: absolute;
+    width: 130px;
+    height: 50px;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+}
+body .footer .mod_copyright .s-f-left .grid-top {
+    text-align: left;
+    padding-left: 165px;
+    font-size: 12px;
+    color: #666;
+}
+body .footer .mod_copyright .s-f-left .grid-top a:hover{color:#fd6600;}
+body .footer .mod_copyright .s-f-left p {
+    padding-left: 165px;
+    font-size: 12px;
+    color: #a5a5a5;
+}
+body .footer .mod_copyright .s-f-right {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    text-align: right;
+    padding-top: 30px;
+}
+body .footer .foot-list-fl ul {
+    width: 145px;
+}
+body .footer .footer-coon {
+    width: 100%;
+    background-color: #fff;
+}
+body .footer .footer-boot {
+    width: 100%;
+    background-color: #f8f8f8;
+    padding-bottom: 30px;
+}
+body .footer .mod_service_inner ul li {
+    width: 300px;
+}
+body .footer .mod_service_inner ul li .mod_service_unit {
+    width: 225px;
+}
+body .footer .foot-list-fl ul li a {
+    font-size: 12px;
+    color: #a5a5a5;
+    line-height: 30px;
+}
+body .footer .foot-list-fl ul li a:hover {
+    text-decoration: underline;
+    color: #fd6600;
+}
+body .footer .foot-list-fl ul li.foot-th {
+    margin-bottom: 8px;
+}
+body .footer .foot-list-fl ul li.foot-th a {
+    font-size: 16px;
+    color: #333;
+    line-height: 26px;
+}
+body .footer .mod_service_inner {
+    background-color: #fff;
+}

@@ -1,0 +1,168 @@
+<include file="public/new_header" title='个人中心'/>
+<style>
+    div{ cursor: pointer; }
+</style>
+<div class="main main-bg" style="padding-top: 0px; min-height: 667px;">
+    <div class="f-home-head">
+        <div class="m-top">
+            <div class="a-left">
+                <a href="{:U('User/message_notice')}">
+                    <i>{$user_message_count}</i>
+                </a>
+            </div>
+            <div class="a-right">
+                <a href="{:U('Mobile/User/sign')}">签到</a>
+                <a href="{:U('Mobile/User/userinfo')}"></a>
+            </div>
+        </div>
+        <div class="m-info">
+            <div class="a-left">
+                <div class="p-tx" style="background-image: url({$user[head_pic]|default="__STATIC__/images/user68.jpg"});border-radius: 50%;"></div>
+                <div class="p-name">
+                    <span>{$user['nickname']}</span>
+                    <if condition="$first_nickname neq ''">
+                        <br />
+                        <i >由({$first_nickname})推荐</span>
+                    </if>
+                </div>
+            </div>
+            <div class="a-right">
+                <div class="p-box" onclick="location.href='{:U('Mobile/User/visit_log')}'">
+                    <span>20</span><i>足迹</i>
+                </div>
+                <div class="p-box" onclick="location.href='{:U('User/myfocus')}'">
+                    <span>{$user.collect_count}</span><i>收藏</i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="f-myinfo">
+        <!--优惠券+余额+积分-->
+        <div class="m-money">
+            <div class="a-fl">
+                <div class="fl-list" onclick="location.href='{:U('Mobile/User/coupon')}'">
+                    <span>{$user['coupon_count']}</span>
+                    <div class="list-name">优惠券</div>
+                </div>
+                <div class="fl-list" onclick="location.href='{:U('Mobile/User/account')}'">
+                    <span>{$user['user_money']}</span>
+                    <div class="list-name"><i></i>余额</div>
+                </div>
+                <div class="fl-list" onclick="location.href='{:U('Mobile/User/points_list')}'">
+                    <span>{$user['pay_points']}</span>
+                    <div class="list-name">积分</div>
+                </div>
+            </div>
+            <a href="{:U('Mobile/User/account')}" class="gocapital">资金管理</a>
+        </div>
+        <!--全部订单-->
+        <div class="m-order">
+            <div class="a-fl">
+                <a class="fl-list" href="{:U('Mobile/Order/order_list',array('type'=>'WAITPAY'))}">
+                    <span><i>{$user.waitPay}</i></span>
+                    <div class="list-name">待付款</div>
+                </a>
+                <a class="fl-list" href="{:U('Mobile/Order/order_list',array('type'=>'WAITSEND'))}">
+                    <span><i>{$user.waitSend}</i></span>
+                    <div class="list-name">待发货</div>
+                </a>
+                <a class="fl-list" href="{:U('Mobile/Order/order_list',array('type'=>'WAITRECEIVE'))}">
+                    <span><i>{$user.waitReceive}</i></span>
+                    <div class="list-name">待收货</div>
+                </a>
+                <a class="fl-list" href="{:U('Mobile/Order/comment',array('status'=>0))}">
+                    <span><i>{$user.waitReceive}</i></span>
+                    <div class="list-name">待评价</div>
+                </a>
+                <a class="fl-list" href="{:U('Mobile/Order/return_goods_list')}">
+                    <span><i>{$user.return_count}</i></span>
+                    <div class="list-name">退款/退货</div>
+                </a>
+            </div>
+            <a href="{:U('Mobile/Order/order_list')}" class="gocapital">全部订单</a>
+        </div>
+        <!--二级入口--> 
+        <div class="m-warp">
+            <div class="a-warp">
+                <a class="a-list" href="{:U('Distribut/index')}">
+                    <div class="a-img" style="background-image: url(__STATIC__/newskin/images/home/ico-1@2x.png)"></div>
+                    <span>我的分销</span>
+                </a>
+                <a class="a-list" href="{:U('Virtual/virtual_list')}">
+                    <div class="a-img" style="background-image: url(__STATIC__/newskin/images/home/ico-2@2x.png)"></div>
+                    <span>虚拟订单</span>
+                </a>
+                <a class="a-list" href="{:U('Order/team_list')}">
+                    <div class="a-img" style="background-image: url(__STATIC__/newskin/images/home/ico-3@2x.png)"></div>
+                    <span>拼团订单</span>
+                </a>
+                <a class="a-list" href="{:U('Mobile/Order/comment',array('status'=>1))}">
+                    <div class="a-img" style="background-image: url(__STATIC__/newskin/images/home/ico-4@2x.png)"></div>
+                    <span>我的评价</span>
+                </a>
+                <a class="a-list" href="{:U('Mobile/Goods/integralMall')}">
+                    <div class="a-img" style="background-image: url(__STATIC__/newskin/images/home/ico-5@2x.png)"></div>
+                    <span>积分兑换</span>
+                </a>
+                <a class="a-list" href="{:U('Mobile/Activity/coupon_list')}">
+                    <div class="a-img" style="background-image: url(__STATIC__/newskin/images/home/ico-6@2x.png)"></div>
+                    <span>领券中心</span>
+                </a>
+                <a class="a-list" href="{:U('Mobile/User/address_list')}">
+                    <div class="a-img" style="background-image: url(__STATIC__/newskin/images/home/ico-7@2x.png)"></div>
+                    <span>地址管理</span>
+                </a>
+                <a class="a-list" href="{:U('Mobile/Newjoin/guidance')}">
+                    <div class="a-img" style="background-image: url(__STATIC__/newskin/images/home/ico-8@2x.png)"></div>
+                    <span>我要开店</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <a href="{:U('Mobile/User/logout')}" id="logout" style="width: 80%;display: block;height: .6rem;line-height: .6rem;text-align: center;background-color: #fd6600;color: #fff;font-size: .3rem;margin:.3rem auto .1rem;border-radius: 5px;">安全退出</a>
+    <div style="height: 1rem;"></div> 
+</div>
+
+<script>
+  $(".main-bg").css("min-height",$(window).height());
+</script>
+
+<!--
+<div class="myorder p">
+    <div class="content30">
+        <a href="">
+            <div class="order">
+                <div class="fl">
+                    <img src="__STATIC__/images/w6.png"/>
+                    <span>帮助中心</span>
+                </div>
+                <div class="fr">
+                    <i class="Mright"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+<div class="myorder p">
+    <div class="content30">
+        <a href="">
+            <div class="order">
+                <div class="fl">
+                    <img src="__STATIC__/images/w7.png"/>
+                    <span>意见反馈</span>
+                </div>
+                <div class="fr">
+                    <i class="Mright"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+-->
+    <button class="guide" onclick="follow_wx()">关注公众号</button>
+    <!--底部导航-start-->
+    <include file="public/footer_nav" icon4='active'/>
+    <!--底部导航-end-->
+    <script src="__STATIC__/js/style.js" type="text/javascript" charset="utf-8"></script>
+</body>
+</html>

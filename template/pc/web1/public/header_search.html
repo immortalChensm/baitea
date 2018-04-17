@@ -1,0 +1,209 @@
+<div class="ecsc-logo">
+	<a href="/" class="logo" style="width:260px;margin-top:8px;height:80px;">
+        <img src="{$tpshop_config['shop_info_store_logo']}" style="width: 155px;">
+        <!-- <img src="__STATIC__/images/new/logo-fs.png" style="width: 105px;"> -->
+    </a>
+</div>
+<style>
+	.ecsc-search-form{
+		border-color: #eaeaea;width: 460px;height: 40px;border-width: 1px;
+	}
+	.search-select-h{
+		border-width: 1px;
+		border-color: #eaeaea;
+	}
+	body .search-select-h ul{
+		border-color: #eaeaea;border-width: 1px;left: -1px;width: 61px;
+	}
+	body .ecsc-search-button{
+		width: 60px;height: 38px;background-image: url(__STATIC__/images/new/search.png);
+		background-repeat: no-repeat;background-position: center;
+		background-color: #fff;border-left: 1px solid #eaeaea;
+	}
+	body .ecsc-search-input{
+		height: 100%;padding-right: 0;
+	}
+	body .search-select-h > span{
+		height: 38px;line-height: 38px;
+	}
+	body .search-select-h > span .jt-x{
+		top: 17px;
+	}
+	body .tpshop2_0_nav{
+		margin-top: 15px;
+	}
+	.tphsop2_0 .u-g-cart{
+		height: 40px;    border: 1px solid #eaeaea;
+	}
+	body .tphsop2_0 .u-g-cart .c-num{
+		height: 38px;
+    	line-height: 38px;color: #666;
+	}
+	.u-mn-cart{
+		top: 38px;
+	}
+	.tphsop2_0 .count{
+		border-radius: 2px;top: 0;width: 20px;text-align: center;height: 20px;line-height: 20px;padding: 0;
+	}
+	.tphsop2_0 .car2_0{
+		width: 21px;
+		background-size: contain;
+	}
+	body .usertpshop .login_index a{
+		border-radius: 0;border-color: #fd6600; color: #fd6600;
+	}
+	.usertpshop .login_index a:hover{
+		background-color:#fd6600;color: #fff;
+	}
+	.top-ri-header ul li>a:hover{
+		color: #fd6600;
+	}
+	.bulletin .content a:hover{
+		color: #fd6600;
+	}
+	.tab-lis-2 .qrcode .qrewm{
+		font-size: 12px;
+	}
+	.dl_login .hinihdk p{
+		background-color: #fff;font-size: 12px;width: 100%;text-align: center;
+	}
+	.dl_login .hinihdk{
+		height: 140px;
+	}
+	.shop-car .tab-cart-tip-warp-box .tab-cart-tip-warp .share-side1{
+		left: 0;
+	}
+
+</style>
+<div class="ecsc-search">
+	<form id="sourch_form" name="sourch_form" method="post" action="{:U('Home/Goods/search')}" class="ecsc-search-form">
+		<div class="search-select-h">
+			<span><em>商品</em><i class="jt-x"></i></span>
+			<ul id="select-h">
+				<li rel="{:U('Home/Goods/search')}">商品</li>
+				<li rel="{:U('Home/Index/street')}">店铺</li>
+				<!--<li>服务</li>-->
+			</ul>
+			<script>
+				var select = $('#select-h');
+				$('.search-select-h').mouseenter(function(){
+					select.show();
+				});
+				$('.search-select-h').mouseleave(function(){
+					select.hide();
+				});
+				select.find('li').click(function() {
+					select.hide();
+					$('#sourch_form').attr('action',$(this).attr("rel"));
+					$('.search-select-h').find('em').text($(this).text());
+				});
+			</script>
+		</div>
+		<input autocomplete="off" name="q" id="q" type="text" value="{$Request.param.q}" placeholder="搜索关键字" class="ecsc-search-input">
+		<button type="button" class="ecsc-search-button" ></button>
+		<div class="candidate p">
+			<ul id="search_list"></ul>
+		</div>
+		<script type="text/javascript">
+
+            $('.ecsc-search-button').on('click',function(){
+                if($.trim($('#q').val()) != ''){
+                    $('#sourch_form').submit();
+                }else{
+                    $('#q').css('background-color','#F6D4CB');
+                    $('#q').attr('placeholder','请输入关键字');
+                }
+            })
+			;(function($){
+				$.fn.extend({
+					donetyping: function(callback,timeout){
+						timeout = timeout || 1e3;
+						var timeoutReference,
+								doneTyping = function(el){
+									if (!timeoutReference) return;
+									timeoutReference = null;
+									callback.call(el);
+								};
+						return this.each(function(i,el){
+							var $el = $(el);
+							$el.is(':input') && $el.on('keyup keypress',function(e){
+								if (e.type=='keyup' && e.keyCode!=8) return;
+								if (timeoutReference) clearTimeout(timeoutReference);
+								timeoutReference = setTimeout(function(){
+									doneTyping(el);
+								}, timeout);
+							}).on('blur',function(){
+								doneTyping(el);
+							});
+						});
+					}
+				});
+			})(jQuery);
+
+			$('.ecsc-search-input').donetyping(function(){
+				search_key();
+			},500).focus(function(){
+				var search_key = $.trim($('#q').val());
+				if(search_key != ''){
+					$('.candidate').show();
+				}
+			});
+			$('.candidate').mouseleave(function(){
+				$(this).hide();
+			});
+
+			function searchWord(words){
+				$('#q').val(words);
+				$('#sourch_form').submit();
+			}
+			function search_key(){
+				var search_key = $.trim($('#q').val());
+				if(search_key != ''){
+					$.ajax({
+						type:'post',
+						dataType:'json',
+						data: {key: search_key},
+						url:"{:U('Home/Api/searchKey')}",
+						success:function(data){
+							if(data.status == 1){
+								var html = '';
+								$.each(data.result, function (n, value) {
+									html += '<li onclick="searchWord(\''+value.keywords+'\');"><div class="search-item">'+value.keywords+'</div><div class="search-count">约'+value.goods_num+'个商品</div></li>';
+								});
+//								html += '<li class="close"><div class="search-count">关闭</div></li>';
+								$('#search_list').empty().append(html);
+								$('.candidate').show();
+							}else{
+								$('#search_list').empty();
+							}
+						}
+					});
+				}
+			}
+		</script>
+	</form>
+	<div class="keyword">
+		<ul>
+			<foreach name="tpshop_config.hot_keywords" item="wd" key="k">
+				<li>
+					<a href="{:U('Home/Goods/search',array('q'=>$wd))}" target="_blank">{$wd}</a>
+				</li>
+			</foreach>
+		</ul>
+	</div>
+</div>
+<div class="shopingcar-index fr">
+	<div class="u-g-cart fr fixed" id="hd-my-cart">
+		<a href="{:U('Home/Cart/index')}">
+			<p class="c-num">
+				<i class="car2_0"></i>
+				<span>我的购物车</span>
+				<span class="count cart_quantity" id="cart_quantity"></span>
+			</p>
+		</a>
+		<div class="u-fn-cart u-mn-cart" id="show_minicart">
+			<div class="minicartContent" id="minicart">
+			</div>
+		</div>
+	</div>
+</div>

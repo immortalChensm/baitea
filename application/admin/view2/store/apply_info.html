@@ -1,0 +1,143 @@
+<include file="public/layout" />
+<body style="background-color: #FFF; overflow: auto;">
+<div id="toolTipLayer" style="position: absolute; z-index: 9999; display: none; visibility: visible; left: 95px; top: 573px;"></div>
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title"><a class="back" href="javascript:history.back();" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+            <div class="subject">
+                <h3>店铺管理 - 查看会员“{$apply.realname}”的店铺申请信息</h3>
+                <h5>店铺的申请资料操作</h5>
+            </div>
+        </div>
+    </div>
+    <form action="{:U('Store/review')}"  method="post" id="review">
+        <input type="hidden" name="id" value="{$apply.id}">
+        <div class="ncap-form-default">
+        
+        <table class="store-joinin" cellspacing="0" cellpadding="0" border="0">
+        <thead>
+        <tr>
+            <th colspan="20">申请信息</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th class="w150">申请人：</th>
+            <td>{$apply.realname}</td>
+        </tr>
+        <tr>
+            <th class="w150">店铺名称：</th>
+            <td>{$apply.store_name}</td>
+        </tr>
+        
+        <tr>
+            <th>负责人手机号码：</th>
+            <td>{$apply.mobile}</td>
+        </tr>
+        
+        <tr>
+            <th>店铺图片：</th>
+            <td><img src="{$apply.business_licence_cert}"/></td>
+        </tr>
+        
+        <tr>
+            <th>主营商品：</th>
+            <td>{$apply.shop_zy}</td>
+        </tr>
+        
+        <tr>
+            <th>注册号：</th>
+            <td>{$apply.business_licence_number}</td>
+        </tr>
+        
+        <tr>
+            <th>店铺地址：</th>
+            <td>{$apply.store_address}</td>
+        </tr>
+        
+        <tr>
+            <th>店铺简介：</th>
+            <td>{$apply.shop_desc}</td>
+        </tr>
+        
+        </tbody>
+    </table>
+        <table class="store-joinin" cellspacing="0" cellpadding="0" border="0">
+            <thead>
+            <tr>
+                <th colspan="20">证件信息：</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th>企业营业执照副本：</th>
+                <td colspan="20">
+                    <a href="{$apply.business_licence_cert}" target="_blank"><img src="{$apply.business_licence_cert|default='__PUBLIC__/images/icon_goods_thumb_empty_300.png'}" height="60"></a>
+                </td>
+            </tr>
+            
+            <tr>
+                <th>店铺负责人身份证：</th>
+                <td colspan="20">
+                    <a href="__ROOT__/{$apply.idcard_fpic}" target="_blank">
+                            <img src="__ROOT__/{$apply.idcard_fpic}" height="120">
+                    </a>
+                </td>
+            </tr>
+            
+            <tr>
+                <th>国家认证证书：</th>
+                <td colspan="20">
+                    <a href="__ROOT__/{$apply.country_cert}" target="_blank">
+                            <img src="__ROOT__/{$apply.country_cert}" height="120">
+                    </a>
+                </td>
+            </tr>
+            
+            </tbody>
+        </table>
+        <table class="store-joinin" cellspacing="0" cellpadding="0" border="0">
+            <thead>
+            <tr>
+                <th colspan="20">操作信息</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th>备注说明：</th>
+                <td colspan="20">
+                    <textarea name="review_msg" placeholder="请输入操作备注" rows="3" class="form-control"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <th>商家信息审核：</th>
+                <td colspan="20">
+                    <input name="apply_state" value="0" <if condition="$apply.apply_state eq 0">checked="checked"</if> type="radio">未审核
+                    <input name="apply_state" value="1" <if condition="$apply.apply_state eq 1">checked="checked"</if> type="radio">通过
+                    <input name="apply_state" value="2" <if condition="$apply.apply_state eq 2">checked="checked"</if> type="radio">未通过
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="bot">
+            <a href="JavaScript:void(0);" onclick="$('#review').submit();" class="ncap-btn-big ncap-btn-green">确认提交</a>
+        </div>
+    </div>
+    </form>
+</div>
+<script type="text/javascript">
+    function changepay(){
+        $('#sg_name').val($('#sg_id option:selected').text());
+        $('#paying_amount').val($('#sg_id option:selected').attr('rel'));
+    }
+    function img_call_back(fileurl_tmp)
+    {
+        $("#paying_amount_cert").val(fileurl_tmp);
+        $("#img_a").attr('href', fileurl_tmp);
+        $("#img_i").attr('onmouseover', "layer.tips('<img src="+fileurl_tmp+">',this,{tips: [1, '#fff']});");
+    }
+</script>
+</body>
+</html>

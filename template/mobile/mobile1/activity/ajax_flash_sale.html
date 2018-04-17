@@ -1,0 +1,30 @@
+<volist name="flash_sale_goods" id="vo">
+<div class="m-list">
+    <div class="list-left" style="background-image: url({$vo.goods_id|goods_thum_images=247,229})"></div>
+    <div class="list-right">
+        <div class="list-title1">{$vo['goods_name']}</div>
+        <div class="list-content">品质认证/性价比品质款/一年无忧质保</div>
+        <div class="list-bottom">
+            <div class="list-l">
+                <div class="money">￥{$vo['price']}</div>
+                <div class="no-money">
+                    <span>￥<empty name="vo[spec_goods_price]">{$vo['goods']['shop_price']}<else/>{$vo['spec_goods_price']['price']}</empty></span>
+                    <span class="surplus">剩余<i class="surplus-num">{$vo['percent']>100 ? 100 : $vo['percent']}%</i></span>
+                </div>
+                <div class="prcoss">
+                    <div class="yes-pro" style="width: {$vo['percent']}%;"></div>
+                </div>
+            </div>
+            <div class="list-r">
+            	<if condition="$vo['percent'] lt 100">
+                    <a href="{:U('Mobile/Goods/goodsInfo',array('id'=>$vo[goods_id],'item_id'=>$vo[spec_goods_price][item_id]))}" <if condition="($vo['end_time'] - time()) gt 7200">style="background-color: #666" </if>>
+                    <if condition="($vo['end_time'] - time()) gt 7200">未开场<else />去秒杀</if>
+                    </a>
+                <else/>
+                    <a style="background-color: #aaa">已售馨</a>
+                </if>
+            </div>
+        </div>
+    </div>
+</div>
+</volist>

@@ -1,0 +1,74 @@
+<include file="public/new_header" title='分类'/>
+<header>
+    <label>
+        <input type="text" placeholder="请输入关键词" onfocus="location.href='{:U('Goods/ajaxSearch')}'">
+    </label>
+</header>
+<div class="flool classlist">
+    <div class="fl category1">
+        <ul>
+            <assign name="m" value="0"/>
+            <foreach name="goods_category_tree" item="vo" key="k">
+                <if condition="$vo[level] eq 1">
+                    <li >
+                       <a href="javascript:void(0);" <if condition="$m eq 0"></if> data-id="{$m++}">{$vo['mobile_name']|getSubstr=0,12}</a>
+                    </li>
+                </if>
+            </foreach>
+        </ul>
+    </div> 
+    <div class="fr category2">
+        <assign name="j" value="0"/>
+        <foreach name="goods_category_tree" key="kk" item="vo">
+            <div class="branchList" >
+                <!--广告图-s-->
+                <div class="tp-bann"  data-id="{$j++}">
+                    <adv  limit="1" item="v" pid="401">
+                        <a href="{$v.ad_link}" <if condition="$v['target'] eq 1">target="_blank"</if> >
+                            <img src="{$v[ad_code]}" title="{$v[title]}" style="{$v[style]}">
+                        </a>
+                    </adv>
+                </div>
+                <!--广告图-e-->
+                <!--分类-s-->
+                <div class="tp-class-list">
+                    <foreach name="vo.tmenu" item="v2" key="k2">
+                            <h4><a href="{:U('Mobile/Goods/goodsList',array('id'=>$v2[id]))}" >{$v2['name']}</a></h4>
+                            <ul class="tp-category">
+                                <foreach name="v2.sub_menu" item="v3">
+                                        <li>
+                                            <a href="{:U('Mobile/Goods/goodsList',array('id'=>$v3[id]))}">
+                                                <img src="{$v3['image']|default='__STATIC__/images/zy.png'}"/>
+                                                <p>{$v3['name']}</p>
+                                            </a>
+                                        </li>
+                                </foreach>
+                            </ul>
+                    </foreach>
+                </div>
+                <!--分类-e-->
+            </div>
+        </foreach>
+    </div>
+</div>
+<include file="public/footer_nav" icon2='active'/>
+<script src="__STATIC__/js/style.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    $(function () {
+        //点击切换2 3级分类
+        var array=new Array();
+        $('.category1 li').each(function(){
+            array.push($(this).position().top-0);
+        });
+        $('.branchList').eq(0).show().siblings().hide();
+        $('.category1 li').click(function() {
+            var index = $(this).index() ;
+            $('.category1').delay(200).animate({scrollTop:array[index]},300);
+            $(this).addClass('cur').siblings().removeClass();
+            $('.branchList').eq(index).show().siblings().hide();
+            $('.category2').scrollTop(0);
+        });
+    });
+</script>
+</body>
+</html>

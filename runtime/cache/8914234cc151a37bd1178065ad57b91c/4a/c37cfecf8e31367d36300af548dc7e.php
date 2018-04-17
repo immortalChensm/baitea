@@ -1,0 +1,3 @@
+<?php
+//000031104000[{"goods_id":1,"goods_name":"Apple iPhone 6s Plus 16G \u73ab\u7470\u91d1 \u79fb\u52a8\u8054\u901a\u7535\u4fe14G\u624b\u673a","original_img":"\/public\/upload\/goods\/2016\/03-09\/56e01a4088d3b.jpg","shop_price":"200.00"},{"goods_id":39,"goods_name":"\u534e\u4e3a\uff08HUAWEI\uff09 M2 10.0 \u5e73\u677f\u7535\u8111 WiFi \u6708\u5149\u94f6","original_img":"\/public\/upload\/goods\/2016\/01-13\/5695b2f14616a.jpg","shop_price":"2288.00"}]
+?>
