@@ -68,6 +68,9 @@ class WxPayApi
 		//print_r($xml);
 		//exit();
 		$startTimeStamp = self::getMillisecond();//请求开始时间
+		
+		//file_put_contents("weixin_request.xml", $xml);
+		
 		$response = self::postXmlCurl($xml, $url, false, $timeOut);
 
 		$result = WxPayResults::Init($response);

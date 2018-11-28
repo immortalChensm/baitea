@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>去喝茶</title>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/aui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/mobile.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/custom.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/plugins/layui/css/layui.css">
+    <script src="/public/__STATIC__/h5/js/jquery.min.js"></script>
+</head>
+<body style="background-color: #fff;">
+<header>
+    <a class="head-icon">
+        <div class="icon-return"></div>
+    </a>
+    <div class="head-words">
+        发布服务
+    </div>
+    <a class="head-fb" id="addservice" onclick="addserver()">发布</a>
+</header>
+<div class="main">
+    <div class="f-release">
+        <form action="">
+            <div class="m-list">
+                <div class="a-l">
+                    <span>服务开始时间</span>
+                    <span id="time1">
+                      <div class="layui-input-inline">
+                        <input type="text" class="layui-input" id="test5" placeholder="2018-02-03 13:30:10">
+                      </div>
+                    </span>
+                </div>
+                <div class="a-r">
+                    <img src="/public/__STATIC__/h5/images/icon/icon_more-r.png">
+                    <input type="text" class="input_date" id="demo1">
+                </div>
+            </div>
+            <div class="m-list">
+                <div class="a-l">
+                    <span>服务结束时间</span>
+                    <span id="time2">
+                         <div class="layui-input-inline">
+                           <input type="text" class="layui-input" id="test6" placeholder="2018-02-04 13:30:10">
+                         </div>
+                    </span>
+                </div>
+                <div class="a-r">
+                    <img src="/public/__STATIC__/h5/images/icon/icon_more-r.png">
+                    <input type="text" class="input_date" id="demo2">
+                </div>
+            </div>
+            <div class="m-list">
+                <div class="a-l">
+                    <span>服务范围</span>
+                </div>
+                <div class="a-r">
+                    <input type="text"  class="input_num" id="orbit"><span>km</span>
+                </div>
+            </div>
+            <div class="m-list">
+                <div class="a-l">
+                    <span>服务费用</span>
+                </div>
+                <div class="a-r">
+                    <input type="text"  class="input_num" id="cost"><span>￥/小时</span>
+                </div>
+            </div>
+            <div class="m-list-1 layui-bg-ff">
+                <span>注意事项：</span>
+                <textarea id="notice">请输入服务注意事项</textarea>
+            </div>
+        </form>
+    </div>
+</div>
+<link rel="stylesheet" href="/public/__STATIC__/h5/days/lCalendar.css">
+<script src="/public/__STATIC__/h5/days/lCalendar.js"></script>
+<script src="/public/__STATIC__/h5/plugins/layui/layui.js"></script>
+<script>
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        //日期时间选择器
+        laydate.render({
+            elem: '#test5'
+            ,type: 'datetime'
+        });
+        laydate.render({
+            elem: '#test6'
+            ,type: 'datetime'
+        });
+        laydate.getEndDate(month, year);
+    });
+</script>
+<script type="text/javascript">
+
+	$(function(){
+		/*
+		$("#addservice").click(function(e){
+			
+			var data = {};
+			data['start'] = $("#test5").val();
+			data['end']   = $("#test6").val();
+			data['orbit'] = $("#orbit").val();
+			data['cost']  = $("#cost").val();
+			data['notice']= $("#notice").val();
+			
+			$.ajax({
+				type:'post',
+				data:data,
+				url:"{:Url('Teaserver/addteaservice')}",
+				success:function(data){
+					data = JSON.parse(data);
+					if(data.status==1){
+						alert(data.msg);
+					}
+				}
+			});
+		});*/
+		
+	});
+</script>
+<script type="text/javascript">
+        
+        function setupWebViewJavascriptBridge(callback) {  
+            if (window.WebViewJavascriptBridge) {  
+                callback(WebViewJavascriptBridge)  
+            } else {  
+                document.addEventListener('WebViewJavascriptBridgeReady' , function() {  
+                    callback(WebViewJavascriptBridge)  
+                }, false );  
+            }  
+
+            // =====以下是iOS必须的特殊处理========  
+            if (window.WVJBCallbacks) { return window.WVJBCallbacks.push(callback); }  
+            window.WVJBCallbacks = [callback];  
+            var WVJBIframe = document.createElement('iframe');  
+            WVJBIframe.style.display = 'none';  
+            WVJBIframe.src = 'wvjbscheme://__BRIDGE_LOADED__';  
+            document.documentElement.appendChild(WVJBIframe);  
+            setTimeout(function() { document.documentElement.removeChild(WVJBIframe) }, 0);  
+            // =====以上是iOS必须的特殊处理========  
+        }
+
+          // 固定写法2 函数名字与1保持一致  
+            setupWebViewJavascriptBridge(function(bridge) {  
+                // Java 注册回调函数，第一次连接时调用 初始化函数  
+                 bridge.init();  
+            });
+   
+
+       
+       
+       
+       //发布服务
+        function addserver(order_id,rec_id,goods_id,imgsurl){
+    	   data = {};
+    	   var data = {};
+			data['start'] = $("#test5").val();
+			data['end']   = $("#test6").val();
+			data['orbit'] = $("#orbit").val();
+			data['cost']  = $("#cost").val();
+			data['notice']= $("#notice").val();
+    	   
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('addserver',  
+                    		data,
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+       }
+       
+   
+</script>
+
+<!--<script>-->
+    <!--$("body").css("background-color","#fff");-->
+    <!--var calendar1 = new LCalendar();-->
+    <!--calendar1.init({-->
+        <!--'trigger': '#demo1',//标签id-->
+        <!--'type': 'datetime',//date 调出日期选择 datetime 调出日期时间选择 time 调出时间选择 ym 调出年月选择-->
+        <!--'minDate':'1900-1-1',//最小日期 注意：该值会覆盖标签内定义的日期范围-->
+    <!--});-->
+    <!--var calendar2 = new LCalendar();-->
+    <!--calendar2.init({-->
+        <!--'trigger': '#demo2',//标签id-->
+        <!--'type': 'datetime',//date 调出日期选择 datetime 调出日期时间选择 time 调出时间选择 ym 调出年月选择-->
+        <!--'minDate':'1900-1-1',//最小日期 注意：该值会覆盖标签内定义的日期范围-->
+    <!--});-->
+    <!--$(function () {-->
+        <!--$("#demo1").on('input propertychange',function (){-->
+            <!--console.log(1)-->
+            <!--$("#time1").html($(this).val())-->
+        <!--});-->
+        <!--$("#demo2").on('input propertychange',function (){-->
+            <!--$("#time2").html($(this).val())-->
+        <!--})-->
+    <!--})-->
+<!--</script>-->
+</body>
+</html>

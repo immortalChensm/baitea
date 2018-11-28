@@ -14,6 +14,7 @@ use app\common\logic\ActivityLogic;
 use app\common\logic\GoodsPromFactory;
 use think\Db;
 use think\Page;
+use app\common\logic\UsersLogic;
 /**
  * 
  * 此项目优惠卷　　默认优惠卷类型为免费领取
@@ -127,9 +128,68 @@ class Activity extends Base {
         //默认就是　　免费领取的优惠卷列表
         $type = I('type', 1);
         $p = I('p', 1);
-
+        $store_id = I("store_id");
+        //print_r($this->user);
         $activityLogic = new ActivityLogic();
-        $result = $activityLogic->getCouponList($type, $this->user_id, $p);
+        $result = $activityLogic->getCouponList($type, $this->user_id, $p,$store_id);
+        $cid = [];
+        foreach ($result['coupon_list'] as $k=>$v){
+            $cid[] = $v['id'];
+        }
+        $coupon_list = $this->user_coupon_list($cid);
+        foreach ($result['coupon_list'] as $k=>$v){
+            
+            if($coupon_list[$v['id']]){
+                 $temp= $coupon_list[$v['id']];
+    
+                 $result['coupon_list'][$k]['coupon_status'] = [
+                     "is_get"=>$temp["is_get"],
+                     "status"=>$temp['status']
+                 ];
+            }else{
+                $result['coupon_list'][$k]['coupon_status'] = [
+                    "is_get"=>0,
+                    "status"=>-1
+                ];
+            }
+            
+            
+        }
+        
+        $user_coupon = 
+        $this->ajaxReturn(['status' => 1, 'msg' => '获取成功', 'result' => $result]);
+        
+        
+    }
+    
+    //获取这个用户已经领取了哪些优惠券
+    private function user_coupon_list($cid)
+    {
+        $result = \think\Db::name("coupon_list")->whereIn("cid",$cid)->where("uid",$this->user_id)->select();
+        $data = [];
+        foreach($result as $k=>$v){
+            $data[$v['cid']] = [
+                "is_get"=>$v['id'],
+                "status"=>$v['status']
+            ];
+        }
+        return $data;
+        
+        
+    }
+    
+    /**
+     * 领券列表：指定店铺获取
+     */
+    public function coupon_listbystoreid()
+    {
+        //默认就是　　免费领取的优惠卷列表
+        $type = I('type', 1);
+        $p = I('p', 1);
+        $storeid = I("store_id");
+    
+        $activityLogic = new ActivityLogic();
+        $result = $activityLogic->getCouponList($type, $this->user_id, $storeid,$p);
         $this->ajaxReturn(['status' => 1, 'msg' => '获取成功', 'result' => $result]);
     }
     

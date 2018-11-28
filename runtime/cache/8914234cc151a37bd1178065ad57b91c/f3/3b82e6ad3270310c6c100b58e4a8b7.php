@@ -1,3 +1,0 @@
-<?php
-//000031104000[{"goods_id":56,"goods_name":"\u521b\u7ef4\uff08skyworth\uff0955M5 55\u82f1\u5bf84K\u8d85\u9ad8\u6e05\u7f51\u7edc\u667a\u80fd\u6db2\u6676\u7535\u89c6\u673a","original_img":"\/public\/upload\/goods\/2016\/01-14\/56970fc50a9f3.jpg","shop_price":"3699.00"},{"goods_id":57,"goods_name":"TCL D50A710 50\u82f1\u5bf8 40\u4e07\u5c0f\u65f6\u89c6\u9891 \u5168\u9ad8\u6e05 \u5185\u7f6eWiFi \u516b\u6838\u5b89\u5353\u667a\u80fdLED\u6db2\u6676\u7535\u89c6","original_img":"\/public\/upload\/goods\/2016\/01-14\/569710f50e7d8.jpg","shop_price":"2799.00"}]
-?>

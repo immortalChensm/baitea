@@ -142,7 +142,7 @@
 								<div style="text-align: center; width: 270px;">
 									<a href="{:U('Tea/tea_info',array('teart_id'=>$vo['teart_id']))}" class="btn blue"><i class="fa fa-search"></i>编辑</a>
 
-									<a class="btn red"  href="javascript:void(0)" data-url="{:U('Store/shop_del')}" data-id="{$vo.id}" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a>
+									<a class="btn red"  href="javascript:void(0)" data-url="{:U('Tea/tea_del')}" data-id="{$vo['teart_id']}" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a>
 								</div>
 							</td>
 							<td align="" class="" style="width: 100%;">

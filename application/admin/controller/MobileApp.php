@@ -86,7 +86,6 @@ class MobileApp extends Base
         
         tpCache($inc_type, ['app_version' => $param['app_version']]);
         tpCache($inc_type, ['app_log' => $param['app_log']]);
-        
         if (!$file) {
             return $this->success("保存成功，但是没有文件上传", url('MobileApp/index'));
         }

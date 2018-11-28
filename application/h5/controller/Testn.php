@@ -306,20 +306,96 @@
          $data = [
              'activity_id'=>'4',//评论的活动id
          ];
-         */
          
-         //我报名的活动列表
+          //我报名的活动列表
          $token = "e9007232e6dbd9e877e69bfa83e7139b";
          $url = "www.liketea.com/index.php/api/User/myjoin_activity?token={$token}";
          $data = [
          ];
-
+         */
+         
+       
+         /**
+          * I('post.nickname') ? $post['nickname'] = I('post.nickname') : false; //昵称
+        //I('post.qq') ? $post['qq'] = I('post.qq') : false;  //QQ号码
+        I('post.head_pic') ? $post['head_pic'] = I('post.head_pic') : false; //头像地址
+        I('post.sex') ? $post['sex'] = I('post.sex') : false;  // 性别
+        //I('post.birthday') ? $post['birthday'] = strtotime(I('post.birthday')) : false;  // 生日
+        //I('post.province') ? $post['province'] = I('post.province') : false;  //省份
+        //I('post.city') ? $post['city'] = I('post.city') : false;  // 城市
+        //I('post.district') ? $post['district'] = I('post.district') : false;  //地区
+        //I('post.email') ? $post['email'] = I('post.email') : false;  
+        I('post.mobile') ? $post['mobile'] = I('post.mobile') : false;  
+        I('post.info') ? $post['info'] = I('post.info') : false;
+        I('post.longitude') ? $post['longitude'] = I('post.longitude') : false;
+        I('post.latitude') ? $post['latitude'] = I('post.latitude') : false;
+        $token = "f5604f8b2102befa1d026b52d2139880";
+         $url = "www.liketea.com/index.php/api/User/updateUserInfo?token={$token}";
+         $data = [
+             'nickname'=>'laotouzi',
+             'head_pic'=>'laoyoutiao',
+             'sex'=>'1',
+             //'mobile'=>'18896871476',
+             'info'=>'我是一个老老油条abc',
+             'longitude'=>'120.234561',
+             'latitude'=>'31.2345'
+         ];
+         
+         $token = "6c047136726e8c422ecd85e7ac3387c5";
+         $url = "www.liketea.com/index.php/api/Payment/alipay_sign?token={$token}";
+         $data = [
+             'order_sn'=>'201804131740131459',//合并付款的订单号 针对多个订单
+         ];
+          * ***/
+         
+         /*
+         $token = "7761a58c4a7471d00797f1661ab8aca0";
+         $cart_from_date = [
+            
+             [
+                'cartID'=>'4',
+                'goodsNum'=>'5',
+                'selected'=>'0'
+             ],
+             [
+             'cartID'=>'12',
+             'goodsNum'=>'1',
+             'selected'=>'1'
+             ],
+             [
+             'cartID'=>'15',
+             'goodsNum'=>'1',
+             'selected'=>'1'
+             ],
+              
+         ];
+         
+         $a = '[{
+  "cartId" : "18",
+  "goodsNum" : "1",
+  "selected" : "0"
+}]';
+         $url = "www.liketea.com/index.php/api/Cart/cart2?token={$token}";
+         $data = [
+             'cart_form_data'=>json_encode($cart_from_date)
+         ];
+         */
+         
+         
+         $token = "59b28c3e9c8045d48e07fcbbf9b009a3";
+         $url = "www.liketea.com/index.php/api/Cart/addCart?token={$token}";
+         $data = [
+             'goods_id'=>167,
+             'goods_num'=>2,
+         ];
+         
          
          $result = $this->get_api_data($url,'post',$data);
-
+         //print_r(json_encode($cart_from_date));
          print_r($result);
      }
      
+    
       
  }
 ?>

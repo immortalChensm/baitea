@@ -39,10 +39,10 @@
      	<tr>
 	      <td class="bdl"></td>
 	      <td class="w70">
-	      <div class="ncsc-goods-thumb"><a href="{:U('Home/Goods/goodsInfo',array('id'=>$good['goods_id']))}" target="_blank"><img src="{$good['goods_id']|goods_thum_images=240,240}"  ></a></div></td>
+	      <div class="ncsc-goods-thumb"><a href="{$good['goods_id']|goods_thum_images=240,240}" target="_blank"><img src="{$good['goods_id']|goods_thum_images=240,240}"  ></a></div></td>
 	      <td class="tl">
 	      	<dl class="goods-name">
-	          <dt><a target="_blank" href="{:U('Home/Goods/goodsInfo',array('id'=>$good['goods_id']))}">{$good['goods_name']}</a></dt>
+	          <dt><a target="_blank" href="{$good['goods_id']|goods_thum_images=240,240}">{$good['goods_name']}</a></dt>
 	        </dl>
 	      </td>
 	      <td><p>{$good['goods_price']}</p></td>
@@ -93,11 +93,11 @@
     	<tr>
 	      <td class="bdl"></td>
 	      <td class="w70">
-	      	<div class="ncsc-goods-thumb"><a href="{:U('Home/Goods/goodsInfo',array('id'=>$good['goods_id']))}" target="_blank"><img src="{$good['goods_id']|goods_thum_images=240,240}"  ></a></div>
+	      	<div class="ncsc-goods-thumb"><a href="{$good['goods_id']|goods_thum_images=240,240}" target="_blank"><img src="{$good['goods_id']|goods_thum_images=240,240}"  ></a></div>
 	      </td>
 	      <td class="tl">
 	      	<dl class="goods-name">
-	          <dt><a target="_blank" href="{:U('Home/Goods/goodsInfo',array('id'=>$good['goods_id']))}">{$good['goods_name']}</a></dt>
+	          <dt><a target="_blank" href="{$good['goods_id']|goods_thum_images=240,240}">{$good['goods_name']}</a></dt>
 	        </dl>
 	      </td>
 	      <td><p>{$good['goods_price']}</p></td>

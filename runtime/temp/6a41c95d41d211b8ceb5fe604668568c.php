@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:3:{s:42:"./application/admin/view2/index\index.html";i:1523440343;s:45:"./application/admin/view2/public\menubox.html";i:1517208468;s:42:"./application/admin/view2/public\left.html";i:1517208468;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:3:{s:42:"./application/admin/view2/index\index.html";i:1525772429;s:45:"./application/admin/view2/public\menubox.html";i:1517208468;s:42:"./application/admin/view2/public\left.html";i:1517208468;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -11,7 +11,7 @@
 <!-- Apple devices fullscreen -->
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="shortcut icon" type="image/x-icon" href="<?php echo $tpshop_config['shop_info_store_ico']; ?>" media="screen"/>
-<title>掌心</title>
+<title>趣喝茶</title>
 <script type="text/javascript">
 var SITEURL = window.location.host +'/index.php/admin';
 </script>

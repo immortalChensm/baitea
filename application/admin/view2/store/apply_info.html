@@ -39,7 +39,7 @@
         
         <tr>
             <th>店铺图片：</th>
-            <td><img src="{$apply.business_licence_cert}"/></td>
+            <td><img src="{:substr($apply.business_licence_cert,1)}"/></td>
         </tr>
         
         <tr>
@@ -74,7 +74,7 @@
             <tr>
                 <th>企业营业执照副本：</th>
                 <td colspan="20">
-                    <a href="{$apply.business_licence_cert}" target="_blank"><img src="{$apply.business_licence_cert|default='__PUBLIC__/images/icon_goods_thumb_empty_300.png'}" height="60"></a>
+                    <a href="{:substr($apply.business_licence_cert,1)}" target="_blank"><img src="{:substr($apply.business_licence_cert,1)}" height="60"></a>
                 </td>
             </tr>
             
@@ -86,15 +86,15 @@
                     </a>
                 </td>
             </tr>
-            
+            <!--
             <tr>
                 <th>国家认证证书：</th>
                 <td colspan="20">
-                    <a href="__ROOT__/{$apply.country_cert}" target="_blank">
-                            <img src="__ROOT__/{$apply.country_cert}" height="120">
+                    <a href="__ROOT__/{:substr($apply.country_cert,1)}" target="_blank">
+                            <img src="__ROOT__/{:substr($apply.country_cert,1)}" height="120">
                     </a>
                 </td>
-            </tr>
+            </tr>  -->
             
             </tbody>
         </table>

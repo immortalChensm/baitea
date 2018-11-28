@@ -21,7 +21,9 @@
                     <input type="hidden" name="orderby1" value="goods_id" />
                     <input type="hidden" name="orderby2" value="desc" />
                     <tr>
+                    
                         <td>&nbsp;</td>
+                        <!--
                         <th>本店分类</th>
                         <td class="w80">
                             <select name="store_cat_id1" id="store_cat_id1" class="select">
@@ -40,13 +42,16 @@
 					        </foreach>
 					       </select>
                         </td>
-                        <th class="w60">新品/推荐</th>
+                          -->
+                        <th class="w160" style="width:150px;">新品/推荐/众筹/拍品</th>
                         <td class="w80">
                             <select name="intro" class="select">
                                 <option value="0">全部</option>
                                 <option value="is_hot">热卖</option>
                                 <option value="is_new">新品</option>
                                 <option value="is_recommend">推荐</option>
+                                <option value="is_crowd_goods">众筹</option>
+                                <option value="is_auction_goods">拍品</option>
                             </select>
                         </td>
                         <td class="w160"><input type="text" class="text w150" name="key_word" value="" placeholder="搜索词" /></td>

@@ -422,6 +422,7 @@ function sendSms($scene, $sender, $params,$unique_id=0)
  */
 function queryExpressInfo($shipping_code, $invoice_no)
 {
+    
     $url = "https://m.kuaidi100.com/query?type=" . $shipping_code . "&postid=" . $invoice_no . "&id=1&valicode=&temp=0.49738534969422676";
     $resp = httpRequest($url, "GET");
     return json_decode($resp, true);
@@ -700,6 +701,59 @@ function accountLog($user_id, $user_money = 0, $pay_points = 0,$desc = '', $dist
     }
 }
 
+//众筹的退款
+/**
+ * 订单商品售后退款
+ * @param $rec_id
+ * @param int $refund_type  //退款类型，0原路返回，1退到用户余额
+ * @param int $refund_type
+ */
+function updateRefundCrowdGoods($rec_id,$refund_type=0){
+
+    $order_goods = M('order_goods')->where(array('rec_id'=>$rec_id))->find();
+    $order       = M("order")->where("order_id",$order_goods['order_id'])->find();
+
+    $updata = array('refund_type'=>$refund_type,'refund_time'=>time(),'status'=>5);
+
+    //将此订单列为已退款
+    M("order")->where("order_id",$order['order_id'])->save([
+        'pay_status'=>3,
+        'order_status'=>3
+    ]);
+
+    //在线支付金额退到余额去
+    if($refund_type==1 && $order['total_amount']>0){
+        accountLog(
+            $order['user_id'],
+            $order['total_amount'],
+            0,
+            '众筹商品结束未达到众筹目标时自动退回给用户的余额',
+            0,
+            $order['order_id'],
+            $order['order_sn']
+        );
+    }
+    $expense_data = [
+        'money'=>$order['total_amount'],
+        'log_type_id'=>$order['order_id'],
+        'type'=>5,//众筹自动退款
+        'user_id'=>$order['user_id'],
+        'store_id'=>$order['store_id']
+    ];
+    expenseLogcrowd($expense_data);//退款记录日志
+    //您支持的${ordersn}即将结束，但还没有达到${purpose}目标，资金将退回您的余额里
+    $ret = sms_send(Db::name("users")->where("user_id",$order['user_id'])->value("mobile"),"SMS_136385115",[
+        "ordersn"=>"众筹商品：{$order_goods['goods_name']}，订单号为:{$order['order_sn']}",
+        "purpose"=>"众筹"
+     ]);
+    
+    return true;
+}
+function expenseLogcrowd($data){
+    $data['addtime'] = time();
+    $data['admin_id'] = session('admin_id');
+    M('expense_log')->add($data);
+}
 /**
  * 记录商家的帐户变动
  * @param $store_id 店铺ID
@@ -920,8 +974,14 @@ function update_pay_status($order_sn, $transaction_id = '')
                 update_pay_status($val['order_sn'], $transaction_id);
             return;
         }
+       
         // 找出对应的订单
         $order = M('order')->master()->where(['order_sn' => $order_sn, 'pay_status' => 0])->find();   // 看看有没已经处理过这笔订单  支付宝返回不重复处理操作
+        //判断是否是众筹订单
+        if($order['status'] =='1'){
+            $itemId = Db::name('order_goods')->where(array('order_id'=>$order['order_id']))->getField('item_id');
+            $itemId && Db::name('raise_specification')->where(array('id'=>$itemId))->setDec('store',1);
+        }
         if (empty($order)) return false; //如果这笔订单已经处理过了
         // 修改支付状态  已支付
         M('order')->where("order_sn", $order_sn)->save(array('pay_status' => 1, 'pay_time' => time(), 'transaction_id' => $transaction_id));
@@ -998,18 +1058,31 @@ function update_pay_status_fortea($order_sn, $transaction_id = '')
 {
     
         // 先查看一下 是不是 合并支付的主订单号
-        $order_list = M('TeartOrder')->where("order_sn", $order_sn)->select();
+        //$order_list = M('TeartOrder')->where("order_sn", $order_sn)->select();
     
         // 找出对应的订单
-        $order = M('TeartOrder')->master()->where(['order_sn' => $order_sn, 'pay_status' => 0])->find();   // 看看有没已经处理过这笔订单  支付宝返回不重复处理操作
-        if (empty($order)) return false; //如果这笔订单已经处理过了
+        $order = M('TeartOrder')->where(['order_sn' => $order_sn])->find();   // 看看有没已经处理过这笔订单  支付宝返回不重复处理操作
+        //if (empty($order)) return false; //如果这笔订单已经处理过了
+        if(!empty($order['pay_status'])){
+            return false;//说明此订单已经支付过了
+        }
         // 修改支付状态  已支付
-        M('TeartOrder')->where("order_sn", $order_sn)->save(array('pay_status' => 1, 'pay_time' => time(), 'transaction_id' => $transaction_id));
+        M('TeartOrder')->where("order_sn", $order_sn)->save([
+            'pay_status' =>1, 
+            'pay_time' =>time(), 
+            'transaction_id' =>$transaction_id]
+        );
+        
+        //商家的资金累加
+        $order_money = \think\Db::name("tea_order")->where("order_sn",$order_sn)->find();
+        $merchant = \think\Db::name("tea_art")->where("teart_id",$order_money['teart_id'])->find(); 
+        
+        \think\Db::name("users")->where("user_id",$merchant['user_id'])->setInc("user_money",$order_money['pay']);
         
         // 记录订单操作日志
         logOrder($order['order_id'], '订单付款成功', '付款成功', $order['user_id'], 2);
         
-       
+        //file_put_contents("teaorder_result.txt", $order);
 
         //用户支付, 发送短信给商家
         //$res = checkEnableSendSms("4");
@@ -1020,6 +1093,17 @@ function update_pay_status_fortea($order_sn, $transaction_id = '')
         //$sender = $store['service_phone'];
         //$params = array('order_id' => $order['order_id']);
         //sendSms("4", $sender, $params);
+        
+        
+        //$store = M('store')->where("store_id = ".$order['store_id'])->find();
+        //$sender = (!empty($store) && !empty($store['service_phone'])) ? $store['service_phone'] : false;
+        //$params = array('consignee'=>$order['consignee'] , 'mobile' => $order['mobile']);
+        
+        $user = \think\Db::name("Users")->where("user_id",$order['user_id'])->find();
+        $tea_mobile = \think\Db::name("tea_art")->where("teart_id",$order['teart_id'])->getField("mobile");
+        $msg = $user['realname']."用户已经付款，请您及时处理，订单号是:".$order_sn;
+        smsnotice($msg,$tea_mobile);
+
 }
 
 
@@ -1257,7 +1341,9 @@ function calculate_price($user_id = 0, $order_goods = null, $shipping_code = arr
         // 循环优惠券
         if($coupon_id){
             foreach ($coupon_id as $key => $value){
-                $store_coupon_price[$key] = $couponLogic->getCouponMoney($user_id, $value, $key); // 下拉框方式选择优惠券
+                
+                $store_coupon_price[$key] = $couponLogic->getCouponMoney($user_id, $value, $key,$order_goods); // 下拉框方式选择优惠券
+                
             }
         }
     }
@@ -1282,7 +1368,6 @@ function calculate_price($user_id = 0, $order_goods = null, $shipping_code = arr
     }
     */
         
-        
     $shipping_price = 0; // 所有 商家物流费
 
     // 计算每个商家的应付金额
@@ -1296,6 +1381,8 @@ function calculate_price($user_id = 0, $order_goods = null, $shipping_code = arr
     }
     $prom_amount=array_sum($store_order_prom_amount);
     // 最终应付金额 = 商品价格 + 物流费 - 优惠券 - 积分 - 余额 - 优惠活动金额
+    
+    
     $order_amount = $goods_price + $shipping_price - $coupon_price-$prom_amount;
     // 订单总价 = 商品总价 + 物流总价
     $total_amount = $goods_price + $shipping_price;
@@ -1325,14 +1412,19 @@ function calculate_price($user_id = 0, $order_goods = null, $shipping_code = arr
     if($pay_points  > floor($order_amount * $point_rate))
         $pay_points = floor($order_amount * $point_rate);
 
-    $integral_money = ($pay_points / $point_rate);
-    $order_amount = $order_amount - $integral_money; //  积分抵消应付金额
-
+    //$integral_money = ($pay_points / $point_rate);
+    //$order_amount = $order_amount;// - $integral_money; //  积分抵消应付金额
+   
     // 计算每个商家平摊积分余额  和 余额
     $sum_store_order_amount = array_sum($store_order_amount);
     foreach ($store_order_amount as $k => $v) {
         // 当前的应付金额 除以所有商家累加的应付金额,  算出当前应付金额的占比
-        $proportion = $v / $sum_store_order_amount;
+        if($sum_store_order_amount){
+            $proportion = $v / $sum_store_order_amount;
+        }else{
+            $proportion = $v;
+        }
+        
         if ($pay_points > 0) {
             $store_point_count[$k] = (int)($proportion * $pay_points);
             $store_order_amount[$k] -= $store_point_count[$k] / tpCache('shopping.point_rate'); // 每个商家减去对应积分抵消的余额
@@ -1783,11 +1875,11 @@ function caldistance($ori_x,$ori_y,$des_x,$des_y,$distance='',$type='1')
  * @param string $msg
  * @return array
  * **/
-function smsnotice($msg,$mobile)
+function smsnotice($msg,$mobile,$template_id)
 {
     $log_id = M('sms_log')->insertGetId(array('mobile' => $mobile,'add_time' => time(),'status' => 0,'msg' => $msg));
 
-    vendor('ChuanglanSmsHelper.ChuanglanSmsApi');
+    /*vendor('ChuanglanSmsHelper.ChuanglanSmsApi');
     $clapi  = new \ChuanglanSmsApi();
     $result = $clapi->sendSMS($mobile, $msg,'true');
      
@@ -1799,5 +1891,202 @@ function smsnotice($msg,$mobile)
         return (array('status' => 1, 'msg' => '发送成功,请注意查收'));
     } else {
         return (array('status' => -1, 'msg' => '发送失败'));
+    }*/
+    
+
+
+    header('content-type:text/html;charset=utf-8');
+    
+    $sendUrl = 'http://v.juhe.cn/sms/send'; //短信接口的URL
+    
+    $smsConf = array(
+        'key'   => '399102f1109ffcd4b405650e074e4847', //您申请的APPKEY
+        'mobile'    => $mobile, //接受短信的用户手机号码
+        'tpl_id'    => $template_id, //您申请的短信模板ID，根据实际情况修改
+        'tpl_value' =>$msg //您设置的模板变量，根据实际情况修改
+    );
+    
+    $content = juhecurl($sendUrl,$smsConf,1); //请求发送短信
+    
+    if($content){
+        $result = json_decode($content,true);
+        $error_code = $result['error_code'];
+        if($error_code == 0){
+            //状态为0，说明短信发送成功
+            //echo "短信发送成功,短信ID：".$result['result']['sid'];
+            M('sms_log')->where(array('mobile'=>$mobile,'status' => 0))->save(array('status' => 1));
+            return (array('status' => 1, 'msg' => "短信发送成功,短信ID：".$result['result']['sid']));
+        }else{
+            //状态非0，说明失败
+            $msg = $result['reason'];
+            //echo "短信发送失败(".$error_code.")：".$msg;
+            return (array('status' => -1, 'msg' => "短信发送失败(".$error_code.")：".$msg));
+        }
+    }else{
+        //返回内容异常，以下可根据业务逻辑自行修改
+        return (array('status' => -1, 'msg' => '发送失败'));
+    }
+    
+}
+
+
+/**
+ * 请求接口返回内容
+ * @param  string $url [请求的URL地址]
+ * @param  string $params [请求的参数]
+ * @param  int $ipost [是否采用POST形式]
+ * @return  string
+ */
+function juhecurl($url,$params=false,$ispost=0){
+    $httpInfo = array();
+    $ch = curl_init();
+    curl_setopt( $ch, CURLOPT_HTTP_VERSION , CURL_HTTP_VERSION_1_1 );
+    curl_setopt( $ch, CURLOPT_USERAGENT , 'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.172 Safari/537.22' );
+    curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT , 30 );
+    curl_setopt( $ch, CURLOPT_TIMEOUT , 30);
+    curl_setopt( $ch, CURLOPT_RETURNTRANSFER , true );
+    if( $ispost )
+    {
+        curl_setopt( $ch , CURLOPT_POST , true );
+        curl_setopt( $ch , CURLOPT_POSTFIELDS , $params );
+        curl_setopt( $ch , CURLOPT_URL , $url );
+    }
+    else
+    {
+        if($params){
+            curl_setopt( $ch , CURLOPT_URL , $url.'?'.$params );
+        }else{
+            curl_setopt( $ch , CURLOPT_URL , $url);
+        }
+    }
+    $response = curl_exec( $ch );
+    if ($response === FALSE) {
+        //echo "cURL Error: " . curl_error($ch);
+        return false;
+    }
+    $httpCode = curl_getinfo( $ch , CURLINFO_HTTP_CODE );
+    $httpInfo = array_merge( $httpInfo , curl_getinfo( $ch ) );
+    curl_close( $ch );
+    return $response;
+}
+
+/**
+ * 根据支付宝返回的银行英文名称返回具体的银行
+ * **/
+function getbank($bank)
+{
+    $banklist = json_decode(require 'bank.php',true); 
+    return $banklist[$bank];
+}
+
+/**
+ * 判断是否有空的
+ * **/
+function Isempty($object)
+{
+    if(is_string($object)){
+        return empty($object)?true:false;
+    }elseif(is_array($object)){
+        foreach ($object as $v){
+            if (empty($v)){
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * 高德地图逆地理位置编码[经纬度转换]  调用次数日300w次　
+ * @param number $lng 经度
+ * @param number $lat 纬度
+ * @return string 返回位置名称
+ * **/
+function gdlocation($lng,$lat)
+{
+    $gdkey = C("GAODE_DISTANCE_KEY");
+    $url = "http://restapi.amap.com/v3/geocode/regeo?key={$gdkey}&location={$lng},{$lat}&poitype=&radius=100&extensions=all&batch=false&roadlevel=0";
+    $result = file_get_contents($url);
+    $result = json_decode($result,true);
+    if($result['info']=="OK"){
+        return $result['regeocode']['formatted_address'];
+    }else{
+        //return null;
+        return $result['info'];
+    }
+}
+
+//计算倒计时时间
+ function count_down($end_date){
+    if(is_integer($end_date)){
+        $diff = $end_date - time();
+    }else{
+        $diff = strtotime($end_date) - time();
+    }
+    //$diff += 3600*24;
+    if($diff <= 0) return 0;
+    $str = '';
+    $oneday = 3600*24;
+    $day = floor($diff/$oneday);
+    $day && $str .= $day."天";
+    
+    //$diff = $diff-(天*一天的秒数)
+    
+    $diff -= $day*$oneday;
+    $hour = round($diff/3600,1);
+    $hour && $str .= $hour."小时";
+    
+    
+  
+    return $str;
+}
+
+/**
+ * 阿里云短信　发送
+ * @param string $mobile　手机号
+ * @param stirng $templateId 申请好的模板ID
+ * @param array $msg　短信模板内容
+ * **/
+function sms_send($mobile,$templateId,$msg)
+{
+    include_once './vendor/aliyun-php-sdk-core/Config.php';
+    include_once './vendor/Dysmsapi/Request/V20170525/SendSmsRequest.php';
+    
+    $accessKeyId = 'LTAIJD3P8azAO0oh';
+    $accessKeySecret = 'J6HmGBwn0NbqJ8kwyPSsPCWams0Y9g';
+    
+    //短信API产品名
+    $product = "Dysmsapi";
+    //短信API产品域名
+    $domain = "dysmsapi.aliyuncs.com";
+    //暂时不支持多Region
+    $region = "cn-hangzhou";
+    
+    //初始化访问的acsCleint
+    $profile = \DefaultProfile::getProfile($region, $accessKeyId, $accessKeySecret);
+    \DefaultProfile::addEndpoint("cn-hangzhou", "cn-hangzhou", $product, $domain);
+    $acsClient= new \DefaultAcsClient($profile);
+    
+    $request = new \Dysmsapi\Request\V20170525\SendSmsRequest;
+    //必填-短信接收号码
+    $request->setPhoneNumbers($mobile);
+    //必填-短信签名
+    $request->setSignName('趣喝茶app');
+    //必填-短信模板Code
+    $request->setTemplateCode($templateId);
+    //选填-假如模板中存在变量需要替换则为必填(JSON格式)
+    $request->setTemplateParam(json_encode($msg, JSON_UNESCAPED_UNICODE));
+    //选填-发送短信流水号
+    //$request->setOutId("1234");
+    
+    //发起访问请求
+    $resp = $acsClient->getAcsResponse($request);
+    
+    //短信发送成功返回True，失败返回false
+    if ($resp && $resp->Code == 'OK') {
+        return(array('status' => 1, 'msg' => "短信发送成功"));
+    } else {
+        return array('status' => -1, 'msg' => $resp->Message . ' subcode:' . $resp->Code);
     }
 }

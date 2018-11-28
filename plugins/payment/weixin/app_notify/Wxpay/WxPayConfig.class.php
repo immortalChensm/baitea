@@ -17,7 +17,7 @@ class WxPayConfig
      public static $NOTIFY_URL;
 
     //private标记的构造方法
-    private function __construct($trade_type)
+    private function __construct($trade_type,$notify_url='')
     {
         $code = '';
         if (!$trade_type || $trade_type == "APP") {
@@ -32,7 +32,11 @@ class WxPayConfig
         self::$KEY = $wxPayVal['key'];
         self::$APPSECRET = $wxPayVal['appsecret'];
         $http = (!$_SERVER['HTTPS'] || $_SERVER['HTTPS'] == 'off') ? "http://" : "https://";
-        self::$NOTIFY_URL = $http.$_SERVER["SERVER_NAME"].U('Api/Teawxpay/notify');
+        
+        
+        //self::$NOTIFY_URL = $http.$_SERVER["SERVER_NAME"].U('Api/wxpay/notify');
+        
+        self::$NOTIFY_URL = $notify_url;
     }
 
     //创建__clone方法防止对象被复制克隆
@@ -41,11 +45,11 @@ class WxPayConfig
         trigger_error('Clone is not allow!', E_USER_ERROR);
     }
     //单例方法,用于访问实例的公共的静态方法
-    public static function getInstance($trade_type)
+    public static function getInstance($trade_type,$notify_url='')
     {
         if (!(self::$_instance instanceof self)) {
 
-            self::$_instance = new self($trade_type);
+            self::$_instance = new self($trade_type,$notify_url);
 
         }
         return self::$_instance;

@@ -26,10 +26,8 @@ class Base extends Controller {
         parent::__construct();
         $this->checkToken(); // 检查token        
         //$this->user = M('users')->where('user_id', $this->user_id)->find();
-        
         $unique_id = I("unique_id"); // 唯一id  类似于 pc 端的session id
         define('SESSION_ID',$unique_id); //将当前的session_id保存为常量，供其它方法调用                
-
     }    
     
     /*
@@ -44,6 +42,7 @@ class Base extends Controller {
         Session::start();
    
         $local_sign = $this->getSign();
+        //echo $local_sign;
         $api_secret_key = C('API_SECRET_KEY');
         
         
@@ -53,7 +52,7 @@ class Base extends Controller {
         // 不参与签名验证的方法
         //@modify by wangqh. add notify
         //增加了　dispatching　　查询该商品的物流
-        if(!in_array(strtolower(ACTION_NAME), array('return_goods','getservertime','group_list','getconfig','alipaynotify', 'notify', 'goodslist','search','goodsthumimages','login','favourite','homepage','dispatching')))
+        /*if(!in_array(strtolower(ACTION_NAME), array('return_goods','getservertime','group_list','getconfig','alipaynotify', 'notify', 'goodslist','search','goodsthumimages','login','favourite','homepage','dispatching','imgs_upload)))
         {        
             if($local_sign != $_POST['sign'])
             {   
@@ -61,12 +60,13 @@ class Base extends Controller {
                 exit(json_encode($json_arr,JSON_UNESCAPED_UNICODE));
 
             }
+            
             if(time() - $_POST['time'] > 600)
             {    
                 $json_arr = array('status'=>-1,'msg'=>'请求超时!!!','result'=>'' );
                 exit(json_encode($json_arr));
             }
-        }       
+        }  */   
     }
     
     /**
@@ -107,7 +107,11 @@ class Base extends Controller {
      */
     protected function getSign(){
         header("Content-type:text/html;charset=utf-8");
-        $data = $_POST;        
+        $data = $_POST;  
+        //生成请求日志
+        file_put_contents("request_param.txt", "请求时间：".date("Y-m-d H:i:s").":".$_SERVER['REQUEST_METHOD'].":".json_encode($_POST,JSON_UNESCAPED_UNICODE)."\r\n",FILE_APPEND);
+        
+        //print_r($data);      
         unset($data['time']);    // 删除这两个参数再来进行排序     
         unset($data['sign']);    // 删除这两个参数再来进行排序
         ksort($data);
@@ -138,7 +142,7 @@ class Base extends Controller {
        
         // 判断哪些控制器的 哪些方法需要登录验证的
         $check_arr = [
-            'cart'      => ['cart2','cart3', 'cart4','integral','integral2'],
+            'cart'      => ['cart2','cart3', 'cart4','integral','integral2','cartList'],
             'distribut' => ['add_goods', 'goods_list', 'index', 'lower_list', 'my_store', 'order_list', 'rebate_log', 'store'],
             'goods'     => ['collectGoodsOrNo','search','clear_searchlog','getsearchlog'], //额外增加的search 商品列表页搜索时必须要用户登录　　否则不知道搜索历史是哪个家伙的
             'message'   => ['message_read'],
@@ -147,20 +151,24 @@ class Base extends Controller {
                 'get_complain_talk', 'order_confirm', 'order_detail', 'order_list', 'publish_complain_talk', 'reply_add', 'return_goods',
                 'return_goods_cancel', 'return_goods_index', 'return_goods_info', 'return_goods_list', 'return_goods_refund'],
 	        'payment'   => ['alipay_sign'],
-            'store'     => ['collectStoreOrNo','getshop_list'],
+            'store'     => ['collectStoreOrNo',/*'getshop_list'*/],
             'user'      => ['account', 'account_list', 'addAddress', 'add_comment', 'add_service_comment', 'cancelOrder', 'clear_message',
                 'clear_visit_log', 'comment', 'comment_num', 'del_address', 'del_visit_log', 'getAddressList',
                 'getCollectStoreData', 'getCouponList', 'getOrderList', 'getUserCollectStore', 'logout', 'message',
                 'message_switch', 'orderConfirm', 'password', 'points', 'points_list', 'recharge_list', 'return_goods','return_goods_info',
                 'return_goods_list','return_goods_status','service_comment','setDefaultAddress','updateUserInfo','upload_headpic','userInfo',
                 'visit_log','withdrawals','withdrawals_list','paypwd','idcard_recognize','teamerchant_add','imgs_upload','teashop_add','teart_add','userteart_info',
-            'addteart_service','geteart_servicelist','subscribe_teart','teart_list','teart_list_serach','get_teart_info','addteart_order','submit_tea_order','teapayorder','userteaorder_list',
+            'addteart_service','geteart_servicelist','subscribe_teart',/*'teart_list'*//*'teart_list_serach',*//*'get_teart_info',*/'addteart_order','submit_tea_order','teapayorder','userteaorder_list',
                 'getteaorder_details','cancelteaorder','teaorder_comment','teart_orderlist','teart_receiveorder','teart_cancelorder','tea_dealorder','dealcancel_order','myarticle',
-                'deletearticle','myactivity','myjoin_activity'
+                'deletearticle','myactivity','myjoin_activity','bindbank','banklist','myteartlist','getUser',
             ],
             'newjoin'      => ['agreement','basicInfo', 'storeInfo','remark','getApply'],
-            'Article'      =>['addarticle','articlelist','details','comment'],
-            'Active'      =>['addactive','activelist','details','comment','remove_activity','join_activity']
+            //'article'      =>['addarticle','articlelist','details','comment','clickpraise'],
+            'article'      =>['addarticle','comment','clickpraise'],
+            //'active'      =>['addactive','activelist','details','comment','remove_activity','join_activity','clickpraise'],
+            'active'      =>['addactive','comment','remove_activity','join_activity','clickpraise'],
+            'live'        =>['liveshow','liveshow_apply','subscribeliver','subscribeliver','getImUserSign'],
+            //'auctiongoods'            =>['auctionProcess']
         ];
         
         // 保留状态的检查组
@@ -217,12 +225,14 @@ class Base extends Controller {
         }
 
         $user = M('users')->where("token", $token)->find();
+        
         if (empty($user)) {
             return ['status'=>-101, 'msg'=>'登录超时[token错误]'];
         }
         
         // 登录超过72分钟 则为登录超时 需要重新登录.  //这个时间可以自己设置 可以设置为 20分钟
-        if(time() - $user['last_login'] > C('APP_TOKEN_TIME')) {  //3600
+        $time = 315360000;//C('APP_TOKEN_TIME')
+        if(time() - $user['last_login'] > $time) {  //3600
             return ['status'=>-102, 'msg'=>'登录超时,请重新登录!', 'result'=>(time() - $user['last_login'])];
         }
         
@@ -246,7 +256,7 @@ class Base extends Controller {
                 }
                 //article 针对帖子上传图片的目录
                 //active 针对活动上传图片的目录
-                if(!in_array($type, ['shopimgs','tea_arts','article','active'])){
+                if(!in_array($type, ['live','shopimgs','tea_arts','article','active','profile','orders'])){
                     return ['status'=>-1,'msg'=>'type参数错误'];
                 }
                 $file = "./public/upload/{$type}/".date("Ymdhis").md5(mt_rand(0, 99999)).".png";
@@ -258,7 +268,7 @@ class Base extends Controller {
                     mkdir($file_dir);
                 }
                 if(file_put_contents($file, base64_decode($this->request->param("img")))){
-                    return ['status'=>1,'msg'=>'上传成功','data'=>$file];
+                    return ['status'=>1,'msg'=>'上传成功','result'=>$file];
                 }else{
                     return ['status'=>-1,'msg'=>'上传失败'];
                 }

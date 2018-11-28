@@ -36,9 +36,13 @@
                     <th class="w120">下单时间</th>
                     <th class="w80">订单总价</th>
                     <th class="w80">付款金额</th>
+                    <!--
                     <th class="w80">积分金额</th>
+                      -->
                     <th class="w80">优惠金额</th>
+                      <!--
                     <th class="w80">余额抵扣</th>
+                     -->
                     <th class="w80">商品总价</th>
                     <th class="w80">订单状态</th>
                     <th class="w100">发货状态</th>
@@ -54,9 +58,13 @@
                         <td>{$v.add_time|date="Y-m-d H:i",###}</td>
                         <td>{$v.total_amount}</td>
                         <td>{$v.order_amount}</td>
+                        <!-- 
                         <td>{$v.integral_money}</td>
+                         -->
                         <td>{$v.coupon_price|default='0.00'}</td>
+                        <!-- 
                         <td>{$v.user_money}</td>
+                         -->
                         <td>{$v.goods_price}</td>
                         <td>{$order_status[$v['order_status']]}</td>
                         <td>{$shipping_status[$v['shipping_status']]}</td>

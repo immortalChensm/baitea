@@ -1,3 +1,0 @@
-<?php
-//000031104000[{"goods_id":41,"goods_name":"\u534e\u4e3a\uff08HUAWEI\uff09 M2 8\u82f1\u5bf8\u5e73\u677f\u7535\u8111\uff081920\u00d71200 IPS\u5c4f \u6d77\u601d\u9e92\u9e9f930 16GB WiFi\uff09\u9999\u69df\u91d1","original_img":"\/public\/upload\/goods\/2016\/01-13\/5695bf6426994.jpg","shop_price":"1588.00"},{"goods_id":43,"goods_name":"\u8363\u8000\u7545\u73a9\u5e73\u677fnote 9.6\u82f1\u5bf8\u5e73\u677f\u7535\u8111 \u79fb\u52a8\/\u8054\u901a\u53cc4G LTE\u7248","original_img":"\/public\/upload\/goods\/2016\/01-13\/5695c0d15fc5f.jpg","shop_price":"500.00"}]
-?>

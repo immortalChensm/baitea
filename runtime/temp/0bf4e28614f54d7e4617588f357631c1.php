@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:4:{s:50:"./application/seller/new/finance\order_statis.html";i:1517208469;s:41:"./application/seller/new/public\head.html";i:1522050654;s:41:"./application/seller/new/public\left.html";i:1517208469;s:41:"./application/seller/new/public\foot.html";i:1517208469;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:4:{s:50:"./application/seller/new/finance\order_statis.html";i:1524101877;s:41:"./application/seller/new/public\head.html";i:1522050654;s:41:"./application/seller/new/public\left.html";i:1517208469;s:41:"./application/seller/new/public\foot.html";i:1517208469;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -151,11 +151,15 @@
                     <th class="w120">结束时间</th>
                     <th class="w80">订单商品金额</th>
                     <th class="w80">运费</th>
+                    <!--  
                     <th class="w80">平台抽成</th>
                     <th class="w80">积分金额</th>
                     <th class="w80">分销金额</th>
+                    
                     <th class="w80">优惠价</th>
+                    -->
                     <th class="w80">优惠券抵扣</th>
+                    
                     <th class="w80">本期应结</th>
                     <th class="w120">创建记录日期</th>
                     <th class="w90">查看订单</th>
@@ -169,10 +173,12 @@
                         <td><?php echo date("Y-m-d H:i",$v['end_date']); ?></td>
                         <td><?php echo $v['order_totals']; ?></td>
                         <td><?php echo $v['shipping_totals']; ?></td>
+                        <!-- 
                         <td><?php echo $v['commis_totals']; ?></td>
                         <td><?php echo $v['give_integral']; ?></td>
                         <td><?php echo $v['distribut']; ?></td>
                         <td><?php echo $v['order_prom_amount']; ?></td>
+                         -->
                         <td><?php echo $v['coupon_price']; ?></td>
                         <td><?php echo $v['result_totals']; ?></td>
                         <td><?php echo date("Y-m-d H:i",$v['create_date']); ?></td>

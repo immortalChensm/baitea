@@ -25,11 +25,17 @@ class Active extends Base {
         $data['location_y']      = $this->request->param("location_y");
         $data['address']         = $this->request->param("address");
         $data['num']             = $this->request->param("num");
+        
         $data['sex']             = $this->request->param("sex");
+        
+        
         $data['consume']         = $this->request->param("consume");
-        $data['imglist']         = $this->request->param("imglist");
+        $data['imgs']            = $this->request->param("imgs");
         $data['add_time']        = time();
         
+        if(!in_array($data['sex'], [0,1,2])){
+            $this->ajaxReturn(['status'=>-1,'msg'=>'活动性别参数不正确']);
+        }
         $result = $this->validate($data, 'Active');
         $img_num = explode(",", $data['imglist']);
         if(count($img_num)>3) $this->ajaxReturn(['status'=>-1,'msg'=>'最多3张图片']);
@@ -49,19 +55,23 @@ class Active extends Base {
         $p = $this->request->param("p");
         $list = \think\Db::name("active")->order("add_time desc")->page($p?:1,10)->select();
         $user = [];
+        $activity = [];
         foreach ($list as $k=>$v){
             $user[] = $v['user_id'];
             $list[$k]['add_time'] = date("Y-m-d H:i:s",$v['add_time']);
             $list[$k]['active_time'] = date("Y-m-d H:i:s",$v['active_time']);
-            
+            $list[$k]['imgs'] = explode(',', $v['imgs']);
             //报名状态处理
-            if(time()>strtotime($v['active_time'])){
+            if(time()<$v['active_time']){
                 $list[$k]['status'] = '1';//报名中
             }else{
                 $list[$k]['status'] = '2';//已结束
             }
+            $activity[] = $v['id'];
         }
-        $info = \think\Db::name("users")->field("user_id,realname,head_pic")->whereIn("user_id",$user)->select();
+        $info = \think\Db::name("users")->field([
+            "user_id","nickname"=>"realname","head_pic","mobile"
+            ])->whereIn("user_id",$user)->select();
         //茶商
         $tea_merchant = \think\Db::name("store")->field("user_id")->whereIn("user_id",$user)->select();
         //茶艺师
@@ -79,8 +89,15 @@ class Active extends Base {
         
         $userInfo = [];
         foreach ($info as $k=>$v){
-            $userInfo[$v['user_id']] = ['realname'=>$v['realname'],'head_pic'=>$v['head_pic']];
+            $userInfo[$v['user_id']] = [
+                'realname'=>($v['realname']?:substr($v['mobile'],0,3).'****'.substr($v['mobile'],-3,5)),
+                'head_pic'=>$v['head_pic']
+                
+            ];
         }
+        
+        $join_activity = $this->join_activity_num($activity);
+ 
         foreach ($list as $k=>$v){
             $list[$k]['userinfo'] = $userInfo[$v['user_id']];
             if(in_array($v['user_id'], $teaMerchant)){
@@ -90,8 +107,21 @@ class Active extends Base {
             }else{
                 $list[$k]['role'] = '茶友';
             }
+            
+            $list[$k]['join_num'] = count($join_activity[$v['id']]);
         }
         $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$list]);
+    }
+    
+    //已参加活动的人数
+    public function join_activity_num($activid)
+    {
+        $list = \think\Db::name("activity_join")->whereIn("active_id",$activid)->select();
+        $active_user = [];
+        foreach($list as $k=>$v){
+            $active_user[$v['active_id']][] = $v['user_id'];
+        }
+        return $active_user;
     }
     
     public function details()
@@ -100,7 +130,11 @@ class Active extends Base {
         empty($article_id) && $this->ajaxReturn(['status'=>-1,'msg'=>'活动不存在']);
         $article = \think\Db::name("active")->where("id",$article_id)->find();
         $article['add_time'] = date("Y-m-d H:i:s",$article['add_time']);
-        $article['userinfo'] = \think\Db::name("users")->field("realname,head_pic")->where("user_id",$article['user_id'])->find();
+        
+        $article['imgs'] = explode(',', $article['imgs']);
+        $article['userinfo'] = \think\Db::name("users")->field([
+            "user_id","nickname"=>"realname","head_pic"
+            ])->where("user_id",$article['user_id'])->find();
         $article['commentNum'] = \think\Db::name("active_comment")->whereIn("active_id",$article['id'])->count("cid");
         $article['commentList'] = \think\Db::name("active_comment")->whereIn("active_id",$article['id'])->select();
         $userId = [];
@@ -108,10 +142,16 @@ class Active extends Base {
             $article['commentList'][$k]['add_time'] = date("Y-m-d H:i:s",$v['add_time']);
             $userId[] = $v['user_id'];
         }
-        $userInfo = \think\Db::name("users")->field("user_id,realname,head_pic")->whereIn("user_id",$userId)->select();
+        $userInfo = \think\Db::name("users")->field([
+            "user_id","nickname"=>"realname","head_pic","mobile"
+            ])->whereIn("user_id",$userId)->select();
         $user_info_arr = [];
         foreach ($userInfo as $k=>$v){
-            $user_info_arr[$v['user_id']] = ['realname'=>$v['realname'],'headimg'=>$v['head_pic']];
+            $user_info_arr[$v['user_id']] = [
+                'realname'=>($v['realname']?:substr($v['mobile'],0,3).'****'.substr($v['mobile'],-3,5)),
+                'headimg'=>$v['head_pic']
+                
+            ];
         }
         foreach ($article['commentList'] as $k=>$v){
             
@@ -128,6 +168,17 @@ class Active extends Base {
         }else{
             $article['role'] = "茶友";
         }
+        
+        //报名状态处理
+        if(time()<$article['active_time']){
+            $article['status'] = '1';//报名中
+        }else{
+            $article['status'] = '2';//已结束
+        }
+        $article['active_time'] = date("Y-m-d H:i:s",$article['active_time']);
+        $join_activity = $this->join_activity_num($article['id']);
+        $article['join_num'] = count($join_activity[$article['id']]);
+        
         $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$article]);
     }
     
@@ -146,7 +197,7 @@ class Active extends Base {
     {
         $article_id = $this->request->param("active_id");
         empty($article_id)&& $this->ajaxReturn(['status'=>-1,'msg'=>'参数错误']);
-        $active = \think\Db::name("active")->where(function($query){
+        $active = \think\Db::name("active")->where(function($query)use($article_id){
             $query->where("user_id",$this->user_id)->where("id",$article_id);
         })->find();
         empty($active['id'])&& $this->ajaxReturn(['status'=>-1,'msg'=>'您的活动不存在无法删除']);
@@ -163,7 +214,7 @@ class Active extends Base {
         //报名人数限制
         //报名性别限制
         
-        $activity_id = $this->request->param("activity_id");
+        $activity_id = $this->request->param("active_id");
         empty($activity_id)&& $this->ajaxReturn(['status'=>-1,'msg'=>'参数错误']);
         $active = \think\Db::name("active")->where("id",$activity_id)->find();
         empty($active)&& $this->ajaxReturn(['status'=>-1,'msg'=>'活动不存在']);
@@ -176,17 +227,37 @@ class Active extends Base {
         }
         
         $userinfo = \think\Db::name("users")->where("user_id",$this->user_id)->getField("sex");
+        
         if($active['sex']!=$userinfo['sex']){
-            $this->ajaxReturn(['status'=>-1,'msg'=>'您不能参加异性群组织的活动']);
+            if($active['sex']!=0){
+                $this->ajaxReturn(['status'=>-1,'msg'=>'您不能参加异性群组织的活动']);
+            }
+           
+            
+            
         }
         
-        $is_join = \think\Db::name("activity_join")->where("user_id",$this->user_id)->find();
+        $is_join = \think\Db::name("activity_join")->where("active_id",$activity_id)->where("user_id",$this->user_id)->find();
         if($is_join['user_id']){
             $this->ajaxReturn(['status'=>1,'msg'=>'您已经报名过了']);
         }
         
         \think\Db::name("activity_join")->save(['user_id'=>$this->user_id,'active_id'=>$activity_id,'add_time'=>time()])
         && $this->ajaxReturn(['status'=>1,'msg'=>'报名成功']);
+    }
+    
+    //是否报名了该活动
+    public function join_active_status()
+    {
+        $activity_id = $this->request->param("active_id");
+        empty($activity_id)&& $this->ajaxReturn(['status'=>-1,'msg'=>'参数错误']);
+        $join= \think\Db::name("activity_join")->where("active_id",$activity_id)->where("user_id",$this->user_id)->find();
+        if($join['id']){
+            $res = ['status'=>1,'msg'=>'获取成功','result'=>['status'=>1]];
+        }else{
+            $res = ['status'=>1,'msg'=>'获取成功','result'=>['status'=>2]];
+        }
+        $this->ajaxReturn($res);
     }
 }
 ?>

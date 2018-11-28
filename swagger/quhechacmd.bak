@@ -1,0 +1,570 @@
+    1  netstat -an
+    2  mysql -hrm-m5e73nm4c2zooyyw0.mysql.rds.aliyuncs.com -P 3306 -u quhecha -p
+    3  ping rm-m5e73nm4c2zooyyw0.mysql.rds.aliyuncs.com
+    4  cd 
+    5  cd /
+    6  cd home
+    7  ls
+    8  ll
+    9  yum install nginx
+   10  service nginx start
+   11  service nginx status
+   12  service nginx start
+   13  nginx -t
+   14  vi /etc/nginx/nginx.conf
+   15  vi /etc/nginx/conf.d/default.conf
+   16  service nginx start
+   17  curl http://localhost
+   18  nginx -v
+   19  yum install php php-fpm
+   20  service php-fpm start
+   21  php -v
+   22  yum uninstall php
+   23  yum remove php-fpm
+   24  rpm -Uvh http://ftp.iij.ad.jp/pub/linux/fedora/epel/6/i386/epel-release-6-8.noarch.rpm
+   25  rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+   26  yum list --enablerepo=remi --enablerepo=remi-php56 | grep php
+   27  yum install --enablerepo=remi --enablerepo=remi-php56 php php-mysql php-opcache php-pecl-apcu php-devel php-mbstring php-mcrypt php-mysqlnd php-phpunit-PHPUnit php-pecl-xdebug php-pecl-xhprof php-pdo php-pear php-fpm php-cli php-xml php-bcmath php-process php-gd php-common
+   28  php -v
+   29  service php-fpm start
+   30  cat /etc/php-fpm/www.conf | grep -i 'listen='
+   31  cat /etc/php-fpm.d/www.conf | grep -i 'listen='
+   32  cd /etc/php-fpm.d
+   33  ls
+   34  cat www.conf 
+   35  cat www.conf | grep - i 'listen='
+   36  cat www.conf| grep -i 'listen='
+   37  nginx -t
+   38  cd /
+   39  cd home
+   40  ls
+   41  mkdir www
+   42  ls
+   43  ll
+   44  chmod -R 777 www
+   45  ll
+   46  service nginx restart
+   47  service php-fpm restart
+   48  ls
+   49  ll
+   50  cd www
+   51  ls
+   52  vi test.php
+   53  vi test.pp
+   54  vi test.php
+   55  vi test.ph
+   56  vi test.php
+   57  ab -c 1000 -n 10000 http://localhost/test.php
+   58  ab -c 10000 -n 150000 http://localhost/test.php
+   59  ulimit -n 20480
+   60  echo 10000 > /proc/sys/net/core/somaxconn
+   61  echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse
+   62  echo 1 > /proc/sys/net/ip4/tcp_tw_recycle
+   63  echo 1 >/proc/sys/et/ipv4/tcp_tw_recycle
+   64  echo 1 > /proc/sys/net/ipv4/tcp_tw_recycle
+   65  echo 0 > /proc/sys/net/ipv4/tcp_syncookies
+   66  systcl -p
+   67  sysctl -p
+   68  service nginx restart
+   69  ab -c 10000 -n 150000 http://localhost/test.ph
+   70  ab -c 10000 -n 150000 http://localhost/test.php
+   71  sysctl -p
+   72  service nginx restart
+   73  ab -c 10000 -n 150000 http://localhost/test.php
+   74  service nginx restart
+   75  ab -c 10000 -n 150000 http://localhost/test.php
+   76  ab -c 1000 -n 150000 http://localhost/test.php
+   77  sysctl -p
+   78  service nginx restart
+   79  ab -c 1000 -n 150000 http://localhost/test.php
+   80  ab -c 100 -n 150000 http://localhost/test.php
+   81  sysctl -p
+   82  service nginx restart
+   83  ab -c 100 -n 150000 http://localhost/test.php
+   84  ab -c 10000 -n 15000 http://localhost/test.php
+   85  sysctl -p
+   86  service nginx restart
+   87  service php-fpm restart
+   88  ab -c 10000 -n 15000 http://localhost/test.php
+   89  sysctl -p
+   90  modprobe ip_conntrack
+   91  systcl -p
+   92  sysctl -p
+   93  service nginx restart
+   94  ab -c 10000 -n 15000 http://localhost/test.php
+   95  ab -c 1000 -n 15000 http://localhost/test.php
+   96  ab -c 1000 -n 15000 http://localhost/test.php -r
+   97  ab -r -c 1000 -n 15000 http://localhost/test.php -r
+   98  ab -r -c 1000 -n 15000 http://localhost/test.php
+   99  ab -r -c 10000 -n 150000 http://localhost/test.php
+  100  ab -r -c 10000 -n 15000 http://localhost/test.php
+  101  ulimit -n 20480
+  102  echo 10000 > /proc/sys/net/core/somaxconn
+  103  echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse
+  104  echo 1 > /proc/sys/net/ipv4/tcp_tw_recycle
+  105  echo 0 > /proc/sys/net/ipv4/tcp_syncookies
+  106  sysctl -p
+  107  service nginx restart
+  108  ab -r -c 10000 -n 15000 http://localhost/test.php
+  109  ab  -c 10000 -n 15000 http://localhost/test.php
+  110  ab  -c 10000 -n 150000 http://localhost/test.php
+  111  ab  -r -c 10000 -n 150000 http://localhost/test.php
+  112  echo 10000 > /proc/sys/net/core/somaxconn
+  113  echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse
+  114  echo 1 > /proc/sys/net/ipv4/tcp_tw_recycle
+  115  echo 0 > /proc/sys/net/ipv4/tcp_syncookies
+  116  sysctl -p
+  117  ab  -r -c 10000 -n 15000 http://localhost/test.php
+  118  ab  -r -c 10000 -n 150000 http://localhost/test.php
+  119  sysctl -p
+  120  service nginx restart
+  121  ab -c 10000 - n 15000 http://localhost/test.php
+  122  ab  -r -c 10000 -n 150000 http://localhost/test.php
+  123  ab  -r -c 10000 -n 15000 http://localhost/test.php
+  124  ab  -c 10000 -n 15000 http://localhost/test.php
+  125  vi index.html
+  126  ab  -c 10000 -n 15000 http://localhost/index.html
+  127  ab  -c 10000 -n 150000 http://localhost/index.html
+  128  ab  -r -c 10000 -n 150000 http://localhost/index.html
+  129  ls
+  130  pwd
+  131  ls
+  132  cd b2c
+  133  ls
+  134  ll
+  135  cd ..
+  136  ls
+  137  ll
+  138  chmod -R 777 b2c
+  139  ll
+  140  service nginx restart
+  141  ls
+  142  nginx -t
+  143  cat /etc/hosts
+  144  vi /etc/hosts
+  145  cat /etc/hosts
+  146  vi /etc/hosts
+  147  cat /etc/hosts
+  148  nginx -t
+  149  service nginx restart
+  150  cd /home
+  151  ls
+  152  cd www
+  153  ls
+  154  curl www.hetea.com
+  155  curl www.hetea.com/test.php
+  156  ls
+  157  service nginx restart
+  158  ls
+  159  cd ..
+  160  ls
+  161  mkdir wwwlogs
+  162  service nginx restart
+  163  ls
+  164  ll
+  165  cd www
+  166  ls
+  167  cd b2c
+  168  ls
+  169  ll
+  170  ls
+  171  cd /home
+  172  ls
+  173  cd www
+  174  ls
+  175  ll
+  176  cd b2c
+  177  ll
+  178  cd application/
+  179  ls
+  180  ll
+  181  cd admin
+  182  ls
+  183  ll
+  184  cd view2/
+  185  ls
+  186  ll
+  187  cd Active/
+  188  ls
+  189  ll
+  190  chmod 777 active_info.html 
+  191  chmod 777 activeList.html 
+  192  chmod 777 commentList.html 
+  193  cd ..
+  194  ls
+  195  ll
+  196  rmdir runtime/
+  197  rm -rf runtime/
+  198  ls
+  199  ll
+  200  php -m
+  201  service nginx restart
+  202  curl www.quhechacn.com
+  203  ping www.quhechacn.com
+  204  service nginx restart
+  205  ping www.quhechacn.com
+  206  service nginx restart
+  207  curl www.quhechacn.com
+  208  service nginx restart
+  209  curl www.quhechacn.com
+  210  curl quhechacn.com
+  211  cd www
+  212  cd /www
+  213  ls
+  214  cd /home
+  215  cd www
+  216  ls
+  217  cd b2c/
+  218  ls
+  219  ll
+  220  vi composer.json 
+  221  rename composer.json composer.jsonbak
+  222  ls
+  223  cp composer.json composerbak.json
+  224  ls
+  225  rm composer.json
+  226  vi composer.json
+  227  composer install
+  228  yum install composer
+  229  curl -sS https://getcomposer.org/installer | php
+  230  mv composer.phar /usr/local/bin/composer  
+  231  composer -v
+  232  ls
+  233  ll
+  234  composer install
+  235  ls
+  236  ll
+  237  composer install
+  238  ls
+  239  cd vendor/
+  240  ls
+  241  ll
+  242  cd jpush
+  243  ls
+  244  cd jpush
+  245  ls
+  246  ll
+  247  cd ..
+  248  ls
+  249  mkdir jpusht
+  250  cp composer.json jpusht/composer.json
+  251  ls
+  252  cd jpusht
+  253  ls
+  254  composer install
+  255  ls
+  256  ll
+  257  cd vendor
+  258  ls
+  259  cd ..
+  260  pwd
+  261  ls
+  262  python
+  263  cd /
+  264  cd home
+  265  dir
+  266  mkdir jpush
+  267  cd jpush
+  268  yum search python
+  269  yum install python36
+  270  yum install epel-release
+  271  yum install python36
+  272  python
+  273   wget https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tar.xz
+  274  ls
+  275  xz -d Python-3.6.1.tar.xz 
+  276  ls
+  277  tar -xvf Python-3.6.1.tar
+  278  ls
+  279  cd Python-3.6.1
+  280  ls
+  281   ./configure --prefix=/usr/local/python3.6 --enable-optimizations
+  282  ls
+  283  make
+  284  ls
+  285  cd ..
+  286  ls
+  287  rm -rf Python-3.6.1
+  288  rm -rf Python-3.6.1.tar 
+  289  ls
+  290  yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+  291  yum makecache
+  292  yum install python36u
+  293  python
+  294  ls
+  295  cd /
+  296  cd home
+  297  ls
+  298  cd jpush
+  299  ls
+  300  yum install -y epel-release 
+  301  yum clean all && yum makecache 
+  302  yum -v
+  303  wget https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tar.xz
+  304  tar -xvJf  Python-3.6.2.tar.xz
+  305  ls
+  306  cd Python-3.6.2
+  307  ./configure prefix=/usr/local/python3
+  308  make && make install
+  309  ln -s /usr/local/python3/bin/python3 /usr/bin/python
+  310  python -v
+  311  ls
+  312  python
+  313  python3
+  314  whereis python
+  315  make && make install
+  316  yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc make
+  317  mv python python.bak
+  318  make && make install
+  319  python
+  320  ln -s /usr/local/python3/bin/python3 /usr/bin/python
+  321  python 
+  322  python3
+  323  ln -s /usr/local/python3/bin/python3 /usr/bin/python3
+  324  python3
+  325  python
+  326  python3
+  327  cd /usr/bin
+  328  ls
+  329  whereis python
+  330  python
+  331  pwd
+  332  whereis python3
+  333  pip3 install tornado
+  334  pip install tornado
+  335  pip -v
+  336  pip-v
+  337  ls
+  338  cd /
+  339  cd www
+  340  ls
+  341  cd home
+  342  ls
+  343  cd jpush
+  344  ls
+  345  pip tornado
+  346  pip install tornado
+  347  pip install --upgrade pip
+  348  pip install tornado
+  349  python3
+  350  sudo apt-get remove python2.6
+  351  pip3 install tornado
+  352  wget --no-check-certificate  https://pypi.python.org/packages/source/s/setuptools/setuptools-19.6.tar.gz#md5=c607dd118eae682c44ed146367a17e26
+  353  ls
+  354  tar -zxvf setuptools-19.6.tar.gz 
+  355  ls
+  356  cd setuptools-19.6
+  357  python3 setup.py build
+  358  python3 setup.py install
+  359  wget --no-check-certificate  https://pypi.python.org/packages/source/p/pip/pip-8.0.2.tar.gz#md5=3a73c4188f8dbad6a1e6f6d44d117eeb
+  360  ls
+  361  ll
+  362  rm pip-8.0.2.tar.gz 
+  363  ls
+  364  cd ..
+  365  ls
+  366  wget --no-check-certificate  https://pypi.python.org/packages/source/p/pip/pip-8.0.2.tar.gz#md5=3a73c4188f8dbad6a1e6f6d44d117eeb
+  367  ls
+  368  tar -zxvf pip-8.0.2.tar.gz 
+  369  ls
+  370  cd pip-8.0.2
+  371  python3 setup.py build
+  372  python3 setup.py install
+  373  ls
+  374  cd ..
+  375  ls
+  376  pip3 install tornado
+  377  whereis pip3
+  378  cd /
+  379  cd /usr/bin
+  380  ls
+  381  cd /
+  382  whereis pip
+  383  cd /
+  384  cd home
+  385  ls
+  386  cd jpush
+  387  ls
+  388  cd pip-8.0.2
+  389  ls
+  390  python3 setup.py build
+  391  python3 setup.py install
+  392  ls
+  393  whereis pip3
+  394  pip install tornado
+  395  ls
+  396  python3 setup.up build
+  397  python3 setup.py build
+  398  running build
+  399  python3 setup.py install
+  400  whereis pip
+  401  cd /usr/local/python3
+  402  ls
+  403  cd bin
+  404  ls
+  405  pip3.6 install tornado
+  406  ./pip3.6 install tornado
+  407  python3
+  408  ls
+  409  man date
+  410  man null
+  411  man NULL
+  412  man true
+  413  man false
+  414  man if
+  415  man while
+  416  man sleep
+  417  man ip
+  418  man function
+  419  man for
+  420  ls
+  421  cd /
+  422  cd www
+  423  ls
+  424  cd home
+  425  ls
+  426  cd www
+  427  ls
+  428  cd b2c
+  429  ls
+  430  cd ..
+  431  ls
+  432  cd home
+  433  ls
+  434  cd jpush
+  435  ls
+  436  python3
+  437  ls
+  438  cd ..
+  439  ls
+  440  mkdir jiguan
+  441  ls
+  442  cd jiguan/
+  443  ls
+  444  ll
+  445  python3 server.py 
+  446  pip3 install requests
+  447  cd /usr/local
+  448  ls
+  449  cd python3
+  450  ls
+  451  cd bin
+  452  ls
+  453  pip3.6 install requests
+  454  ./pip3.6 install requests
+  455  ls
+  456  cd /
+  457  ls
+  458  cd home
+  459  ls
+  460  cd jiguan/
+  461  ls
+  462  ll
+  463  python3 server.py 
+  464  ./usr/local/python3/bin/pip3.6 install pymysql
+  465  cd /usr/local/python3/bin
+  466  ls
+  467  ./pip3.6 install pymysql
+  468  pwd
+  469  cd /home
+  470  ls
+  471  cd jiguan
+  472  ls
+  473  jiguan server.py 
+  474  python3 server.py 
+  475  ls
+  476  python3 server.py -d
+  477  python3 server.py &
+  478  ls
+  479  netstat -an |more
+  480  curl 127.0.0.1:9888/sendmsg
+  481  ls
+  482  cd ..
+  483  ls
+  484  cd www
+  485  ls
+  486  cd b2c
+  487  ls
+  488  ll
+  489  cd application/
+  490  ls
+  491  ll
+  492  ls
+  493  ll
+  494  curl 118.190.204.122:9888/sendmsg
+  495  ls
+  496  ll
+  497  tar -h
+  498  tar --help
+  499  tar -czvf h5bak.tar.gz h5
+  500  ls
+  501  ll
+  502  cd ..
+  503  ls
+  504  tar -czvf b2cbak b2c
+  505  cd /usr/local/python3
+  506  ls
+  507  cd bin
+  508  ls
+  509  ./pip3.6 install jpush
+  510  cd /home
+  511  ls
+  512  cd jiguan
+  513  ls
+  514  ll
+  515  python3 server.py 
+  516  lsof -i:9888
+  517  yum install lsof
+  518  ls
+  519  ll
+  520  lsof -i9888
+  521  lsof -i:9888
+  522  kill 20291
+  523  python3 server.py 
+  524  python3 server.py —
+  525  python3 server.py &
+  526  lsof -i:9888
+  527  ls
+  528  cd /home
+  529  ls
+  530  lsof -i:9501
+  531  lsof -i:9888
+  532  ls
+  533  mkdir swagger
+  534  ls
+  535  cd swagger
+  536  ls
+  537  git clone https://github.com/swagger-api/swagger-ui.git
+  538  ls
+  539  ll
+  540  git clone https://github.com/swagger-api/swagger-ui.git
+  541  ls
+  542  a = 5
+  543  b = 7
+  544  git clone https://github.com/swagger-api/swagger-ui.git
+  545  ls
+  546  vi swagger.txt
+  547  ls
+  548  cd /home
+  549  man for
+  550  man while
+  551  ls
+  552  cd swagger
+  553  ls
+  554  lsof -i:9888
+  555  kill 20970
+  556  cd ..
+  557  ls
+  558  cd jiguan/
+  559  ls
+  560  ll
+  561  python3 server.py 
+  562  ls
+  563  python3 server.py &
+  564  ls
+  565  cd /home
+  566  ls
+  567  cd swagger
+  568  ls
+  569  history
+  570  history >>quhechacmd.bak

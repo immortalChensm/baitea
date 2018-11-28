@@ -544,6 +544,7 @@ class CartLogic extends Model
             $cartWhere['selected'] = 1;
         }
         $cartList = $cart->with('promGoods,goods')->where($cartWhere)->select();  // 获取购物车商品
+        
         $cartCheckAfterList = $this->checkCartList($cartList);
 //      $cartCheckAfterList = $cartList;
         $cartGoodsTotalNum = array_sum(array_map(function($val){return $val['goods_num'];}, $cartCheckAfterList));//购物车购买的商品总数

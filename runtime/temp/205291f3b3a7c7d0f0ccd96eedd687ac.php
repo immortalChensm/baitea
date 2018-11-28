@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:50:"./application/admin/view2/article\articleList.html";i:1523441404;s:44:"./application/admin/view2/public\layout.html";i:1517208468;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:50:"./application/admin/view2/article\articleList.html";i:1525426902;s:44:"./application/admin/view2/public\layout.html";i:1525742439;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -129,7 +129,7 @@ function selectAll(name,obj){
 
 function get_help(obj){
 	
-	window.open("http://www.tp-shop.cn/");
+	
 	return false;
 	
     layer.open({
@@ -259,9 +259,11 @@ function publicHandle(ids,handle_type){
               <th align="left" abbr="article_title" axis="col3" class="">
                 <div style="text-align: left; width: 240px;" class="">标题</div>
               </th>
+              <!--
               <th align="left" abbr="ac_id" axis="col4" class="">
                 <div style="text-align: left; width: 150px;" class="">文章分类</div>
               </th>
+                -->
               <th align="center" abbr="article_show" axis="col5" class="">
                 <div style="text-align: center; width: 80px;" class="">显示</div>
               </th>
@@ -281,9 +283,10 @@ function publicHandle(ids,handle_type){
     </div>
     <div class="tDiv">
       <div class="tDiv2">
+      <!-- 
           <div class="fbutton"> 
         	<a href="<?php echo U('Admin/Article/article'); ?>"><div class="add" title="新增文章"><span><i class="fa fa-plus"></i>新增文章</span></div></a> 
-          </div>
+          </div> -->
           <!-- <div class="fbutton"><div class="del" title="将选定行数据批量删除"><span><i class="fa fa-trash"></i>批量删除</span></div></div>-->
       </div>
       <div style="clear:both"></div>
@@ -300,9 +303,10 @@ function publicHandle(ids,handle_type){
                 <td align="left" class="">
                   <div style="text-align: left; width: 240px;"><?php echo getSubstr($vo['title'],0,33); ?></div>
                 </td>
+                <!-- 
                 <td align="left" class="">
                   <div style="text-align: left; width: 150px;"><?php echo $vo['category']; ?></div>
-                </td>
+                </td> -->
                 <td align="center" class="">
                   <div style="text-align: center; width: 80px;">
                     <?php if($vo[is_open] == 1): ?>
@@ -316,7 +320,9 @@ function publicHandle(ids,handle_type){
                   <div style="text-align: center; width: 160px;"><?php echo $vo['add_time']; ?></div>
                 </td>
                 <td align="center" class="handle">
+                <!-- 
                   <div style="text-align: center; width: 170px; max-width:170px;"> <a class="btn blue" target="_blank" href="<?php echo U('Home/Article/detail',array('article_id'=>$vo['article_id'])); ?>"><i class="fa fa-search"></i>查看</a>
+                   -->
                     <?php if(!in_array(($vo['article_id']), is_array($article_able_id)?$article_able_id:explode(',',$article_able_id))): ?> <a class="btn red"  href="javascript:void(0)" data-url="<?php echo U('Article/aticleHandle'); ?>" data-id="<?php echo $vo['article_id']; ?>" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a> <?php endif; if(in_array(($vo['article_id']), is_array($article_able_id)?$article_able_id:explode(',',$article_able_id))): ?> <a class="btn red"  href="javascript:;" onclick="layer.alert('系统文章不得删除!',{icon:2});"><i class="fa fa-trash-o"></i>删除</a> <?php endif; ?>
                     <a href="<?php echo U('Article/article',array('act'=>'edit','article_id'=>$vo['article_id'])); ?>" class="btn blue"><i class="fa fa-pencil-square-o"></i>编辑</a> 
                   </div>

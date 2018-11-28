@@ -41,8 +41,9 @@
 							<div style="text-align: left; width: 50px;" class="">级别</div>
 						</th>
 						<th align="left" abbr="ac_id" axis="col4" class="">
-							<div style="text-align: left; width: 50px;" class="">等级名称</div>
+							<div style="text-align: left; width: 100px;" class="">等级名称</div>
 						</th>
+						<!--
 						<th align="center" abbr="article_show" axis="col5" class="">
 							<div style="text-align: center; width: 100px;" class="">可发布商品数</div>
 						</th>
@@ -55,6 +56,7 @@
 						<th align="center" abbr="article_time" axis="col6" class="">
 							<div style="text-align: center; width: 100px;" class="">收费标准</div>
 						</th>
+						  -->
 						<th align="center" axis="col1" class="handle">
 							<div style="text-align: center; width: 150px;">操作</div>
 						</th>
@@ -89,8 +91,9 @@
 								<div style="text-align: left; width: 50px;">{$vo.sg_id}</div>
 							</td>
 							<td align="left" class="">
-								<div style="text-align: left; width: 50px;">{$vo.sg_name}</div>
+								<div style="text-align: left; width: 100px;">{$vo.sg_name}</div>
 							</td>
+							<!--
 							<td align="center" class="">
 								<div style="text-align: center; width: 100px;">
 									{$vo.sg_goods_limit}
@@ -105,6 +108,7 @@
 							<td align="center" class="">
 								<div style="text-align: center; width: 100px;">{$vo.sg_price}</div>
 							</td>
+							  -->
 							<td align="center" class="handle">
 								<div style="text-align: center; width: 170px; max-width:170px;">
 									<a href="{:U('Store/grade_info',array('sg_id'=>$vo['sg_id']))}" class="btn blue"><i class="fa fa-pencil-square-o"></i>编辑</a>

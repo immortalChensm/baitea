@@ -1,0 +1,265 @@
+<include file="public/layout" />
+<style>
+.ncm-goods-gift {
+	text-align: left;
+}
+.ncm-goods-gift ul {
+    display: inline-block;
+    font-size: 0;
+    vertical-align: middle;
+}
+.ncm-goods-gift li {
+    display: inline-block;
+    letter-spacing: normal;
+    margin-right: 4px;
+    vertical-align: top;
+    word-spacing: normal;
+}
+.ncm-goods-gift li a {
+    background-color: #fff;
+    display: table-cell;
+    height: 30px;
+    line-height: 0;
+    overflow: hidden;
+    text-align: center;
+    vertical-align: middle;
+    width: 30px;
+}
+.ncm-goods-gift li a img {
+    max-height: 30px;
+    max-width: 30px;
+}
+
+.ncap-order-style .ncap-order-details{
+	margin:20px auto;
+}
+</style>
+<div class="page">
+  <div class="fixed-bar">
+    <div class="item-title"><a class="back" href="javascript:history.back(-1)" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+      <div class="subject">
+        <h3>拍卖品订单</h3>
+        <h5>商城拍卖品交易订单查询及管理</h5>
+      </div>
+    </div>
+     
+    
+  </div>
+  <div class="ncap-order-style">
+    <div class="titile">
+      <h3></h3>
+    </div>
+
+
+    <div class="ncap-order-details">
+      
+      <div class="tabs-panels">
+          <div class="misc-info">
+              <h3>基本信息</h3>
+              <dl>
+                  <dt>订单 ID:</dt>
+                  <dd>{$order.id}</dd>
+                  <dt>订单号:</dt>
+                  <dd>{$order.ordersn}</dd>
+                  <dt>会员:</dt>
+                  <dd>{$order.nickname}  ID:{$order['user_id']}</dd>
+              </dl>
+              <dl>
+                  <dt>订单状态:</dt>
+                  <dd>
+                  <if condition="$order.order_status eq 0">
+                  		待线下打款
+                  		<elseif condition="$order.order_status eq 1"/>
+                  		待审核
+                  		<else />
+                  		已完成
+					</if>
+                  </dd>
+                  <dt>下单时间:</dt>
+                  <dd>{$order.add_time|date='Y-m-d H:i',###}</dd>
+                  <dt>打款时间:</dt>
+                  <dd>
+                      {$order.pay_evidence_time|date='Y-m-d H:i',###}
+                  </dd>
+                  <dt>打款凭证:</dt>
+                  <dd>
+                     <img src="{:substr($order.pay_evidence,1)}"/>
+                  </dd>
+              </dl>
+             
+          </div>
+        
+        <div class="addr-note">
+          <h4>收货信息</h4>
+          <dl>
+            <dt>收货人：</dt>
+            <dd>{$order.consignee}</dd>
+            <dt>联系方式：</dt>
+            <dd>{$order.mobile}</dd>
+          </dl>
+          <dl>
+            <dt>收货地址：</dt>
+            <dd>{$order.address2}</dd>
+          </dl>
+          <dl>
+            <dt>邮编：</dt>
+            	<dd><if condition="$order.zipcode neq ''"> {$order.zipcode}<else/>N</if></dd>
+          </dl>
+
+        </div>
+  
+        <div class="contact-info">
+          <h3>费用信息</h3>
+          <dl>
+            <dt>出价：</dt>
+            <dd>{:round($order.maxPrice)}</dd>
+          </dl>
+          
+        </div>
+
+        <div class="goods-info">
+          <h4>商品信息</h4>
+          <table>
+            <thead>
+              <tr>
+                <th >商品</th>
+                <th>拍卖价格</th>
+                <th>结拍时间</th>
+              </tr>
+            </thead>
+            <tbody>
+           	<tr>
+                <td ><div style="float:left;margin:0px 5px;">{$order.goods_name}</div><div class="goods-thumb" style="float:left;"><a href="{$order.original_img}" target="_blank"><img alt="" src="{$order.original_img}" /> </a></div></td>
+                <td >{$order.shop_price}</td>
+                <td>{:date('Y-m-d H',$order.auction_end)}</td>
+                
+            </tr>
+          </table>
+        </div>
+        
+        <div class="goods-info">
+          <h4>平台操作</h4>
+          <div>
+          <if condition="$order.order_status eq 1">
+          	<a id="pay"　class="btn btn-default" style="
+    margin-bottom: 0;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    touch-action: manipulation;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    padding: 5px 10px;
+    font-size: 13px;
+    line-height: 1.54;
+    border-radius: 2px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: #fff;
+    background-color: #f47023;
+    border-color: #f47023;
+    border-radius: 6px;
+    margin-right: 2px;">确认付款(平台需要确认用户是否线下打款)</a>
+    
+    
+          	<p style="margin:30px;">  </p>
+          	<a href="javascript:order_confirm('{$order.id}','2)" class="btn btn-default" style="
+    margin-bottom: 0;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    touch-action: manipulation;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    padding: 5px 10px;
+    font-size: 13px;
+    line-height: 1.54;
+    border-radius: 2px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: #fff;
+    background-color: #f47023;
+    border-color: #f47023;
+    border-radius: 6px;
+    margin-right: 2px;" id="cancel">付款无效</a></if>
+          </div>
+        </div>
+        
+      </div>
+  	</div>
+  </div>
+</div>
+<script type="text/javascript">
+     $(function(){
+    	 
+    	 $("#pay").click(function(e){
+    		 //layer.alert('订单中至少要有一个商品', {icon: 2});
+    		 //layConfirm("确定要删除吗?" , function(){
+    		//		location.href = del_url;
+    		//});
+    		layConfirm("您确定吗?" , function(){
+    			$.ajax({
+       			 url:"{:Url('Auction/editAuction')}",
+       			 type:'post',
+       			 dataType:'json',
+       			 data:{
+       				 id:"{$order.id}",
+       				 type:2
+       			 },
+       			 success:function(data){
+       				 if(data.ret==1){
+       					 layer.msg('操作成功', {icon: 1},function(){
+       	 						window.location.href = "{:Url('Auction/index')}";
+       	 					});
+       				 }else{
+       					 layer.alert('操作失败', {icon: 2});
+       				 }
+       				 
+       			 }
+       		 });
+    		});
+    		 
+    	 })
+    	 
+    	 $("#cancel").click(function(e){
+    		 //layer.alert('订单中至少要有一个商品', {icon: 2});
+    		 //layConfirm("确定要删除吗?" , function(){
+    		//		location.href = del_url;
+    		//});
+    		 
+    		 layConfirm("您确定吗?" , function(){
+    			 $.ajax({
+        			 url:"{:Url('Auction/editAuction')}",
+        			 type:'post',
+        			 dataType:'json',
+        			 data:{
+        				 id:"{$order.id}",
+        				 type:0
+        			 },
+        			 success:function(data){
+        				 if(data.ret==1){
+        					 layer.msg('操作成功', {icon: 1},function(){
+        	 						window.location.href = "{:Url('Auction/index')}";
+        	 					});
+        				 }else{
+        					 layer.alert('操作失败', {icon: 2});
+        				 }
+        				 
+        			 }
+        		 });
+    		});
+    		 
+    		 
+    	 })
+     })
+</script>
+</body>
+</html>

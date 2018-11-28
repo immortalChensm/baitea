@@ -1,0 +1,129 @@
+<table>
+       <tbody>
+       <empty name="goodsList">
+           <tr>
+               <td class="no-data" align="center" axis="col0" colspan="50">
+                   <i class="fa fa-exclamation-circle"></i>没有符合条件的记录
+               </td>
+           </tr>
+           <else/>
+            <volist name="goodsList" id="list">
+              <tr>
+                <td align="center" axis="col0">
+                  <div style="width: 70px;">                  
+                  	<input type="checkbox" name="goods_id[]" value="{$list.goods_id}"/>{$list.goods_id}
+                  </div>
+                </td>                
+                <td align="center" axis="col0">
+                  <div style="text-align: left; width: 333px;">{$list.goods_name|getSubstr=0,33}</div>
+                </td>
+               
+                <td align="center" axis="col0">
+                  <div style="text-align: center; width: 70px;">
+                  	<if condition="$list.is_crowd_goods eq 1">
+          			
+           				<span>&yen;{:round($list.crowdfunding_money,2)}</span>
+           			<else />
+           				<span>&yen;{:round($list.shop_price,2)}</span>
+           			</if>
+                  	
+                  
+                  </div>
+                </td>
+                
+                  <td align="center" axis="col0">
+                      <div style="text-align: center; width: 130px;" id="auction{$list.goods_id}">{$list.auction_end|date='Y-m-d H:i',###}</div>
+                  </td>
+
+                <td align="center" axis="col0">
+                  <div style="text-align: center; width: 85px;">
+                        <if condition="$list[is_on_sale] eq 0">下架</if>
+                        <if condition="$list[is_auction_goods] eq 1">
+                        
+                        <if condition="$list[is_on_sale] eq 1">出售中</if>
+                       
+                        
+                        <if condition="$list[is_on_sale] eq 2">违规下架</if>
+                  </div>
+                </td>    
+                <td align="center" axis="col0">
+                    <div style="text-align: center; width: 70px;">
+                        <if condition="$list[goods_state] eq 0">待审核</if>
+                        <if condition="$list[goods_state] eq 1">通过</if>
+                        <if condition="$list[goods_state] eq 2">未通过</if>
+                    </div>
+                </td>
+                <td align="center" axis="col0">
+                  <div style="text-align: center; width: 100px;">{$store_list[$list[store_id]]}</div>
+                </td>  
+                
+               
+              </tr>
+            </volist>          
+            <tr class="spe_select">
+	            <td colspan="14">
+                    <div class="col-sm-3 form-inline">
+                        	全选
+                        <input type="checkbox" onclick="$('input[name=\'goods_id\[\]\']').prop('checked', this.checked);">
+
+                            
+                        <a id="act_button" href="javascript:;" onclick="selectAuction();" style="color:#FFF;" class="ncap-btn-mini ncap-btn-green disabled"><i class="fa"></i> 确定</a>
+                    </div>                
+                </td>
+            </tr>
+           </empty>
+          </tbody>
+        </table>
+        <!--分页位置--> {$page}
+		<script>
+            // 点击分页触发的事件
+            $(".pagination  a").click(function(){
+                cur_page = $(this).data('p');
+                ajax_get_table('search-form2',cur_page);
+            });
+            
+            function selectAuction(){
+            	
+            	var goodsid = document.getElementsByName("goods_id[]");
+            	auctionId = [];
+            	auctionTime = [];
+            	for(var i=0;i<goodsid.length;i++){
+            		if(goodsid[i].checked==true){
+            			auctionId.push(goodsid[i].value);
+            			auctionTime.push($("#auction"+goodsid[i].value).text());
+            		
+            		}
+            	}
+            	
+            	//检查拍品的结拍时间是否一致
+            	if(isequal(auctionTime)){
+            		
+            	
+            	
+	            	if(auctionId.length!=0){
+	            		var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+	            		
+	            		//$("#auction_select").val(auctionId.join(","));
+	            		window.parent.document.getElementById("auction_select").value= auctionId.join(",") ;
+	            		
+	            		parent.layer.close(index); //再执行关闭   
+	            	}
+            	}
+            }
+            
+            function isequal(auctionTime)
+            {
+            	var temp = auctionTime;
+            	var first = temp.length;
+            	
+            	for(var i=0;i<auctionTime.length;i++){
+            		for(var j=0;j<auctionTime.length;j++){
+            			if(auctionTime[j]!=auctionTime[i]){
+            				layer.msg('选择的拍品结拍时间不一致'); 
+            				return false;
+            			}
+            		}
+            	}
+            	return true;
+            }
+        </script>        

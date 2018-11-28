@@ -353,13 +353,69 @@ class StoreLogic extends Model
         $db_prefix = C('database.prefix');
         $collect_store_where = array('sc.user_id' => $user_id);
         $store_list = Db::name('store_collect')->alias('sc')
-            ->field('sc.*,sg.sg_name,s.store_logo,s.store_avatar,s.store_collect,s.store_servicecredit')
+            ->field('sc.*,sg.sg_name,s.store_desccredit,s.store_servicecredit,s.store_deliverycredit,s.store_logo,s.store_avatar,s.store_collect,s.store_servicecredit,s.store_zy,s.store_address,s.longitude,s.latitude,s.mb_slide')
             ->join($db_prefix.'store s', 'sc.store_id = s.store_id', 'left')
             ->join($db_prefix.'store_grade sg', 'sg.sg_id = s.grade_id', 'left')
             ->where($collect_store_where)
             ->page($page,$limit)
             ->select();
+        /*
+        $storeId = [];
+        foreach($store_list as $k=>$v){
+            $storeId[$k] = $v['store_id'];
+        }
+        $store = $this->gettea_storelocaton($storeId);
+        foreach($store_list as $k=>$v){
+            $param=['v'=>$v,'store'=>$store['store']?:[]];
+            $store_list[$k]['Trueshop_address'] = call_user_func_array(function()use($param){
+                
+                if(in_array($param['v']['store_id'], $param['store'])){
+                    return $param['store'][$param['v']['store_id']];
+                }else{
+                    return '';//没有线下实体茶馆
+                }
+            },$param);
+            
+            $locatin_x = ['v'=>$v,'store'=>$store['location']?:[]];
+            $store_list[$k]['Trueshop_longitude'] = call_user_func_array(function()use($locatin_x){
+            
+                if(in_array($locatin_x['v']['store_id'], $locatin_x['store'])){
+                    return $locatin_x['store'][$locatin_x['v']['store_id']]['longitude'];
+                }else{
+                    return '';//没有线下实体茶馆
+                }
+            },$locatin_x);
+            
+            
+            $locatin_y = ['v'=>$v,'store'=>$store['location']?:[]];
+            $store_list[$k]['Trueshop_latitude'] = call_user_func_array(function()use($locatin_y){
+            
+                if(in_array($locatin_y['v']['store_id'], $locatin_y['store'])){
+                    return $locatin_y['store'][$locatin_y['v']['store_id']]['latitude'];
+                }else{
+                    return '';//没有线下实体茶馆
+                }
+            },$locatin_y);
+                
+        }*/
         return $store_list;
+    }
+    
+    //获取线下茶馆的位置
+    //@wroteby jackcsm
+    private function gettea_storelocaton($storeId)
+    {
+        $list = db("store_entry")->whereIn("store_id",$storeId)->fetchSql(false)->select();
+        $store = [];
+        $location = [];
+        foreach($list as $k=>$v){
+            $store[$v['store_id']] = $v['shop_address'];
+            $location[$v['store_id']] = ['longitude'=>$v['shop_longitude'],'latitude'=>$v['shop_latitude']];
+        }
+        return [
+            'store'=>$store,
+            'location'=>$location
+        ];
     }
     
     /**

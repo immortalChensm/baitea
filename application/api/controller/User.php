@@ -30,6 +30,51 @@ class User extends Base {
         $this->userLogic = new UsersLogic();
     } 
 
+    //注册说明
+    public function registNotice()
+    {
+        $data = db("article")->where("title","趣喝茶服务条款")->value("content");
+        $this->ajaxReturn(['status' => 1, 'msg' => '获取成功' , 'result'=>$data] );
+    }
+    //关于
+    public function about()
+    {
+        $data = db("article")->where("article_id",11)->value("content");
+        $this->ajaxReturn(['status' => 1, 'msg' => '获取成功' , 'result'=>$data] );
+    }
+    //帮助
+    public function help()
+    {
+        $data = db("article")->where("article_id",12)->value("content");
+        $this->ajaxReturn(['status' => 1, 'msg' => '获取成功' , 'result'=>$data] );
+    }
+    
+    //反馈
+    public function feedback()
+    {
+        $data['context'] = input("context");
+        $data['user_id'] =$this->user_id;
+        $data['add_time'] = time();
+        $data['mobile'] = input("mobile");
+        $data['email'] = input("email");
+        
+        if(!$data['user_id']){
+            $this->ajaxReturn(['status' => -1, 'msg' => '请先登录'] );
+        }
+        
+        if(!$data['context']){
+            $this->ajaxReturn(['status' => -1, 'msg' => '反馈内容不得为空'] );
+        }
+        if(!check_mobile($data['mobile'])){
+            $this->ajaxReturn(['status' => -1, 'msg' => '手机号码不正确'] );
+        }
+        if(!check_email($data['email'])){
+            $this->ajaxReturn(['status' => -1, 'msg' => '邮箱不正确'] );
+        }
+        db("qfeedback")->add($data);
+        $this->ajaxReturn(['status' => 1, 'msg' => '提交成功' ] );
+        
+    }
     /**
      *  登录
      */
@@ -56,6 +101,19 @@ class User extends Base {
         $cartLogic->setUserId($data['result']['user_id']);
         $cartLogic->setUniqueId($unique_id);
         $cartLogic->doUserLoginHandle();  // 用户登录后 需要对购物车 一些操作
+        
+        //在此进入一次账号导入[导入IM系统]
+        $url = "http://118.190.204.122:9501";
+        
+        $ret = httpRequest($url, 'post',[
+            "server_name"=>'im_open_login_svc',
+            'command'=>'account_import',
+                'identify'=>$data['result']['user_id'],
+                'nick'=>$data['result']['nickname'],
+                'face_url'=>$data['result']['head_pic']
+            
+        ]);
+        
         $this->ajaxReturn($data);
     }
     
@@ -168,15 +226,16 @@ class User extends Base {
         
         $is_bind_account = tpCache('basic.is_bind_account');
         $wxuser = session('third_oauth');
+        /*
         if($is_bind_account && $wxuser){
             $head_pic = $wxuser['head_pic'];
             $nickname = $nickname ?: $wxuser['nickname'];
             $data = $this->userLogic->reg($username,$password , $password, $push_id,$nickname,$head_pic);
             if($data['status'] == -1)$this->ajaxReturn($data);
             $data = $this->userLogic->oauth_bind_new($data['result']);
-        }else{
+        }else{*/
             $data = $this->userLogic->reg($username,$password ,$password2, $push_id,$invite_code);
-        }
+        //}
         
         if($data['status'] == 1){
             $cartLogic = new CartLogic();
@@ -231,8 +290,99 @@ class User extends Base {
      * 获取用户信息
      */
     public function userInfo(){
-        //$user_id = I('user_id/d');
+        $user_id = I('user_id/d');
+        
+        
+        if ($user_id){
+            $this->user_id = $user_id;
+        }
         $data = $this->userLogic->getApiUserInfo($this->user_id);
+        $data['result']['bankcard_num'] =  count(\think\Db::name("bank")->where(function($query){
+            $query->where("user_id",$this->user_id);
+        })->select());
+        $data['tea'] = db("tea_art")->where("user_id",$this->user_id)->find();
+        $data['store'] = db("store")->where("user_id",$this->user_id)->find();
+        
+        //get store_apply data
+        $data['store_apply'] = db("store_apply")->where("user_id",$this->user_id)->find();
+        
+        $data['shop'] = db("store_entry")->where("store_id",$this->user_id)->find();
+        $role = [];
+        $roleName  = "";
+        if ($data['tea']){
+            //$role["is_tea"] = "1";
+            //$role['is_tea_explain'] = "此字段用于解释is_tea，它为１表示这个用户是个茶艺师，其它或不存在表示这个用户不是茶艺师";
+            //$role["teart_state"] = $data['tea']['teart_state'];
+            //$role['teart_state_explain'] = "此字段用于解释teart_state为２表示已认证通过，为１表示还在待后台审核，为３表示后台不允许你通过";
+            
+            $role["teart_state"] = $data['tea']['teart_state'];
+            if($role['is_tea']==1&&$role['tea_state']==2)$roleName.= '茶艺师/';
+        }else{
+            //$role["is_tea"] = "0";
+            $role["teart_state"] = "0";//0　不是茶艺师　 1未审核　2已认证　3认证不通过
+        }
+        
+        if($data['store']){
+            //$role['is_teamerchant'] = "1";
+            //$role['is_teamerchant_explain'] = "此字段用于解释is_teamerchant是不是茶商，没有或是空都均表示不是";
+            //店铺状态，0关闭，1开启，2审核中
+            $role['tea_merchant_state'] = $data['store']['store_state'];
+            
+            if($role['is_teamerchant']==1&&$role['tea_merchant_state']==1)$roleName.= '茶商/';
+        }else{
+            
+            //没有审核的店铺可能这用户已经申请了
+            if($data['store_apply']['user_id']){
+                //$role["is_teamerchant"] = "0";//还不能是茶商，因为后台还没有审核　
+                //店铺申请状态 0未审核，1通过，2拒绝
+                if($data['store_apply']['apply_state']==0){
+                    $role['tea_merchant_state'] = "2";
+                }elseif($data['store_apply']['apply_state']==2){
+                    //后台审核不通过
+                    $role['tea_merchant_state'] = "-2";
+                }
+                
+            }else{
+                //$role["is_teamerchant"] = "0";//还不能是茶商，因为后台还没有审核　
+                //还没有申请
+                $role['tea_merchant_state'] = "-1";
+            }
+            
+        }
+        
+        if($data['shop']){
+            //$role['has_shop'] = "1";
+            //0未入驻　1审核中　2已入驻
+            $role['shop_state'] = $data['shop']['shop_state'];
+            
+            //if($role['has_shop']==1&&$role['shop_state']==1)$roleName.= '茶商';
+            
+        }else{
+            //$role["has_shop"] = "0";
+            //
+            $role['shop_state'] = "0";
+        }
+            
+        //是否是主播
+        $is_live = \think\Db::name("live_apply")->where("userid",$this->user_id)->find();
+        if($is_live['userid']){
+            //$role["is_live"] = "1";
+            //１审核中　２审核通过　３不允通过
+            $role['live_state'] = $is_live['status'];
+            
+            if($role['is_live']==1&&$role['live_state']==2)$roleName.= '主播';
+        }else{
+            //$role["is_live"] = "0";
+            //未申请
+            $role['live_state'] = "-1";
+        }
+        $data['result']['role'] = $roleName==''?'茶友':$roleName;
+        //$data[0]['role'] = $roleName;
+        $data['role'] = $role;
+        
+        unset($data['shop']);
+        unset($data['tea']);
+        unset($data['store']);
         exit(json_encode($data));
     }
      
@@ -249,21 +399,32 @@ class User extends Base {
         }
 
         I('post.nickname') ? $post['nickname'] = I('post.nickname') : false; //昵称
-        I('post.qq') ? $post['qq'] = I('post.qq') : false;  //QQ号码
+        //I('post.qq') ? $post['qq'] = I('post.qq') : false;  //QQ号码
         I('post.head_pic') ? $post['head_pic'] = I('post.head_pic') : false; //头像地址
         I('post.sex') ? $post['sex'] = I('post.sex') : false;  // 性别
-        I('post.birthday') ? $post['birthday'] = strtotime(I('post.birthday')) : false;  // 生日
-        I('post.province') ? $post['province'] = I('post.province') : false;  //省份
-        I('post.city') ? $post['city'] = I('post.city') : false;  // 城市
-        I('post.district') ? $post['district'] = I('post.district') : false;  //地区
-        I('post.email') ? $post['email'] = I('post.email') : false;  
+        //I('post.birthday') ? $post['birthday'] = strtotime(I('post.birthday')) : false;  // 生日
+        //I('post.province') ? $post['province'] = I('post.province') : false;  //省份
+        //I('post.city') ? $post['city'] = I('post.city') : false;  // 城市
+        //I('post.district') ? $post['district'] = I('post.district') : false;  //地区
+        //I('post.email') ? $post['email'] = I('post.email') : false;  
         I('post.mobile') ? $post['mobile'] = I('post.mobile') : false;  
-
+        I('post.info') ? $post['info'] = I('post.info') : false;
+        I('post.longitude') ? $post['longitude'] = I('post.longitude') : false;
+        I('post.latitude') ? $post['latitude'] = I('post.latitude') : false;
         $email = $post['email'];
         $mobile = $post['mobile'];
         $code = I('post.mobile_code', '');
         $scene = I('post.scene', 6);
 
+        //位置转换
+        $address = gdlocation($post['longitude'], $post['latitude']);
+        if($address=='UNKNOWN_ERROR'){
+            $post['address'] = '';
+        }else{
+            $post['address'] = $address;
+        }
+        
+        
         if (!empty($email)) {
             $c = M('users')->where(['email' => $email, 'user_id' => ['<>', $this->user_id]])->find();
             $c && $this->ajaxReturn(['status'=>-1,'msg'=>"邮箱已被使用"]);
@@ -271,16 +432,28 @@ class User extends Base {
         if (!empty($mobile)) {
             $c = M('users')->where(['mobile' => $mobile, 'user_id' => ['<>', $this->user_id]])->count();
             $c && $this->ajaxReturn(['status'=>-1,'msg'=>"手机已被使用"]);
-            (!$code) && $this->ajaxReturn(['status'=>-1,'msg'=>'请输入验证码']);
-            $check_code = $this->userLogic->check_validate_code($code, $mobile, 'mobile', SESSION_ID, $scene);
-            if ($check_code['status'] != 1) {
-                $this->ajaxReturn($check_code);
-            }
+            //(!$code) && $this->ajaxReturn(['status'=>-1,'msg'=>'请输入验证码']);
+            //$check_code = $this->userLogic->check_validate_code($code, $mobile, 'mobile', SESSION_ID, $scene);
+            //if ($check_code['status'] != 1) {
+            //    $this->ajaxReturn($check_code);
+            //}
         }
-
         if (!$this->userLogic->update_info($this->user_id,$post)) {
             $this->ajaxReturn(['status'=>-1,'msg'=>'更新失败','result'=>'']);
         }
+        
+        //在此进入一次账号导入[导入IM系统]
+        $url = "http://118.190.204.122:9501";
+        
+        $ret = httpRequest($url, 'post',[
+            "server_name"=>'im_open_login_svc',
+            'command'=>'account_import',
+            'identify'=>$this->user_id,
+            'nick'=>$post['nickname'],
+            'face_url'=>$post['head_pic']
+        
+        ]);
+        
         $this->ajaxReturn(['status'=>1,'msg'=>'更新成功','result'=>'']);
     }
 
@@ -292,7 +465,7 @@ class User extends Base {
             if(!$this->user_id){
                 exit(json_encode(array('status'=>-1,'msg'=>'缺少参数','result'=>'')));
             }
-            $data = $this->userLogic->passwordForApp($this->user_id,encrypt(I('post.old_password')),encrypt(I('post.new_password'))); // 修改密码
+            $data = $this->userLogic->passwordForApp($this->user_id,encrypts(I('post.old_password')),encrypts(I('post.new_password'))); // 修改密码
             exit(json_encode($data));
         }
     }
@@ -358,9 +531,9 @@ class User extends Base {
             $this->ajaxReturn(['status'=>-1,'msg'=>'图形验证码错误！']);
         } */
         
-        if ($scene != 6) {
-            $this->ajaxReturn(['status'=>-1,'msg'=>'场景码错误！']);
-        }
+        //if ($scene != 6) {
+        //    $this->ajaxReturn(['status'=>-1,'msg'=>'场景码错误！']);
+        //}
         
         $data['mobile'] = $mobile;  
         if (!$this->userLogic->update_info($this->user_id, $data)) {
@@ -405,7 +578,7 @@ class User extends Base {
     {
         //先验证手机号码
         if (check_mobile($this->request->param("username"))) {
-            
+            //验证码验证
             $res = $this->userLogic->check_validate_code($this->request->param("code"), $this->request->param("username"), 'phone',0,0,0);
             if($res['status'] != 1) exit(json_encode($res));
             
@@ -414,17 +587,15 @@ class User extends Base {
             $this->ajaxReturn(['status'=>-1,'msg'=>'手机号码格式错误']);
         }
         
-        $mobile = \think\Db::name("User")->where("mobile",$this->request->param("mobile"))->getField("mobile");
-        empty($mobile) && $this->ajaxReturn(['status'=>-1,'msg'=>'这个账号不存在']);
-        
-        if (!$this->request->param("username") || !$this->request->param("password"))
-            $this->ajaxReturn(['status' => -1, 'msg' => '请输入用户名或密码']);
-        
+        $mobile = \think\Db::name("Users")->where("mobile",$this->request->param("username"))->getField("mobile");
+        empty($mobile) && $this->ajaxReturn(['status'=>-1,'msg'=>'该手机号码没有关联账户']);
+
         if ($this->request->param("password") != $this->request->param("password2"))
             $this->ajaxReturn(['status' => -1, 'msg' => '两次输入密码不一致']);
         
         
-        print_r($this->request->param());
+        \think\Db::name("Users")->where("mobile",I("username"))->save(['password'=>encrypts(I("password2"))])
+        && $this->ajaxReturn(['status' => 1, 'msg' => '密码修改成功','result'=>db("Users")->where("mobile",I("username"))->find()]);
         
     }
     /**
@@ -603,18 +774,24 @@ class User extends Base {
     /*
      * 获取商品收藏列表
      */
-    public function getGoodsCollect()
+    public function getGoodsCollect(\app\api\controller\Goods $goods)
     {
         $data = $this->userLogic->get_goods_collect($this->user_id);
         unset($data['show']);
         unset($data['page']);
+       
+        foreach ($data['result'] as $k=>$v){
+            $data['result'][$k]['star'] = $goods->commentStatistics($v['goods_id']);
+            $data['result'][$k]['shop_price'] = round($v['shop_price'],2);
+        }
+        
         $this->ajaxReturn($data);
     }
 
     /*
      * 用户订单列表
      */
-    public function getOrderList()
+    public function getOrderList($status = 0)
     {
         $type = I('type','');
         $p = I('p', 1);
@@ -622,16 +799,18 @@ class User extends Base {
             $this->ajaxReturn(['status'=>-1, 'msg'=>'缺少参数', 'result'=>'']);
         } 
         //删除的订单, 作废订单 ,虚拟订单 不列出来
-        $map = " deleted = 0 and order_status <> 5 and order_prom_type < 5 AND user_id = :user_id";
+        $map = " deleted = 0 and order_status <> 5 and order_prom_type < 5 AND user_id = :user_id AND status = 0";
+        $status == '1' && $map = " deleted = 0 and order_status <> 5 and order_prom_type < 5 AND user_id = :user_id AND status = 1";
         $map = $type ? $map.C($type) : $map;   
-        
         $order_list = [];
         $order_obj = new \app\common\model\Order();
         $order_list_obj = $order_obj->order("order_id DESC")->where($map)->bind(['user_id'=>$this->user_id])->page($p, 10)->select();
+        //print_r($order_list_obj);
         if ($order_list_obj) {
             //转为数字，并获取订单状态，订单状态显示按钮，订单商品
-            $order_list=collection($order_list_obj)->append(['order_status_detail','order_button','order_goods','store'])->toArray();
+            $order_list=collection($order_list_obj)->append(['crowd_order_status_detail','order_status_detail','order_button','order_goods','store'])->toArray();
         } 
+        //print_r($order_list);
         //添加订单商品的图片
         $GoodsId = [];
         foreach ($order_list as $k=>$v){
@@ -643,6 +822,14 @@ class User extends Base {
             //print_r($v['order_goods'][0]);
             //$GoodsId[$v['order_goods'][0]['goods_id']] = $v['order_goods'][0]['goods_id'];
             $order_list[$k]['order_goods'][0]['goods_img'] = $goodsImg[$v['order_goods'][0]['goods_id']];
+            $order_list[$k]['order_goods'][0]['goods_remark'] = D('Goods')->where(['goods_id'=>$v['order_goods'][0]['goods_id']])->getField('goods_remark');
+            $crowd_end = D('Goods')->where(['goods_id'=>$v['order_goods'][0]['goods_id']])->getField('crowd_end');
+            $order_list[$k]['purchase'] = $v['pay_status'] == '1' ?count_down($crowd_end) : 0;   //距离结束时间
+        }
+        if($status==1){
+            foreach ($order_list as $k=>$v){
+                $order_list[$k]['order_status_detail'] = $v['crowd_order_status_detail'];
+            }
         }
         $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$order_list]);
     }
@@ -701,11 +888,62 @@ class User extends Base {
         $data['img']              = input('post.img/a', ''); //小程序需要
         $data['user_id']          = $this->user_id;
         
+        if(!in_array($data['seller_score'], [1,2,3,4,5])){
+            exit(json_encode(array('status'=>-1,'msg'=>'评价分数最高5分!!!')));
+        }
+        if(!in_array($data['logistics_score'], [1,2,3,4,5])){
+            exit(json_encode(array('status'=>-1,'msg'=>'评价分数最高5分!!!')));
+        }
+        if(!in_array($data['describe_score'], [1,2,3,4,5])){
+            exit(json_encode(array('status'=>-1,'msg'=>'评价分数最高5分!!!')));
+        }
+        if(!in_array($data['goods_rank'], [1,2,3,4,5])){
+            exit(json_encode(array('status'=>-1,'msg'=>'评价分数最高5分!!!')));
+        }
         $commentLogic = new CommentLogic;
         $return = $commentLogic->addGoodsAndServiceComment($data);
         
         $this->ajaxReturn($return);
     }  
+    
+    //批量性评价　　[此订单有多件商品，评价内容完全一致]
+    //@wroteby jackcsm
+    public function add_listcomment()
+    {
+        $order = \think\Db::name("order_goods")->where("order_id",$this->request->param("order_id"))->find();
+        $Recid = [];
+        $goodsId = [];
+        $OrderId = [];
+        $goodsNum =[];
+        
+        foreach($order as $k=>$v){
+            $Recid[$v['rec_id']] = $v['rec_id'];
+            $goodsId[$v['rec_id']] = $v['goods_id'];
+            $OrderId[$v['rec_id']] = $v['order_id'];
+
+        }
+        $commentLogic = new CommentLogic;
+        
+        foreach ($Recid as $k=>$v){
+            
+            $commentLogic->addGoodsAndServiceCommentlist([
+                "order_id"=>$OrderId[$k],
+                "rec_id"=>$k,
+                "goods_id"=>$goodsId[$k],
+                "seller_score"=>input('post.service_rank', 0),
+                "logistics_score"=>input('post.deliver_rank', 0),
+                "describe_score"=>input('post.goods_rank', 0),
+                "goods_rank"=>input('post.goods_score/d', 0),
+                "is_anonymous"=>input('post.is_anonymous/d', 0),
+                "content"=>input('post.content', ''),
+                "img"=>input('post.img/a', ''),
+                "user_id"=>$this->user_id,
+            ]);
+        }
+
+        $this->ajaxReturn(['status'=>1,'msg'=>'批量评价成功']);
+        
+    }
     
     /**
      * 提交服务评论
@@ -801,15 +1039,13 @@ class User extends Base {
             if(empty($this->request->param("idcard_b"))){
                 $this->ajaxReturn(['status' => -1, 'msg' => '身份证照片必须上传']);
             }
-            
+            /*
             if(!config("AREAS")[substr($this->request->param("idcard"),0,6)]){
-                $this->ajaxReturn(['status' => -1, 'msg' => '身份证号码不对']);
-            }
+                $this->ajaxReturn(['status' => -1, 'msg' => '身份证号码不对'.config("AREAS")[substr($this->request->param("idcard"),0,6)]]);
+            }*/
            //等候时间比较长　原因是图片内容[base64]的内容太大导致
             $idcard_info = idcard_reconginze($this->request->param("idcard_f"));
-            
-            //return $idcard_info;
-            //print_r($idcard_info);
+            //file_put_contents("idcard.log", $this->request->param("idcard_f"));
             $sex = ['1'=>'男','2'=>'女'];
             if($idcard_info['error_code']==0){
                 if($this->request->param("realname")!=$idcard_info['result']['realname']){
@@ -822,7 +1058,7 @@ class User extends Base {
                     $this->ajaxReturn(['status' => -1, 'msg' => '您的身份证号和身份证上的不一致']);
                 }
             }else{
-                $this->ajaxReturn(['status' => -1, 'msg' => '聚合平台请求异常'.$idcard_info]);
+                $this->ajaxReturn(['status' => -1, 'msg' => '聚合平台验证失败','reason'=>json_encode($idcard_info,JSON_UNESCAPED_UNICODE)]);
             }
             
             $idcard_query = idcard_query($this->request->param("idcard"), $this->request->param("realname"));
@@ -832,7 +1068,7 @@ class User extends Base {
                     $this->ajaxReturn(['status' => -1, 'msg' => '身份证系统不存在此人']);
                 }
             }else{
-                $this->ajaxReturn(['status' => -1, 'msg' => '聚合平台请求异常'.json_encode($idcard_query,JSON_UNESCAPED_UNICODE)]);
+                $this->ajaxReturn(['status' => -1, 'msg' => '聚合平台验证失败','reason'=>json_decode($idcard_query,true)]);
             }
             
             $idcardfpic = "./public/upload/idcard/".date("Ymdhis").mt_rand(0, 99999)."fpic.png";
@@ -917,10 +1153,45 @@ class User extends Base {
         $page = I('page', 1);
         $storeLogic = new StoreLogic();
         $store_list = $storeLogic->getUserCollectStore($this->user_id,$page,10);
+        
+        $location = [];
+        foreach ($store_list as $k=>$v){
+            $location[$v['store_id']] = [
+                'longitude'=>($v['Trueshop_longitude']?$v['Trueshop_longitude']:$v['longitude']),
+                'latitude'=>($v['Trueshop_latitude']?$v['Trueshop_latitude']:$v['latitude']),
+            ];
+        }
+        
+        $distance = $this->getstoredistance($location);
+        foreach ($store_list as $k=>$v){
+            $store_list[$k]['distance'] = $distance[$v['store_id']];
+            $store_list[$k]['store_bglist'] = explode(",", $v['mb_slide']);
+        }
+        
         $json_arr = array('status' => 1, 'msg' => '获取成功', 'result' => $store_list);
         exit(json_encode($json_arr));
     }
     
+    //获取当前店铺距离用户的距离
+    //@wroteby jackcsm
+    private function getstoredistance($location)
+    {
+        $longitude = I("longitude");
+        $latitude  = I("latitude");
+        Isempty([$latitude,$longitude]) && $this->ajaxReturn(['status' => -1, 'msg' => '用户当前的经纬度必须传递']);
+        $dis = '';
+        foreach ($location as $k=>$v){
+            if($v['longitude']&&$v['latitude']){
+                $temp = caldistance($longitude, $latitude, $v['longitude'], $v['latitude']);
+                
+                $dis[$k] = $temp['results'][0]['distance']?:0;
+            }else{
+                $dis[$k] = 0;
+            }
+            
+        }
+        return $dis;
+    }
     /**
      * 申请提现记录列表网页
      * @return type
@@ -937,7 +1208,6 @@ class User extends Base {
         if ($is_json) {
             $this->ajaxReturn(['status' => 1, 'msg' => '获取成功', 'result' => $list]);
         }
-        
         $this->assign('page', $page->show());// 赋值分页输出
         $this->assign('list', $list); // 下线
         if (I('is_ajax')) {
@@ -945,23 +1215,24 @@ class User extends Base {
         }
         return $this->fetch();
     }
-    
     /**
      * 申请提现
      */
     public function withdrawals()
     {
         $data = I('post.');
-        if (!capache([], SESSION_ID, $data['verify_code'])) {
-            $this->ajaxReturn(['status' => -1, 'msg' => "验证码错误"]);
-        }
-        if(isset($_POST['paypwd']) && encrypt($data['paypwd']) != $this->user['paypwd']){
-            $this->ajaxReturn(['status' => -1, 'msg' => "支付密码错误"]);
-        }
+        //if (!capache([], SESSION_ID, $data['verify_code'])) {
+        //    $this->ajaxReturn(['status' => -1, 'msg' => "验证码错误"]);
+        //}
+        //if(isset($_POST['paypwd']) && encrypts($data['paypwd']) != $this->user['paypwd']){
+        //    $this->ajaxReturn(['status' => -1, 'msg' => "支付密码错误"]);
+        //}
         $data['user_id'] = $this->user_id;    		    		
-        $data['create_time'] = time();                
+        $data['create_time'] = time();   
+                     
         $distribut_min = tpCache('basic.min'); // 最少提现额度
         $distribut_need  = tpCache('basic.need'); //满多少才能提
+        
         if ($data['money'] < $distribut_min) {
             $this->ajaxReturn(['status' => -1, 'msg' => '每次最少提现额度'.$distribut_min]);
         }
@@ -976,10 +1247,16 @@ class User extends Base {
         if ($this->user['user_money'] < ($withdrawal+$data['money'])){
             $this->ajaxReturn(['status' => -1, 'msg' => '您有提现申请待处理，本次提现余额不足']);
         }
+        
+        //获取银行卡信息
+        $bankinfo = \think\Db::name("bank")->where("id",$data['bankid'])->find();
+        $data['bank_name'] = $bankinfo['bank'];
+        $data['bank_card'] = $bankinfo['cardnum'];
+        $data['realname'] = $bankinfo['username'];
         if (M('withdrawals')->add($data)) {
-            $bank['bank_name'] = $data['bank_name'];
-            $bank['bank_card'] = $data['account_bank'];
-            $bank['realname'] = $data['account_name'];
+            $bank['bank_name'] = $bankinfo['bank'];
+            $bank['bank_card'] = $bankinfo['cardnum'];
+            $bank['realname'] = $bankinfo['username'];
             M('users')->where(array('user_id'=>$this->user_id))->save($bank);
             $json_arr = array('status' => 1, 'msg' => '提交成功');
         } else {
@@ -1246,12 +1523,15 @@ class User extends Base {
      * @return type
      */
     public function express()
-    {
+    {   
         $is_json = I('is_json', 0);
-        $order_id = I('get.order_id/d', 0);
+        $order_id = I('order_id/d', 0);
         $order_goods = M('order_goods')->where("order_id" , $order_id)->select();
         $delivery = M('delivery_doc')->where("order_id" , $order_id)->limit(1)->find();
+        //file_put_contents("express.txt", json_encode($delivery));
         if ($is_json) {
+            $delivery['goods_num'] = count($order_goods);
+            $delivery['goods_imgs'] = \think\Db::name("goods")->where("goods_id",$order_goods[0]['goods_id'])->value("original_img");
             $this->ajaxReturn(['status' => 1, 'msg' => '获取成功', 'result' => $delivery]);
         }
         $this->assign('order_goods', $order_goods);
@@ -1285,7 +1565,7 @@ class User extends Base {
         $token = I('token/s', '');
         $return = $this->getUserByToken($token);
         if ($return['status'] == 1) {
-            $return['result'] = '';
+            //$return['result'] = '';
         }
         $this->ajaxReturn($return);
     }
@@ -1377,7 +1657,7 @@ class User extends Base {
                                 ->where(['user_id'=>['eq',$this->user_id]])
                                 ->find();
             
-            //if(!empty($exits_app_shop['apply_state'])){
+            if(!empty($exits_app_shop['user_id'])){
                 if($exits_app_shop['apply_state']==0){
                     $this->ajaxReturn(['status'=>-1,'msg'=>'入驻申请已经提交，请等待管理员审核!']);
                 }elseif($exits_app_shop['apply_state']==1){
@@ -1388,7 +1668,7 @@ class User extends Base {
                 
                 }
                 
-            //}
+            }
             
             if(!$this->user['idcard_isvalidate']){
                 $this->ajaxReturn(['status'=>-1,'msg'=>'请先实名认证!']);
@@ -1404,9 +1684,9 @@ class User extends Base {
             }elseif($verify_srore_name['store_name']){
                 $this->ajaxReturn(['status'=>-1,'msg'=>'当前店铺名称已被使用!']);
             }
-            if(empty($postData['shop_zy'])){
-                $this->ajaxReturn(['status'=>-1,'msg'=>'请填写主营商品!']);
-            }
+            //if(empty($postData['shop_zy'])){
+            //    $this->ajaxReturn(['status'=>-1,'msg'=>'请填写主营商品!']);
+            //}
             if(empty($postData['business_licence_number'])){
                 $this->ajaxReturn(['status'=>-1,'msg'=>'请填写注册号!']);
             }
@@ -1446,13 +1726,13 @@ class User extends Base {
             
             $data['user_id']                 = $this->user_id;
             $data['add_time']                = time();
-            $data['seller_name']             = $this->user['realname'];
+            $data['seller_name']             = $this->user['mobile'];
             $data['contacts_name']           = $this->user['realname'];
             $data['store_person_cert']       = $this->user['idcard_fpic'];
             
             $data['store_person_name']       = $this->user['realname'];
             $data['store_person_mobile']     = $this->user['mobile'];
-            
+            $data['sg_id']     = $postData['sg_id'];
             if(\think\Db::name("store_apply")->save($data)){
                 $this->ajaxReturn(['status'=>1,'msg'=>'提交成功,请等待审核结果']);
             }else{
@@ -1481,7 +1761,7 @@ class User extends Base {
                                 ->where(['store_id'=>['eq',$is_merchant['store_id']]])
                                 ->find();
             
-            if(!empty($exits_app_shop['shop_state'])){
+            if(!empty($exits_app_shop['store_id'])){
                 if($exits_app_shop['shop_state']==1){
                     $this->ajaxReturn(['status'=>-1,'msg'=>'入驻申请已经提交，请等待管理员审核!']);
                 }elseif($exits_app_shop['shop_state']==2){
@@ -1526,6 +1806,9 @@ class User extends Base {
                 $this->ajaxReturn(['status'=>-1,'msg'=>'请填写店铺简介!']);
             }
 
+            if($postData['shop_name']!=$is_merchant['store_name']){
+                $this->ajaxReturn(['status'=>-1,'msg'=>'填写的茶馆必须和您的店铺名字一致']);
+            }
             $data['shop_logo']               = $postData['shop_logo'];
             $data['shop_name']               = $postData['shop_name'];
             $data['shop_products']           = $postData['shop_products'];
@@ -1772,7 +2055,10 @@ class User extends Base {
             $list[$k]['service_time'] = date("Y.m.d",$v['start']).'-'.date("Y.m.d",$v['end']);
             $list[$k]['add_time']     = date("Y-m-d H:i",$v['add_time']);
         }
-        $this->ajaxReturn(['status' => 1, 'msg' => '获取成功', 'result' => $list]);
+        $page = M("teart_service")->where("teart_id",$teart_id)->count("id");
+        $data['pages'] = $page;
+        $data['data'] = $list;
+        $this->ajaxReturn(['status' => 1, 'msg' => '获取成功', 'result' => $data]);
     }
     
     //茶艺师关注和取消关注
@@ -1801,21 +2087,101 @@ class User extends Base {
     }
     
     //茶艺师列表获取
-    public function teart_list()
+    public function teart_list(\app\common\logic\Teacomment $tea)
     {
         //排序　
         //距离计算　　未完成
         //评分计算　　未完成
         $p = I("p")?:1;
-        $list = M("tea_art")->order("add_time")->page($p,10)->select();
-        $sub = $this->get_teart_subnum();
-        foreach ($list as $k=>$v){
-            $list[$k]['subscribe'] = count($sub[$v['user_id']]);
+        $sort = I("sort")?I("sort"):'score';
+        $x = I("longitude");
+        $y = I("latitude");
+        $keyword = I("keyword");
+        $storeid = I("store_id");//传递此参数表示获取某个茶馆的茶艺师
+        if($storeid){
+            $list = M("tea_art")->where("store_id",$storeid)->where("teart_state",2)->order("add_time")->page($p,10)->select();
+        }else{
+            $list = M("tea_art")->where("teart_state",2)->whereLike("teart_name","%$keyword%")->order("add_time")->page($p,10)->select();
         }
-        $json = ['status' => 1, 'msg' => '获取成功', 'result' => $list];
+        empty($list) &&$this->ajaxReturn(['status'=>-1,'msg'=>'搜索不到茶艺师数据']);
+        $teartId = [];
+        foreach ($list as $k=>$v){
+            //$list[$k]['subscribe'] = count($sub[$v['user_id']]);
+            $teartId[] = $v['teart_id'];
+        }
+        $sub = $this->get_teart_subnum($teartId);
+        $Tea_is_sub = $this->isSubscribetea_art($teartId);
+        //print_r($Tea_is_sub);
+        foreach ($list as $k=>$v){
+            $list[$k]['is_subscribe'] = empty($Tea_is_sub[$this->user_id.$v['teart_id']])?0:1;
+            $list[$k]['subscribe'] = count($sub[$v['teart_id']]);
+        }
+        if($sort=='score'){
+            //获取评综合评分
+            $star = $tea->getcomment($teartId);
+            $distance = $tea->gettea_distance($teartId,$x,$y);
+            foreach ($list as $k=>$v){
+                $list[$k]['star'] = $star[$v['teart_id']];
+                $list[$k]['distance'] = $distance[$v['teart_id']];
+            }
+            $ret = [];
+            foreach ($list as $k=>$v){
+                $ret[$k.'a'] = $v;
+            }
+            //评分由高到低
+            $ret = array_sort($ret,'star','desc');
+            $result = [];
+            foreach($ret as $k=>$v){
+                $temp = $v;
+                $result['list'][] = $temp;
+            }
+        }elseif($sort=='distance'){
+            //获取各个茶艺师距离用户的位置
+            $star = $tea->gettea_distance($teartId,$x,$y);
+            $comment = $tea->getcomment($teartId);
+            foreach ($list as $k=>$v){
+                $list[$k]['star'] = $comment[$v['teart_id']];
+                $list[$k]['distance'] = $star[$v['teart_id']];
+            
+            }
+            $ret = [];
+            foreach ($list as $k=>$v){
+                $ret[$k.'a'] = $v;
+            }
+           
+            //距离由高到低
+            $ret = array_sort($ret,'distance','desc');
+            $result = [];
+            foreach($ret as $k=>$v){
+                $temp = $v;
+                $result['list'][] = $temp;
+            }
+        }
+        
+        
+        $json = ['status' => 1, 'msg' => '获取成功', 'result' => $result['list']?:null];
         $this->ajaxReturn($json);
     }
     
+    //用户是否关注了茶艺师
+    public function isSubscribetea_art($teartIdList)
+    {
+        $userid = $this->user_id;
+        $list = \think\Db::name("teart_collect")->where(function($query)use($teartIdList){
+            $query->whereIn("teart_id",$teartIdList);
+        })->select();
+        $tea_sub = [];
+        foreach($list as $k=>$v){
+            //if($v['user_id']==$userid){
+            //    $tea_sub[$v['teart_id']] = 1;
+            //}else{
+            //    $tea_sub[$v['teart_id']] = 0;
+            //}
+            $tea_sub[$v['user_id'].$v['teart_id']] = $v['user_id'].$v['teart_id'];
+            
+        }
+        return $tea_sub;
+    }
     //茶艺师搜索列表
     public function teart_list_serach()
     {
@@ -1827,23 +2193,77 @@ class User extends Base {
         foreach ($list as $k=>$v){
             $list[$k]['subscribe'] = count($sub[$v['user_id']]);
         }
+        
+        $this->teawordadd($keyword);
         $json = ['status' => 1, 'msg' => '获取成功', 'result' => $list];
         $this->ajaxReturn($json);
     }
     
-    //获取每个茶艺师的关注人数
-    private function get_teart_subnum()
+    //搜索关键字添加[茶艺师]
+    public function teawordadd($keyword)
     {
-        $list = \think\Db::name("teart_collect")->field("user_id,teart_id")->select();
+        $ret = db("teakeyword")->where("keyword",$keyword)->find();
+        if($ret['keyword']==$keyword){
+            db("teakeyword")->where("keyword",$keyword)->inc("count");
+            if(!db("teakeyword")->where("user_id",$this->user_id)->where("keyword",$keyword)->find()){
+                db("teakeyword")->save([
+                    'keyword'=>$keyword,
+                    'user_id'=>$this->user_id,
+                    'add_time'=>time(),
+                    'count'=>1
+                ]);
+            }
+
+            
+        }else{
+            db("teakeyword")->save([
+                'keyword'=>$keyword,
+                'user_id'=>$this->user_id,
+                'add_time'=>time(),
+                'count'=>1
+            ]);
+        }
+    }
+    
+    //搜索关键字清除
+    public function clearteakeyword()
+    {
+        if(db("teakeyword")->where("user_id",$this->user_id)->delete()){
+            $json = ['status' => 1, 'msg' => '清除成功'];
+            $this->ajaxReturn($json);
+        }
+    }   
+
+    //我的茶艺师搜索关键字历史
+    public function myteakeyword()
+    {
+        $list = db("teakeyword")->where("user_id",$this->user_id)->select();
+        $json = ['status' => 1, 'msg' => '获取成功','result'=>$list];
+        $this->ajaxReturn($json);
+    }
+    
+    //热门搜索[茶艺师关键字]
+    public function gethottea_keyword()
+    {
+        $list = db("teakeyword")->order("count","desc")->select();
+        $json = ['status' => 1, 'msg' => '获取成功','result'=>$list];
+        $this->ajaxReturn($json);
+    }
+    
+    
+    //获取每个茶艺师的关注人数
+    private function get_teart_subnum($teartId)
+    {
+        $list = \think\Db::name("teart_collect")->field("user_id,teart_id")->whereIn("teart_id",$teartId)->select();
         $user_sub = [];
         foreach ($list as $k=>$v){
-            $user_sub[$v['user_id']][] = $v['teart_id'];
+            $user_sub[$v['teart_id']][] = $v['user_id'];
         }
         return $user_sub;
     }
     
     //获取茶艺师详情
-    public function get_teart_info()
+    public function get_teart_info(\app\common\logic\Teacomment $tea)
     {
         $teart_id = I("teart_id");
         $longitude = I("longitude");
@@ -1851,7 +2271,7 @@ class User extends Base {
         
         empty($teart_id) && $this->ajaxReturn(['status'=>-1,'msg'=>'参数错误']);
         $info = \think\Db::name("tea_art")->where("teart_id",$teart_id)->find();
-        
+        $info['sex'] = \think\Db::name("users")->where("user_id",$info['user_id'])->getField("sex");
         $info['bglist'] = explode(",", $info['teart_pics']);
         $info['subscribe'] = \think\Db::name("teart_collect")->where("teart_id",$info['teart_id'])->count("user_id");
         //距离计算
@@ -1859,10 +2279,40 @@ class User extends Base {
         //综合评价
         $info['score']  = '';
         
+        $star = $tea->gettea_distance([$info['teart_id']],$longitude,$latitude);
+        $comment = $tea->getcomment([$info['teart_id']]);
+        //距离计算
+        $info['distance'] = $star[$info['teart_id']];    
+        //综合评价
+        $info['score']  = $comment[$info['teart_id']];
+        
+        $subis =  $this->isSubscribetea_art($info['teart_id']);
+        $info['is_subscribe'] = empty($subis[$this->user_id.$info['teart_id']])?0:1;
+        
         //获取当前茶艺师最新的服务数据
         $info['last_service'] = \think\Db::name("teart_service")->where("teart_id",$teart_id)->order("add_time","desc")->select();
+        
+        if($info['last_service'][0]['end']<time()){
+            $info['last_service'][0] = [
+                "status"=>"2",//此服务不可以显示
+                "id"=>"",
+                "start"=>"",
+                "end"=>"",
+                "orbit"=>"",
+                "cost"=>"",
+                "notice"=>"",
+                "add_time"=>"",
+                "teart_id"=>"",
+                "service_period"=>""
+            ];
+        }else{
+            $info['last_service'][0]['status'] = 1;//表示可以显示最新的服务
+        }
+        
         foreach ($info['last_service'] as $k=>$v){
-            $info['last_service'][$k]['service_period'] = date("Y.m.d",$v['start']).'-'.date("Y.m.d",$v['end']);
+            if(!empty($v['id'])){
+                $info['last_service'][$k]['service_period'] = date("Y.m.d",$v['start']).'-'.date("Y.m.d",$v['end']);
+            }
         }
         $json = ['status' => 1, 'msg' => '获取成功', 'result' => $info];
         $this->ajaxReturn($json);
@@ -1872,16 +2322,17 @@ class User extends Base {
     public function addteart_order()
     {
         $teart_id = I("teart_id");
+        $service_id = I("service_id");
         
         $start    = I("start");//服务时间段
         $end      = I("end");
         $longitude = I("longitude");//服务范围
         $latitude  = I("latitude");
         
-        
+        empty($service_id) && $this->ajaxReturn(['status'=>-1,'msg'=>'预约服务id错误']);
         empty($teart_id) && $this->ajaxReturn(['status'=>-1,'msg'=>'参数错误']);
         //获取该茶艺师的最新服务
-        $info = \think\Db::name("teart_service")->where("teart_id",$teart_id)->order("add_time","desc")->find();
+        $info = \think\Db::name("teart_service")->where("teart_id",$teart_id)->where("id",$service_id)->find();
         
         //茶艺师服务时间段
         $info['start_service'] = date("Y-m-d H:i",$info['start']);
@@ -1889,9 +2340,54 @@ class User extends Base {
         
         //茶艺师信息
         $info['tea_artinfo'] = \think\Db::name("tea_art")->where("teart_id",$teart_id)->find();
-        //计算服务费用
-        $info['pay'] = round(((strtotime($end)-strtotime($start))/3600)*$info['cost'],2);
         
+        if($start&&$end){
+            
+            //服务时间范围验证
+            $service_period = (strtotime($end)-strtotime($start))/3600;
+            
+            if($service_period<2){
+                $this->ajaxReturn(['status'=>-1,'msg'=>'服务时间范围最少2H']);
+            }
+            
+            //茶艺师不能约自己
+            $isMyself = \think\Db::name("tea_art")->where("user_id",$this->user_id)->find();
+            if($isMyself['teart_name'])$this->ajaxReturn(['status'=>-1,'msg'=>'不能自己约自己哦']);
+            
+            $service_distance = \think\Db::name("teart_service")->where("teart_id",$teart_id)->where("id",$service_id)->find();
+
+            //提交的服务时间段必须在指定的范围内
+            if(strtotime($start)<$service_distance['start']||strtotime($start)>$service_distance['end']){
+                $this->ajaxReturn(['status'=>-1,'msg'=>'服务的起始时间不在指定的时间段']);
+            }
+            if(strtotime($end)<$service_distance['start']||strtotime($end)>$service_distance['end']){
+                $this->ajaxReturn(['status'=>-1,'msg'=>'服务的结束时间不在指定的时间段']);
+            }
+            
+            //计算服务费用
+            //$info['pay'] = round(((strtotime($end)-strtotime($start))/3600)*$info['cost'],2);
+             
+            
+        }
+        if($longitude&&$latitude){
+            //服务范围判断
+            $tea_xy = \think\Db::name("tea_art")
+            ->field("longitude,latitude,address")
+            ->where("teart_id",$teart_id)
+            ->find();
+        
+            //计算客户到茶艺师的距离
+            $distance = caldistance($longitude, $latitude, $tea_xy['longitude'], $tea_xy['latitude']);
+             
+            $service_distance = \think\Db::name("teart_service")->where("teart_id",$teart_id)->where("id",$service_id)->find();
+            if($distance['results'][0]['distance']>($service_distance['orbit']*1000)){
+                //由于数据库保存的距离单位是km
+                //但高德计算的距离是m
+                $this->ajaxReturn(['status'=>-1,'msg'=>'您所在的位置不在服务区域']);
+            }
+        }
+        //计算服务费用
+        $info['pay'] = round(((strtotime($end?:0)-strtotime($start?:0))/3600)*$info['cost'],2);
         $json = ['status' => 1, 'msg' => '获取成功', 'result' => $info];
         $this->ajaxReturn($json);
     }
@@ -1904,12 +2400,13 @@ class User extends Base {
         //判断服务详细地址是否填写
 
         $data['teart_id']  = I("teart_id");
+        $data['service_id']= I("service_id");
         $data['start']     = I("start");//服务时间段
         $data['end']       = I("end");
         $data['longitude'] = I("longitude");//服务范围
         $data['latitude']  = I("latitude");
         $data['address']   = I("address");
-        
+        $service_id = I("service_id");
         $result = $this->validate($data, [
             'teart_id'=>'require|number',
             'start'=>'require|date',
@@ -1949,8 +2446,8 @@ class User extends Base {
         //计算客户到茶艺师的距离
         $distance = caldistance($data['longitude'], $data['latitude'], $tea_xy['longitude'], $tea_xy['latitude']);
      
-        $service_distance = \think\Db::name("teart_service")->where("teart_id",$data['teart_id'])->find();
-        if($distance['results'][0]['distance']>$service_distance['orbit']){
+        $service_distance = \think\Db::name("teart_service")->where("teart_id",$data['teart_id'])->where("id",$service_id)->find();
+        if($distance['results'][0]['distance']>($service_distance['orbit']*1000)){
             $this->ajaxReturn(['status'=>-1,'msg'=>'您所在的位置不在服务区域']);
         }
         //print_r($distance);
@@ -1981,7 +2478,7 @@ class User extends Base {
             'service_pay'=>round(((strtotime($data['end'])-strtotime($data['start']))/3600)*$service_distance['cost'],2),
             'pay'=>round(((strtotime($data['end'])-strtotime($data['start']))/3600)*$service_distance['cost'],2),
             'add_time'=>time(),
-            'service_date'=>$data['start'].'-'.$data['end'],
+            'service_date'=>$data['start'].'~'.$data['end'],
         ];
         /*
         if(!!$order_id = \think\Db::name("teart_order")->save($order)){
@@ -2023,6 +2520,7 @@ class User extends Base {
     public function userteaorder_list()
     {
         //pay_status 0　未支付　　１已支付　　２已退款
+        
         //order_state 0 未完成　1用户取消申请　２商家取消　３已完成
         //agree 0 待审核　　１通过　２拒绝
         $p = $this->request->param("p");
@@ -2112,7 +2610,7 @@ class User extends Base {
             }elseif($v['order_state']==2){
                 $list[$k]['cancelBtn'] = 0;
                 $list[$k]['payBtn']    = 0;
-                $list[$k]['commentBtn']= 0;
+                $list[$k]['commentBtn']= 1;
                 $list[$k]['status']    = '被商家取消';
             }elseif($v['pay_status']==1&&$v['order_state']==3){
                 $list[$k]['cancelBtn'] = 0;
@@ -2154,7 +2652,7 @@ class User extends Base {
         empty($this->request->param("order_id")) && $this->ajaxReturn(['status'=>-1,'msg'=>'参数错误']);
         
         $info = \think\Db::name("teart_order")->where("order_id",$order_id)->find();
-        
+        $info['teartpic'] = \think\Db::name("tea_art")->where("teart_id",$info['teart_id'])->value("teart_logo");
         if(empty($info['order_id']))$this->ajaxReturn(['status'=>-1,'msg'=>'订单不存在']);
             //未付款　未完成
             if(empty($info['pay_status'])&&empty($info['order_state'])){
@@ -2172,7 +2670,7 @@ class User extends Base {
             }elseif($info['order_state']==2){
                 $info['cancelBtn'] = 0;
                 $info['payBtn']    = 0;
-                $info['commentBtn']= 0;
+                $info['commentBtn']= 1;
                 $info['status']    = '被商家取消';
             }elseif($info['pay_status']==1&&$info['order_state']==3){
                 $info['cancelBtn'] = 0;
@@ -2212,13 +2710,25 @@ class User extends Base {
     public function cancelteaorder()
     {
         $order_id = $this->request->param("order_id");
+        $desc = $this->request->param("cancel_desc");
+        //file_put_contents("canceltea.txt", $_POST);
         empty($this->request->param("order_id")) && $this->ajaxReturn(['status'=>-1,'msg'=>'参数错误']);
-        $order = \think\DB::name("teart_order")->where("order_id",$order_id)->find();
+        $order = \think\Db::name("teart_order")->where("order_id",$order_id)->find();
+        
         if(empty($order['order_id']))$this->ajaxReturn(['status'=>-1,'msg'=>'订单不存在']);
         if(empty($order['pay_status'])&&empty($order['order_state'])){
             
             //未支付直接取消订单
-            if (\think\Db::name("teart_order")->where("order_id",$order_id)->save(['cancel_time'=>time(),'order_state'=>1,'agree'=>1]))$this->ajaxReturn(['status'=>1,'msg'=>'订单取消成功']);
+            \think\Db::name("teart_order")->where("order_id",$order_id)->save([
+                'cancel_time'=>time(),
+                'order_state'=>1,
+                'agree'=>1,
+                //'usercanceldesc'>=$desc
+                ]
+                );
+          
+                $this->ajaxReturn(['status'=>1,'msg'=>'订单取消成功']);
+            
         }elseif($order['pay_status']==1&&empty($order['order_state'])){
             //已支付的取消需要商家审核
             if(\think\Db::name("teart_order")->where("order_id",$order_id)->save(['cancel_time'=>time()]))$this->ajaxReturn(['status'=>1,'msg'=>'订单取消申请成功待商家审核 ']);
@@ -2304,7 +2814,23 @@ class User extends Base {
         empty($cancel_desc) && $this->ajaxReturn(['status'=>-1,'msg'=>'什麼原因取消訂單呢']);
         if($order['pay_status']==1){
             //已经支付的订单取消则要退款返回给用户
+            //同意取消并退款
+            //同意意味着商家的资金扣除本订单的金额
+            //购买者的余额开始增加－－让用户自己去提现而不是直接退款
+            $order_money = \think\Db::name("tea_order")->where("order_sn",$order['order_sn'])->find();
+            $merchant = \think\Db::name("tea_art")->where("teart_id",$order_money['teart_id'])->find();
             
+            //执行事务操作
+            \think\Db::transaction(function(){
+                \think\Db::name("users")->where("user_id",$merchant['user_id'])->setDec("user_money",$order_money['pay']);
+            
+                //用户的余额增加
+                \think\Db::name("users")->where("user_id",$order_money['user_id'])->setInc("user_money",$order_money['pay']);
+            });
+            
+           $this->ajaxReturn(['status'=>1,'msg'=>'操作成功']);
+                
+                
         }elseif (empty($order['pay_status'])){
             \think\Db::name("teart_order")
             ->where("order_id",$order_id)
@@ -2383,7 +2909,6 @@ class User extends Base {
     //会员取消的订单　茶艺师订单操作　拒绝或同意
     public function dealcancel_order()
     {
-        
         $order_id = $this->request->param("order_id");
         $refuse_desc = $this->request->param("refuse_desc");
         $is_agree = $this->request->param("is_agree");
@@ -2394,6 +2919,20 @@ class User extends Base {
             //同意取消
             if($order['pay_status']==1){
                 //同意取消并退款
+                //同意意味着商家的资金扣除本订单的金额
+                //购买者的余额开始增加－－让用户自己去提现而不是直接退款
+                $order_money = \think\Db::name("tea_order")->where("order_sn",$order['order_sn'])->find();
+                $merchant = \think\Db::name("tea_art")->where("teart_id",$order_money['teart_id'])->find();
+                
+                //执行事务操作
+                \think\Db::transaction(function(){
+                    \think\Db::name("users")->where("user_id",$merchant['user_id'])->setDec("user_money",$order_money['pay']);
+                    
+                    //用户的余额增加
+                    \think\Db::name("users")->where("user_id",$order_money['user_id'])->setInc("user_money",$order_money['pay']);
+                });
+                
+                $this->ajaxReturn(['status'=>1,'msg'=>'操作成功']);
             }
         }elseif($is_agree==2){
             \think\Db::name("teart_order")->where(function($query)use($order_id,$teart_id){
@@ -2406,10 +2945,51 @@ class User extends Base {
     public function myarticle()
     {
         $article = \think\Db::name("article_tea")->where("user_id",$this->user_id)->select();
+        $articleId = [];
         foreach ($article as $k=>$v){
             $article[$k]['add_time'] = date("Y-m-d H:i:s",$v['add_time']);
+            $articleId[] = $v['id'];
         }
+        $subscribe =  $this->getpraise($articleId);
+        $is_substatus = $this->getsubstatus($articleId);
+        foreach ($article as $k=>$v){
+           
+          //获取每一个帖子的关注人数
+            $article[$k]['subnum'] = count($subscribe[$v['id']]);
+            
+            //这家伙是否关注了
+            $article[$k]['is_subscribe_this_article'] = $is_substatus[$v['id'].$this->user_id];
+        }
+        
+        
+        
         $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result' => ['article'=>$article,'userInfo'=>['realname'=>$this->user['realname'],'head_pic'=>$this->user['head_pic']]]]);
+    }
+    //获取所有帖子的点赞数据
+    public function getpraise($articleId)
+    {
+        $list = \think\Db::name("article_teasub")->whereIn("article_id",$articleId)->where("status",1)->select();
+        $article_sub = [];
+        foreach ($list as $k=>$v){
+            $article_sub[$v['article_id']][] = $v['user_id'];
+        }
+    
+        return $article_sub;
+    
+    }
+    //获取用户是否关注帖子
+    public function getsubstatus($articleId)
+    {
+        $article = db("article_teasub")->whereIn("article_id",$articleId)->select();
+        $user = [];
+        foreach($article as $k=>$v){
+            if($this->user_id==$v['user_id']&&$v['status']==1){
+                $user[$v['article_id'].$v['user_id']] = '1';
+            }else{
+                $user[$v['article_id'].$v['user_id']] = '2';
+            }
+        }
+        return $user;
     }
     
     //删除帖子
@@ -2429,17 +3009,21 @@ class User extends Base {
         $p = $this->request->param("p")?:1;
         $list = \think\Db::name("active")->where('user_id',$this->user_id)->page($p,10)->select();
         $user = [];
+        $activity = [];
         foreach ($list as $k=>$v){
             $user[] = $v['user_id'];
             $list[$k]['add_time'] = date("Y-m-d H:i:s",$v['add_time']);
             $list[$k]['active_time'] = date("Y-m-d H:i:s",$v['active_time']);
         
             //报名状态处理
-            if(time()>strtotime($v['active_time'])){
+            if(time()<strtotime($v['active_time'])){
                 $list[$k]['status'] = '1';//报名中
             }else{
                 $list[$k]['status'] = '2';//已结束
             }
+            
+            $activity[] = $v['id'];
+            
         }
         $info = \think\Db::name("users")->field("user_id,realname,head_pic")->whereIn("user_id",$user)->select();
         //茶商
@@ -2461,6 +3045,9 @@ class User extends Base {
         foreach ($info as $k=>$v){
             $userInfo[$v['user_id']] = ['realname'=>$v['realname'],'head_pic'=>$v['head_pic']];
         }
+        
+        $join_activity = $this->join_activity_num($activity);
+        
         foreach ($list as $k=>$v){
             $list[$k]['userinfo'] = $userInfo[$v['user_id']];
             if(in_array($v['user_id'], $teaMerchant)){
@@ -2470,8 +3057,22 @@ class User extends Base {
             }else{
                 $list[$k]['role'] = '茶友';
             }
+            
+            $list[$k]['join_num'] = count($join_activity[$v['id']]);
+            
         }
         $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result' =>$list]);
+    }
+    
+    //已参加活动的人数
+    public function join_activity_num($activid)
+    {
+        $list = \think\Db::name("activity_join")->whereIn("active_id",$activid)->select();
+        $active_user = [];
+        foreach($list as $k=>$v){
+            $active_user[$v['active_id']][] = $v['user_id'];
+        }
+        return $active_user;
     }
     
     //我报名的活动列表
@@ -2496,6 +3097,7 @@ class User extends Base {
             }else{
                 $list[$k]['status'] = '2';//已结束
             }
+            $activity[] = $v['id'];
         }
         $info = \think\Db::name("users")->field("user_id,realname,head_pic")->whereIn("user_id",$user)->select();
         //茶商
@@ -2517,6 +3119,9 @@ class User extends Base {
         foreach ($info as $k=>$v){
             $userInfo[$v['user_id']] = ['realname'=>$v['realname'],'head_pic'=>$v['head_pic']];
         }
+        
+        $join_activity = $this->join_activity_num($activity);
+        
         foreach ($list as $k=>$v){
             $list[$k]['userinfo'] = $userInfo[$v['user_id']];
             if(in_array($v['user_id'], $teaMerchant)){
@@ -2526,7 +3131,538 @@ class User extends Base {
             }else{
                 $list[$k]['role'] = '茶友';
             }
+            
+            $list[$k]['join_num'] = count($join_activity[$v['id']]);
+            
         }
         $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result' =>$list]);
     }
+    
+    //                 绑定
+    public function bindbank()
+    {
+        $bank = $this->request->param("bank");
+        $username = $this->request->param("username");
+        $cardnum = $this->request->param("cardnum");
+        $url = "https://ccdcapi.alipay.com/validateAndCacheCardInfo.json?_input_charset=utf-8&cardNo={$cardnum}&cardBinCheck=true";
+        $result = json_decode(file_get_contents($url),true);
+        if(!$result['validated']){
+            $this->ajaxReturn(['status'=>-1,'msg'=>'您添加的银行卡不存在']);
+        } 
+        
+        $data['username'] = $username;
+        $data['bank']     = $bank;
+        $data['cardnum']  = $cardnum;
+        $data['cardbin']  = $result['bank'];
+        $data['user_id']  = $this->user_id;
+        $banklogo_url = "https://apimg.alipay.com/combo.png?d=cashier&t={$result['bank']}";
+        
+        $data['banklogo'] = $banklogo_url;
+        $data['add_time'] = time();
+        $data['banktype'] = call_user_func_array(function()use($result){
+            $bankType = ["DC"=>"储蓄卡",
+                            "CC"=>"信用卡",
+                            "SCC"=>"准贷记卡",
+                            "PC"=>"预付费卡"];
+            return $bankType[$result['cardType']];
+        }, $result);
+        
+        $exists_bank = \think\Db::name("bank")->where(function($query)use($cardnum){
+            $query->where("user_id",$this->user_id)->where("cardnum",$cardnum);
+        })->find();
+        if($exists_bank['cardnum']) $this->ajaxReturn(['status'=>-1,'msg'=>'您绑定的银行卡已经存在']);
+        if($bank!=getbank($result['bank']))$this->ajaxReturn(['status'=>-1,'msg'=>'您填写的银行和银行所属行不正确']);
+        \think\Db::name("bank")->save($data) && $this->ajaxReturn(['status'=>1,'msg'=>'绑定成功']);
+    }
+    
+    //银行卡列表
+    public function banklist()
+    {
+        $list = \think\Db::name("bank")->where(function($query){
+            $query->where("user_id",$this->user_id);
+        })->select();
+        $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$list]);
+    }
+    
+    //我关注的艺师列表
+    public function myteartlist()
+    {
+        $list = db("teart_collect")->where(function($query){
+            $query->where("user_id",$this->user_id);
+        })->select();
+        
+        $teaId = [];
+        foreach ($list as $k=>$v){
+            $teaId[] = $v['teart_id'];
+        }
+        $p = I("p")?:1;
+        $teart_list = db("tea_art")->alias("t")->field("t.*,u.sex")->whereIn("t.teart_id",$teaId)->page($p,10)->join("users u","t.user_id=u.user_id","LEFT")->select();
+        $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$teart_list]);
+    }
+    
+    //我关注的主播列表
+    public function mylivelist()
+    {
+        $list = db("livesub")->where(function($query){
+            $query->where("userid",$this->user_id);
+        })->select();
+    
+        $liveId = [];
+        foreach ($list as $k=>$v){
+            $liveId[] = $v['liveid'];
+        }
+        $p = I("p")?:1;
+        $live_list = db("live_apply")->alias("la")
+        ->field([
+            "la.info",
+            "u.head_pic",
+            "u.sex",
+            "u.nickname",
+            "la.userid"
+        ])
+        ->whereIn("userid",$liveId)
+        ->join("users u","la.userid=u.user_id","LEFT")
+        ->page($p,10)
+        ->select();
+        $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$live_list]);
+    }
+    
+    //我关注的用户[获取关注的茶艺师和主播列表]
+    public function mysubscribeusers()
+    {
+        $p = I("p")?:1;
+        $list = db("subscribe_users")->whereIn("userid",$this->user_id)->page($p,10)->select();
+        $teaId = [];
+        $liveId = [];
+        foreach ($list as $k=>$v){
+            if($v['1']==1){
+                $list[$k]['role'] = "1";
+                $teaId[] = $v['subscribeid'];
+            }elseif($v['1']==2){
+                $list[$k]['role'] = "2";
+                $liveId[] = $v['subscribeid'];
+            }
+        }
+        //获取茶艺师的userid
+        $userIdList = \think\Db::name("tea_art")->field("user_id,teart_id")->select();
+        //获取主播的userid
+        $liveIdList = \think\Db::name("live_apply")->select();
+        
+        $isTeaId = [];
+        $userId = [];
+        foreach ($userIdList as $k=>$v){
+            $userId[$v['teart_id']] = $v['user_id'];
+            $isTeaId[$v['user_id']] = $v['teart_id'];
+        }
+        $liveIds = [];
+        foreach ($liveIdList as $k=>$v){
+            $liveIds[$v['userid']] = $v['userid'];
+        }
+
+        foreach ($list as $k=>$v){
+            if($v['1']==1){
+               //茶艺师下验证是否是主播
+               if($liveIds[$userId[$v['subscribeid']]]){
+                   $list[$k]['role'] = "3";
+                  
+               }
+               
+               //将此茶艺师替换为用户id
+               $list[$k]['subscribeid'] = $userId[$v['subscribeid']];
+            }elseif($v['1']==2){
+                //主播下验证是否是茶艺师
+                if($isTeaId[$v['subscribeid']]){
+                    $list[$k]['role'] = "3";
+                }
+            }
+        }
+        
+        $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$list]);
+    }
+    //获取用户详细
+    public function ucenterstatus()
+    {
+        //$user_id = I("user_id");
+        //empty($user_id) &&$this->ajaxReturn(['status'=>-1,'msg'=>'参数错误']);
+        $user = db("users")->where("user_id",$this->user_id)->find();
+        $user['tearole'] = db("tea_art")->where("user_id",$user['user_id'])->find(); 
+        
+        $user['store'] = db("store")->where("user_id",$this->user_id)->find();
+        $user['shopInstance'] = db("store_entry")->where("store_id",$user['store_id'])->find();
+        
+        if($user['tearole']){
+            $user['role'] = "1";
+            $user['role_name'] = "茶艺师";
+            //如果是茶艺师
+            /*if($user['tearole']['teart_state']==1){
+                $user['tearole']['teart_state']['status'] = "审核中";
+            }elseif($user['tearole']['teart_state']==2){
+                $user['tearole']['teart_state']['status'] = "审核通过";
+            }else{
+                $user['tearole']['teart_state']['status'] = "审核未通过";
+            }*/
+        }elseif($user['store']){
+            
+            $user['role'] = "2";
+            $user['role_name'] = "茶商";
+            
+            /*if($user['store']['store_state']==0){
+                $user['store']['store_status_explain'] = "茶商已关闭";
+            }elseif($user['store']['store_state']==1){
+                $user['store']['store_status_explain'] = "正常";
+            }else{
+                $user['store']['store_status_explain'] = "审核中";
+            }*/
+        }else{
+            $user['role'] = "3";
+            $user['role_name'] = "茶友";
+        }
+        
+        
+        if($user['user_id']){
+            $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$user]);
+        }else{
+            $this->ajaxReturn(['status'=>-1,'msg'=>'不存在此人']);
+        }
+    }
+    
+
+    //获取拍品的参与人数
+    private function getAuctionNum($goodsidList)
+    {
+        /*
+        $ret = M("auction_competition")->whereIn("goods_id",$goodsidList)->select();
+        */
+        $ret = M("auction_room")->whereIn("goods_id",$goodsidList)->where("type",1)->select();
+        $auctionJoinNum = [];
+        foreach($ret as $k=>$v){
+            $auctionJoinNum[$v['goods_id']][] = $v['user_id'];
+        }
+        foreach ($auctionJoinNum as $k=>$v){
+            $auctionJoinNum[$k] = array_unique($v);
+        }
+        return $auctionJoinNum;
+    }
+    
+    private function getAuctionData($type)
+    {
+        if($type==1){
+            //当前用户参与的拍卖，且时间未结束的拍卖品
+            $maxAuctionPriceList = $this->getMaxPriceGoodsProcess();
+            $userIdList = [];
+            $auctionGoodsId = [];
+            $maxAuctionPrice = [];
+            foreach ($maxAuctionPriceList as $k=>$v){
+                //拍卖现场中出价最高的人 为当前登录的用户时才会展示
+                //if($v['auction_max']['user_id']==$this->user_id){
+                    $userIdList[] = $this->user_id;
+                    //拍卖现场中的拍品id
+                    $auctionGoodsId[] = $k;
+                    //拍卖品对应的最高价
+                    $maxAuctionPrice[$k] = $v['auction_max']['max_price'];
+                //}
+            
+            }
+            //print_r($maxAuctionPrice);
+            //print_r($maxAuctionPriceList);
+            $page = new Page(M("auction_competition")->alias("ac")
+                ->field([
+                    "ac.*",
+                    "g.auction_end",
+                    "s.store_name"
+                ])
+                ->join("goods g","ac.goods_id=g.goods_id","LEFT")
+                ->join("store s","ac.store_id=s.store_id","LEFT")
+                ->where(function($query){
+                    $query->where("g.auction_end",">",time())->where("ac.user_id",$this->user_id);
+                })->count(),15);
+        
+            $list = M("auction_competition")->alias("ac")
+            ->field([
+                "ac.*",
+                "g.auction_end",
+                "s.store_name",
+                "g.shop_price"=>"auction_price"
+            ])
+            ->join("goods g","ac.goods_id=g.goods_id","LEFT")
+            ->join("store s","ac.store_id=s.store_id","LEFT")
+            ->where(function($query){
+                $query->where("g.auction_end",">",time())->where("ac.user_id",$this->user_id);
+            })
+            ->limit($page->firstRow,$page->listRows)
+            ->fetchSql(false)
+            ->select();
+            $goodsidList = [];
+            foreach ($list as $k=>$v){
+                $list[$k]['auction_end'] = date("m-d H:i");
+                $list[$k]['auction_price'] = round($v['auction_price'],0);
+                $goodsidList[] = $v['goods_id'];
+            }
+            $joinNum = $this->getAuctionNum($goodsidList);
+           
+            foreach ($list as $k=>$v){
+                $list[$k]['auction_num'] = count($joinNum[$v['goods_id']]);
+                
+                $list[$k]['auction_pay_price'] = round($maxAuctionPrice[$v['goods_id']]);
+            }
+           
+        }elseif($type==2){
+            //已结束规则：拍卖时间结束，拍卖品出价最高者是当前用户，并且当前已经线下付款，线上已经审核
+            $maxAuctionPriceList = $this->getMaxPriceGoods();
+            $userIdList = [];
+            $auctionGoodsId = [];
+            $maxAuctionPrice = [];
+            foreach ($maxAuctionPriceList as $k=>$v){
+                //拍卖现场中出价最高的人 为当前登录的用户时才会展示
+                if($v['auction_max']['user_id']==$this->user_id){
+                    $userIdList[] = $this->user_id;
+                    //拍卖现场中的拍品id
+                    $auctionGoodsId[] = $k;
+                    //拍卖品对应的最高价
+                    $maxAuctionPrice[$k] = $v['auction_max']['max_price'];
+                }
+                
+            }
+            //待支付[规则拍卖品已经结束，得到该拍卖品中出价最高的会员，与当前登录用户匹配则展示在待支付栏目中]
+            $page = new Page(M("auction_competition")->alias("ac")
+                ->field([
+                    "ac.*",
+                    "g.auction_end",
+                    "s.store_name"
+                ])
+                ->join("goods g","ac.goods_id=g.goods_id","LEFT")
+                ->join("store s","ac.store_id=s.store_id","LEFT")
+                ->whereIn("ac.goods_id",$auctionGoodsId)
+                ->whereIn("ac.user_id",$userIdList)
+                ->where(function($query){
+                    //结拍时间已经到　　保证金已支付　　出价未支付
+                    //$query->where("g.auction_end","<",time())->where("ac.pay_status",1)->where("ac.order_status",0);
+                    $query->where("g.auction_end","<",time())->where("ac.pay_status",1)->where("ac.order_status",2);
+                })->count(),15);
+            
+            $list = M("auction_competition")->alias("ac")
+            ->field([
+                "ac.*",
+                "g.auction_end",
+                "s.store_name",
+                "g.shop_price"=>"auction_price",
+            ])
+            ->join("goods g","ac.goods_id=g.goods_id","LEFT")
+            ->join("store s","ac.store_id=s.store_id","LEFT")
+            ->whereIn("ac.goods_id",$auctionGoodsId)
+            ->whereIn("ac.user_id",$userIdList)
+            ->where(function($query){
+                $query->where("g.auction_end","<",time())->where("ac.pay_status",1)->where("ac.order_status",2);
+            })
+            ->limit($page->firstRow,$page->listRows)
+            ->fetchSql(false)
+            ->select();
+            
+            foreach ($list as $k=>$v){
+                $list[$k]['auction_pay_price'] = round($maxAuctionPrice[$v['goods_id']]);
+                //$list[$k]['auction_pay_price'] = $maxAuctionPrice[$v['goods_id']];  old
+                //$list[$k]['auction_pay_price'] = round($maxAuctionPrice[$v['goods_id']],0); new
+            }
+            
+        }elseif($type==3){//待　支付
+            //拍卖现场中出价最高的用户列表
+            //
+            $maxAuctionPriceList = $this->getMaxPriceGoods();
+            $userIdList = [];
+            $auctionGoodsId = [];
+            $maxAuctionPrice = [];
+            foreach ($maxAuctionPriceList as $k=>$v){
+                //拍卖现场中出价最高的人 为当前登录的用户时才会展示
+                if($v['auction_max']['user_id']==$this->user_id){
+                    $userIdList[] = $this->user_id;
+                    //拍卖现场中的拍品id
+                    $auctionGoodsId[] = $k;
+                    //拍卖品对应的最高价
+                    $maxAuctionPrice[$k] = $v['auction_max']['max_price'];
+                }
+                
+            }
+            //待支付[规则拍卖品已经结束，得到该拍卖品中出价最高的会员，与当前登录用户匹配则展示在待支付栏目中]
+            $page = new Page(M("auction_competition")->alias("ac")
+                ->field([
+                    "ac.*",
+                    "g.auction_end",
+                    "s.store_name",
+                    "g.goods_remark",
+                ])
+                ->join("goods g","ac.goods_id=g.goods_id","LEFT")
+                ->join("store s","ac.store_id=s.store_id","LEFT")
+                ->whereIn("ac.goods_id",$auctionGoodsId)
+                ->whereIn("ac.user_id",$userIdList)
+                ->where(function($query){
+                    //结拍时间已经到　　保证金已支付　　出价未支付
+                    //$query->where("g.auction_end","<",time())->where("ac.pay_status",1)->where("ac.order_status",0);
+                    $query->where("g.auction_end","<",time())->where("ac.pay_status",1)->where("ac.order_status",0);
+                })->count(),15);
+            
+            $list = M("auction_competition")->alias("ac")
+            ->field([
+                "ac.*",
+                "g.auction_end",
+                "s.store_name",
+                "s.store_logo",
+                "g.shop_price"=>"auction_price",
+            ])
+            ->join("goods g","ac.goods_id=g.goods_id","LEFT")
+            ->join("store s","ac.store_id=s.store_id","LEFT")
+            ->whereIn("ac.goods_id",$auctionGoodsId)
+            ->whereIn("ac.user_id",$userIdList)
+            ->where(function($query){
+                $query->where("g.auction_end","<",time())->where("ac.pay_status",1)->where("ac.order_status",0);
+            })
+            ->limit($page->firstRow,$page->listRows)
+            ->fetchSql(false)
+            ->select();
+            
+            foreach ($list as $k=>$v){
+                $list[$k]['auction_pay_price'] = round($maxAuctionPrice[$v['goods_id']],0);
+                $list[$k]['auction_price'] = round($v['auction_price'],0);
+                //$list[$k]['wait_pay_price'] = round($v['wait_pay_price'],0);
+            }
+            
+
+        }elseif($type==4){
+            //待审核[规则和待支付一致，只是订单状态已经为支付中，待审核状态中]
+        //拍卖现场中出价最高的用户列表
+            //
+            $maxAuctionPriceList = $this->getMaxPriceGoods();
+            $userIdList = [];
+            $auctionGoodsId = [];
+            $maxAuctionPrice = [];
+            foreach ($maxAuctionPriceList as $k=>$v){
+                //拍卖现场中出价最高的人 为当前登录的用户时才会展示
+                if($v['auction_max']['user_id']==$this->user_id){
+                    $userIdList[] = $this->user_id;
+                    //拍卖现场中的拍品id
+                    $auctionGoodsId[] = $k;
+                    //拍卖品对应的最高价
+                    $maxAuctionPrice[$k] = $v['auction_max']['max_price'];
+                }
+                
+            }
+            //待支付[规则拍卖品已经结束，得到该拍卖品中出价最高的会员，与当前登录用户匹配则展示在待支付栏目中]
+            $page = new Page(M("auction_competition")->alias("ac")
+                ->field([
+                    "ac.*",
+                    "g.auction_end",
+                    "s.store_name"
+                ])
+                ->join("goods g","ac.goods_id=g.goods_id","LEFT")
+                ->join("store s","ac.store_id=s.store_id","LEFT")
+                ->whereIn("ac.goods_id",$auctionGoodsId)
+                ->whereIn("ac.user_id",$userIdList)
+                ->where(function($query){
+                    //结拍时间已经到　　保证金已支付　　出价未支付
+                    //$query->where("g.auction_end","<",time())->where("ac.pay_status",1)->where("ac.order_status",0);
+                    $query->where("g.auction_end","<",time())->where("ac.pay_status",1)->where("ac.order_status",1);
+                })->count(),15);
+            
+            $list = M("auction_competition")->alias("ac")
+            ->field([
+                "ac.*",
+                "g.auction_end",
+                "s.store_name",
+                "g.shop_price"=>"auction_price",
+            ])
+            ->join("goods g","ac.goods_id=g.goods_id","LEFT")
+            ->join("store s","ac.store_id=s.store_id","LEFT")
+            ->whereIn("ac.goods_id",$auctionGoodsId)
+            ->whereIn("ac.user_id",$userIdList)
+            ->where(function($query){
+                $query->where("g.auction_end","<",time())->where("ac.pay_status",1)->where("ac.order_status",1);
+            })
+            ->limit($page->firstRow,$page->listRows)
+            ->fetchSql(false)
+            ->select();
+            
+            foreach ($list as $k=>$v){
+                //$list[$k]['evidence_pay_price'] = $maxAuctionPrice[$v['goods_id']]; old
+                $list[$k]['auction_pay_price'] = round($maxAuctionPrice[$v['goods_id']]);
+            }
+        }
+        return $list;
+    }
+    
+    //拍卖中出价最高的
+    private function getAuctionMaxPrice($goodsId)
+    {
+        //该拍卖品出价最高的人
+        $offer   = M("auction_room")->whereIn("goods_id",$goodsId)->max("offer_price");
+        $user = M("auction_room")->whereIn("goods_id",$goodsId)->where("offer_price",$offer)->find();
+        return ["user_id"=>$user['user_id'],"offer_price"=>$offer];
+        
+    }
+
+    //我的拍卖列表
+    public function myAuctionList()
+    {
+        $userid = $this->user_id;
+        $p      = input("p",1);
+        $type   = input("type","1");//1拍卖中　　２已结束　３待支付　４待审核
+        $list = $this->getAuctionData($type);
+        $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$list]);
+        
+    }
+
+    //获取拍卖现场中，拍卖时间已经结束且出价最高的人
+    private function getMaxPriceGoods()
+    {
+        $ret = M("auction_room ar")
+        ->field(["ar.*","g.auction_end"])
+        ->where("g.auction_end","<",time())
+        ->join("goods g","ar.goods_id=g.goods_id")
+        ->select();
+    
+        $auction = [];
+        foreach ($ret as $k=>$v){
+            $auction[$v['goods_id']][] = $v;//保存该拍卖品的出价数据
+        }
+        
+        foreach ($auction as $k=>$v){
+            $max = [];
+            foreach ($v as $kk=>$vv){
+                $max[$vv['id'].'-'.$vv['user_id']] = $vv['offer_price'];
+            }
+            asort($max);//按出价排序　　从小到大
+            $temp = array_reverse($max);
+            //每件拍卖品出价最高的家伙
+            $auction[$k]['auction_max'] = ['max_price'=>current($temp),'user_id'=>explode("-", current(array_keys($temp)))[1]];//数组出栈
+        }
+        //print_r($auction);
+        return $auction;
+    }
+    
+    //获取拍卖现场中，拍卖时间未结束且出价最高的人
+    private function getMaxPriceGoodsProcess()
+    {
+        $ret = M("auction_room ar")
+        ->field(["ar.*","g.auction_end"])
+        ->where("g.auction_end",">",time())
+        ->join("goods g","ar.goods_id=g.goods_id")
+        ->select();
+    
+        $auction = [];
+        foreach ($ret as $k=>$v){
+            $auction[$v['goods_id']][] = $v;//保存该拍卖品的出价数据
+        }
+       
+        foreach ($auction as $k=>$v){
+            $max = [];
+            foreach ($v as $kk=>$vv){
+                $max[$vv['id'].'-'.$vv['user_id']] = $vv['offer_price'];
+            }
+            asort($max);//按出价排序　　从小到大
+            $temp = array_reverse($max);
+            //每件拍卖品出价最高的家伙
+            $auction[$k]['auction_max'] = ['max_price'=>current($temp),'user_id'=>explode("-", current(array_keys($temp)))[1]];//数组出栈
+        }
+        //print_r($auction);
+        return $auction;
+    }
+ 
 }

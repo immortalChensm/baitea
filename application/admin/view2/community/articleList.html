@@ -35,7 +35,7 @@
         <h5>(共{$pager->totalRows}条记录)</h5>
       </div>
       <div title="刷新数据" class="pReload"><i class="fa fa-refresh"></i></div>
-	  <form class="navbar-form form-inline" action="{:U('Admin/Article/articleList')}" method="post">      
+	  <form class="navbar-form form-inline" action="{:U('Admin/Community/articleList')}" method="post">      
       <div class="sDiv">
         <div class="sDiv2">
         <!--
@@ -73,8 +73,14 @@
               <th align="center" abbr="article_time" axis="col6" class="">
                 <div style="text-align: center; width: 120px;" class="">发布时间</div>
               </th>
+              
               <th align="center" axis="col1" class="handle">
-                <div style="text-align: center; width: 150px;">操作</div>
+                <div style="text-align: center; width: 120px;">发布者</div>
+              </th>
+              
+              
+              <th align="center" axis="col1" class="handle">
+                <div style="text-align: center; width: 200px;">操作</div>
               </th>
               <th style="width:100%" axis="col7">
                 <div></div>
@@ -86,11 +92,11 @@
     </div>
     <div class="tDiv">
       <div class="tDiv2">
-      <!-- 
+      
           <div class="fbutton"> 
-        	<a href="{:U('Admin/Article/article')}"><div class="add" title="新增文章"><span><i class="fa fa-plus"></i>新增文章</span></div></a> 
+        	<a href="{:U('Admin/Community/add_articletea',['act'=>'add'])}"><div class="add" title="添加社区公告"><span><i class="fa fa-plus"></i>添加公告</span></div></a> 
           </div>
-          -->
+          
           <!-- <div class="fbutton"><div class="del" title="将选定行数据批量删除"><span><i class="fa fa-trash"></i>批量删除</span></div></div>-->
       </div>
       <div style="clear:both"></div>
@@ -119,10 +125,19 @@
                   <div style="text-align: center; width: 120px;">{$vo.add_time}</div>
                 </td>
                 
+                <td align="center" class="">
+                  <div style="text-align: center; width: 120px;">{$vo.user}</div>
+                </td>
+                
                  <td align="center" class="handle">
-                  <div style="text-align: center; width: 170px; max-width:170px;"> <a class="btn blue" target="_blank" href="{:U('Home/Article/detail',array('article_id'=>$vo['id']))}"><i class="fa fa-search"></i>查看</a>
-                   <a class="btn red"  href="javascript:void(0)" data-url="{:U('Article/aticleHandle')}" data-id="{$vo.id}" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a>
-
+                  <div style="text-align: center; width: 200px; max-width:200px;">
+                 
+                   <a class="btn blue" target="_self" href="{:U('Admin/Community/detail',array('article_id'=>$vo['id']))}"><i class="fa fa-search"></i>查看</a>
+                   
+                   <if condition="$vo.type eq 1">
+                   			<a class="btn red"  href="javascript:void(0)" data-url="{:U('Community/aticleHandle')}" data-id="{$vo.id}" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a>
+                   			<a href="{:U('Community/add_articletea',array('act'=>'edit','article_id'=>$vo['id']))}" class="btn blue"><i class="fa fa-pencil-square-o"></i>编辑</a> 
+ 					</if>
                   </div>
                 </td>
                 

@@ -102,7 +102,7 @@
         <dd>
         	<ul class="ncsc-evidence-pic">
         	  <foreach name="return_goods[imgs]" item="vo">
-              <li><a href="{$vo}" nctype="nyroModal" rel="gal" target="_blank"><img class="show_image" src="{$vo}"></a></li>
+              <li><a href="{$vo}" nctype="nyroModal" rel="gal" target="_blank"><img class="show_image" src="{:Request()->domain()}{$vo}"></a></li>
               </foreach>
             </ul>
         </dd>
@@ -186,10 +186,10 @@
   <div class="item-goods">
       <dl>
         <dt>
-          <div class="ncsc-goods-thumb-mini"><a target="_blank" href="{:U('Home/Goods/goodsInfo',array('id'=>$return_goods['goods_id']))}">
+          <div class="ncsc-goods-thumb-mini"><a target="_blank" href="{$return_goods.goods_id|goods_thum_images=60,60}">
             <img src="{$return_goods.goods_id|goods_thum_images=60,60}"/></a></div>
         </dt>
-        <dd><a target="_blank" href="{:U('Home/Goods/goodsInfo',array('id'=>$return_goods['goods_id']))}">{$order_goods.goods_name}</a>
+        <dd><a target="_blank" href="{$return_goods.goods_id|goods_thum_images=60,60}">{$order_goods.goods_name}</a>
             &yen;{$order_goods.member_goods_price} * {$order_goods.goods_num} <font color="#AAA">(数量)</font>
             <span></span>
         </dd>

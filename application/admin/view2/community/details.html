@@ -1,0 +1,112 @@
+<include file="public/layout" />
+<body style="background-color: #FFF; overflow: auto;">
+<div id="append_parent"></div>
+<div id="ajaxwaitid"></div>
+
+<div class="page">
+  <div class="fixed-bar">
+    <div class="item-title">
+      <a class="back" href="{:U('Community/articleList')}" title="返回列表">
+        <i class="fa fa-arrow-circle-o-left"></i>
+      </a>
+      <div class="subject">
+        <h3>社区活动 - 帖子详情</h3>
+        <h5>查看帖子详情</h5>
+      </div>
+    </div>
+  </div>
+  <form id="add_form" method="post" action="">
+    <div class="ncap-form-default">
+    
+      <dl class="row">
+        <dt class="tit">
+          <label>帖子标题</label>
+        </dt>
+        <dd class="opt">
+          {$info.title}
+          <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>
+      
+      <dl class="row">
+        <dt class="tit">
+          <label>帖子内容</label>
+        </dt>
+        <dd class="opt">
+           {$info.content}
+          <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>
+      
+      <dl class="row">
+        <dt class="tit">
+          <label>帖子图片</label>
+        </dt>
+        <dd class="opt">
+          <volist name="info.imgs" id="vo">
+          	
+          		<img src="{$vo}" style="max-height:220px"/>
+         
+          	
+          </volist>
+          <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>
+      
+      <dl class="row">
+        <dt class="tit">
+          <label>评论量</label>
+        </dt>
+        <dd class="opt">
+          {$info.commentNum}
+          <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>
+      
+      <dl class="row">
+        <dt class="tit">
+          <label>点赞数</label>
+        </dt>
+        <dd class="opt">
+          {$info.clickNum}
+          <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>
+      
+      <dl class="row">
+        <dt class="tit">
+          <label>发布者</label>
+        </dt>
+        <dd class="opt">
+          {$info.username}
+          <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>
+      
+      <dl class="row">
+        <dt class="tit">
+          <label>发布时间</label>
+        </dt>
+        <dd class="opt">
+   			{:date('Y-m-d H:i',$info.add_time)}
+          <span class="err"></span>
+          <p class="notic"></p>
+        </dd>
+      </dl>
+     
+      
+   
+    </div>
+  </form>
+</div>
+<script>
+//按钮先执行验证再提交表单
+</script>
+</body>
+</html>

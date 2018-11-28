@@ -73,8 +73,10 @@ h3 {
           </if></dd>
         </dl>
            <dl>
+           <!-- 
           <dt>发&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;票：</dt>
           <dd>{$order.invoice_title}</dd>
+           -->
         </dl>
         <dl>
           <dt>买家留言：</dt>
@@ -142,7 +144,9 @@ h3 {
 	          <th colspan="2">商品</th>
 	          <th class="w120">单价(元)</th>
 	          <th class="w60">数量</th>
+	          <!--
 	          <th class="w100">规格属性</th>
+	            -->
 	          <th class="w200">会员折扣价</th>
 	        </tr>
 	      </thead>
@@ -151,16 +155,18 @@ h3 {
 	         <tr class="bd-line">
 	          <td>&nbsp;</td>
 	          <td class="w50"><div class="pic-thumb">
-	          	<a target="_blank" href="{:U('Home/Goods/goodsInfo',array('id'=>$good['goods_id']))}"><img src="{$good['goods_id']|goods_thum_images=200,200}"></a></div>
+	          	<a target="_blank" href="{$good['goods_id']|goods_thum_images=200,200}"><img src="{$good['goods_id']|goods_thum_images=200,200}"></a></div>
 	          </td>
 	          <td class="tl">
           		<dl class="goods-name">
-              		<dt><a target="_blank" href="{:U('Home/Goods/goodsInfo',array('id'=>$good['goods_id']))}">{$good.goods_name}</a></dt>
+              		<dt><a target="_blank" href="{$good['goods_id']|goods_thum_images=200,200}">{$good.goods_name}</a></dt>
               	</dl>
 	          </td>
 	          <td>{$good.goods_price}<p class="green"></p></td>
 	          <td>{$good.goods_num}</td>
+	          <!--
 	          <td>{$good.spec_key_name}</td>
+	            -->
 	          <td>{$good.member_goods_price}</td>
 	          </tr>
 	        </volist>
@@ -193,8 +199,10 @@ h3 {
 	        <tr>
 	          <th class="w100">小计</th>
 	          <th class="w100">运费</th>
+	          <!-- 
 	          <th class="w100">积分(-0)</th>
 	          <th class="w100">余额抵扣</th>
+	           -->
 	          <th class="w200">优惠券抵扣</th>
 	          <th class="w100">价格调整</th>
 	          <th class="w100">应付</th>
@@ -204,8 +212,10 @@ h3 {
 	         <tr class="bd-line">
 	          <td class="w100">{$order.goods_price}</td>
 	          <td class="w100">+{$order.shipping_price}</td>
+	          <!-- 
 	          <td class="w100">-{$order.integral_money}</td>
 	          <td class="w100">-{$order.user_money}</td>
+	           -->
 	          <td class="w100">-{$order.coupon_price}</td>
 	          <td class="w100">减:{$order.order_prom_amount}</td>
 	       <!--   <td class="w100">减:{$order.discount}</td>-->

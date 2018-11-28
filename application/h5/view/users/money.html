@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>去喝茶</title>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/aui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/mobile.css">
+    <script src="/public/__STATIC__/h5/js/jquery.min.js"></script>
+</head>
+<body>
+<!--
+<header>
+    <a class="head-icon">
+        <div class="icon-return"></div>
+    </a>
+    <div class="head-words">
+        我的钱包
+    </div>
+    <a class="head-empty"></a>
+</header>
+  -->
+<div class="main main-fill-bottom">
+    <div class="f-money">
+        <div class="m-top">
+            <div class="a-title">账户余额</div>
+            <div class="a-num">￥&nbsp;{$user.user_money}</div>
+            <a href="" class="compont-btn">提现</a>
+        </div>
+        <a class="m-bottom">
+            <div class="a-l"><img src="/public/__STATIC__/h5/images/icon/icon_bank.png"><span>我的银行卡</span></div>
+            <div class="a-r"><span>{$user.bankcard_num}张</span><img src="/public/__STATIC__/h5/images/icon/icon_more-r.png"></div>
+        </a>
+    </div>
+</div>
+<script>
+    $("body").css("background-color","#fff")
+</script>
+</body>
+</html>

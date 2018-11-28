@@ -1,3 +1,0 @@
-<?php
-//000031104000[{"ad_id":4,"pid":2,"media_type":0,"ad_name":"\u9996\u9875banner\u8f6e\u64ad2","ad_link":"\/index.php?m=Home&amp;c=Goods&amp;a=goodsInfo&amp;id=1","ad_code":"\/public\/upload\/ad\/2016\/07-25\/5795ab303cb65.jpg","start_time":1443542400,"end_time":1601481600,"link_man":"","link_email":"","link_phone":"","click_count":0,"enabled":1,"orderby":50,"target":0,"bgcolor":"#000000","ad_key":""},{"ad_id":50,"pid":2,"media_type":0,"ad_name":"\u81ea\u5b9a\u4e49\u5e7f\u544a\u540d\u79f0","ad_link":"javascript:void(0);","ad_code":"\/public\/upload\/ad\/2016\/07-25\/5795abec126c4.jpg","start_time":1451577600,"end_time":1546272000,"link_man":"","link_email":"","link_phone":"","click_count":0,"enabled":1,"orderby":0,"target":0,"bgcolor":"#000000","ad_key":""}]
-?>

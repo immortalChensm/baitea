@@ -1,3 +1,0 @@
-<?php
-//000031104000[{"goods_id":59,"goods_name":"\u9177\u5f00(coocaa) K50 50\u82f1\u5bf8\u667a\u80fd\u7f51\u7edc\u6db2\u6676\u5e73\u677f\u7535\u89c6 \u9177\u5f00\u7cfb\u7edfWiFi","original_img":"\/public\/upload\/goods\/2016\/01-14\/569749040dcd0.jpg","shop_price":"2499.00"},{"goods_id":60,"goods_name":"\u521b\u7ef4(Skyworth) 50S9 50\u82f1\u5bf8 \u5168\u9ad8\u6e05 \u7f51\u7edc WIFI \u667a\u80fd LED\u6db2\u6676\u7535\u89c6","original_img":"\/public\/upload\/goods\/2016\/01-14\/5697523793096.jpg","shop_price":"2599.00"}]
-?>

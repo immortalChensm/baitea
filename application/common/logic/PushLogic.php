@@ -69,6 +69,8 @@ class PushLogic
             $push = $push->addAllAudience();
         } else {
             $push = $push->addRegistrationId($push_ids);
+            //print_r($push_ids);
+            //$push = $push->addAlias($push_ids);
         }
         
         try {

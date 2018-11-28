@@ -76,7 +76,9 @@ class Order extends Base
         I('pay_code') != '' ? $condition['pay_code'] = I('pay_code') : false;
         I('shipping_status') != '' ? $condition['shipping_status'] = I('shipping_status/d') : false;
         I('order_statis_id/d') != '' ? $condition['order_statis_id'] = I('order_statis_id/d') : false; // 结算统计的订单
-
+        //只能拉取非众筹商品
+        $condition['status'] = 0;
+        
         $sort_order = I('order_by', 'DESC') . ' ' . I('sort');
         $condition['order_prom_type'] = array('lt',5);
         $count = Db::name('order'.$select_year)->where($condition)->count();
@@ -262,11 +264,17 @@ class Order extends Base
         $end = strtotime(I('add_time_end'));
         $select_year = getTabByTime(I('add_time_begin')); // 表后缀
         $condition = array('store_id' => STORE_ID ,'deleted' =>0);
+        
+        
         if ($begin && $end) {
             $condition['add_time'] = array('between', "$begin,$end");
         }
         I('consignee') ? $condition['consignee'] = trim(I('consignee')) : false;
         I('order_sn') != '' ? $condition['order_sn'] = trim(I('order_sn')) : false;
+        
+        //众筹
+        $condition['status'] = 0;
+        
         $shipping_status = I('shipping_status');
         $condition['shipping_status'] = empty($shipping_status) ? 0 : $shipping_status;
         $condition['order_status'] = array('in', '1,2,4');
@@ -730,7 +738,7 @@ class Order extends Base
         );
         $shipping['config_value'] = str_replace($template_var, $content_var, $shipping['config_value']);
         $this->assign('shipping', $shipping);
-        return $this->fetch("Plugin/print_express");
+        return $this->fetch("plugin/print_express");
     }
 
     /**
@@ -740,6 +748,7 @@ class Order extends Base
     {
         $orderLogic = new OrderLogic();
         $data = I('post.');
+        //print_r($data);exit();
         $res = $orderLogic->deliveryHandle($data, STORE_ID);
         if ($res) {
             $this->ajaxReturn(['status'=>1,'msg'=>'操作成功', 'url'=>U('Seller/Order/index')]);

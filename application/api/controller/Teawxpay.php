@@ -137,7 +137,8 @@ class Teawxpay extends Base
         
         //在此从支付插件数据表plugin读取支付配置参数　并返回配置参数
         //注释时间：2018-3-03-28
-        $WxPayConfig = \WxPayConfig::getInstance($trade_type);
+        $notify_url = 'http://118.190.204.122/index.php/api/Teawxpay/notify';
+        $WxPayConfig = \WxPayConfig::getInstance($trade_type,$notify_url);
         
         //$payBody = getPayBody($order['order_id']);
         $payBody   = '茶艺师预约服务';

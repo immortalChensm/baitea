@@ -21,6 +21,13 @@ class Base extends Controller {
     public function __construct()
     {
         parent::__construct();
+        
+        $controller = $this->request->controller();
+     
+        if(strtolower($controller)!="api"){
+            $this->redirect("admin/Index/index");
+        }
+      
     }
 
     /*

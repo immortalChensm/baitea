@@ -112,6 +112,8 @@ function updateRefundGoods($rec_id,$refund_type=0){
     expenseLog($expense_data);//退款记录日志
 }
 
+
+
 /**
  * 取消订单退还余额，优惠券等
  * @param $order
@@ -175,7 +177,7 @@ function tpversion()
             'serial_number'=>SERIALNUMBER,
             );     
      $url = "http://service.tp-shop.cn/index.php?m=Home&c=Index&a=user_push&".http_build_query($vaules);
-     stream_context_set_default(array('http' => array('timeout' => 3)));
+     //stream_context_set_default(array('http' => array('timeout' => 3)));
      file_get_contents($url);       
 }
 

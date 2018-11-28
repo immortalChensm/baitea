@@ -50,6 +50,7 @@ class Goods extends Base
         $this->assign('store_goods_class_list', $store_goods_class_list);
         $suppliers_list = M('suppliers')->where(array('store_id'=>STORE_ID))->select();
         $this->assign('suppliers_list', $suppliers_list);
+
         return $this->fetch('goodsList');
     }
 
@@ -102,6 +103,30 @@ class Goods extends Base
         $store_warning_storage = M('store')->where('store_id', STORE_ID)->getField('store_warning_storage');
         $this->assign('store_warning_storage', $store_warning_storage);
         $this->assign('catList', $catList);
+        foreach ($goodsList as $k=>$v){
+            if($v['is_auction_goods']==1){
+                $goodsList[$k]['goods_sn'] = "";
+                $goodsList[$k]['store_count'] = "";
+            }
+        }
+        foreach($goodsList as $k=>$v){
+            if($v['is_auction_goods']==1){
+                if($v['auction_end']<time()){
+                    //unset($goodsList[$k]);
+                    $goodsList[$k]['auction_status'] = "已结束";
+                }else{
+                    $goodsList[$k]['auction_status'] = "进行中";
+                }
+            }
+            if($v['is_crowd_goods']==1){
+                if($v['crowd_end']<time()){
+                    //unset($goodsList[$k]);
+                    $goodsList[$k]['crowd_status'] = "已结束";
+                }else{
+                    $goodsList[$k]['crowd_status'] = "进行中";
+                }
+            }
+        }
         $this->assign('goodsList', $goodsList);
         $this->assign('page', $show);// 赋值分页输出
         return $this->fetch();
@@ -243,7 +268,52 @@ class Goods extends Base
         $this->assign('goodsImages', $goodsImages);  // 商品相册
         return $this->fetch('_goods');
     }
+    
+    /**
+     * 添加修改拍商品
+     */
+    public function addEditAuctionGoods()
+    {
+        $goods_id = I('goods_id/d', 0);
+        $goods_cat_id3 = I('cat_id3/d', 0);
+        
+            $Goods = new \app\seller\model\Goods();
+            $goods = $Goods->where(['goods_id' => $goods_id, 'store_id' => STORE_ID])->find();
+            if(empty($goods)){
+                $this->error("非法操作", U('Goods/goodsList'));
+            }else{
+                $this->assign('goodsInfo', $goods);  // 商品详情
+            }
+            $goods_cat = Db::name('goods_category')->where('id','IN',[$goods['cat_id1'],$goods['cat_id2'],$goods['cat_id3']])->order('level desc')->select();
+     
+        $GoodsLogic = new GoodsLogic();
+        $ShippingArea = new ShippingArea();
+        $store_goods_class_list = Db::name('store_goods_class')->where(['parent_id' => 0, 'store_id' => STORE_ID])->select(); //店铺内部分类
+        $brandList = $GoodsLogic->getSortBrands();
+        $goodsType = Db::name("GoodsType")->select();
+        $suppliersList = Db::name("suppliers")->select();
+        $plugin_shipping = Db::name('plugin')->where(['type' => ['eq', 'shipping'],'status'=>1])->select();//插件物流
+        $shipping_area = $ShippingArea->getShippingArea(STORE_ID);//配送区域
+        $goodsImages = Db::name("GoodsImages")->where('goods_id', $goods_id)->select();
+        $this->assign('goods_cat', $goods_cat);
+        $this->assign('store_id', STORE_ID);
+        $this->assign('shipping_area', $shipping_area);
+        $this->assign('plugin_shipping', $plugin_shipping);
+        $this->assign('store_goods_class_list', $store_goods_class_list);
+        $this->assign('brandList', $brandList);
+        $this->assign('goodsType', $goodsType);
+        $this->assign('suppliersList', $suppliersList);
+        $this->assign('goodsImages', $goodsImages);  // 商品相册
+        return $this->fetch('_goods_auction');
+    }
 
+    /**
+     * 拍卖品发布
+     * **/
+    public function addAuction()
+    {
+        return $this->fetch('_goods_auction');
+    }
     /**
      * 商品保存
      */
@@ -328,6 +398,90 @@ class Goods extends Base
         $this->ajaxReturn([ 'status' => 1, 'msg' => '操作成功', 'result' => ['goods_id'=>$Goods->goods_id]]);
     }
 
+    /**
+     * 拍品保存
+     */
+    public function Auctionsave(){
+        // 数据验证
+        $data =input('post.');
+       
+        $shipping_area_ids = I('post.shipping_area_ids/a', []);
+        $goods_id = input('post.goods_id');
+        $goods_cat_id3 = input('post.cat_id3');
+        $spec_goods_item = input('post.item/a',[]);
+        $store_count = input('post.store_count');
+        $is_virtual = input('post.is_virtual');
+        $virtual_indate = I('post.virtual_indate');//虚拟商品有效期
+        $exchange_integral = I('post.exchange_integral');//虚拟商品有效期
+        
+        $data['auction_end'] = strtotime($data['auction_end'].":00");
+        $data['is_auction_goods'] = 1;
+       
+        $validate = Loader::validate('Auction');
+        $data['store_id'] = STORE_ID;
+        if (!$validate->batch()->check($data)) {
+            $error = $validate->getError();
+            $error_msg = array_values($error);
+            $return_arr = array(
+                'status' => -1,
+                'msg' => $error_msg[0],
+                'data' => $error,
+            );
+            $this->ajaxReturn($return_arr);
+        }
+        $data['on_time'] = time(); // 上架时间
+        $data['shipping_area_ids'] = implode(',', $shipping_area_ids);
+        $data['shipping_area_ids'] = $data['shipping_area_ids'] ? $data['shipping_area_ids'] : '';
+    
+        $type_id = M('goods_category')->where("id", $goods_cat_id3)->getField('type_id'); // 找到这个分类对应的type_id
+        $stores = M('store')->where(array('store_id' => STORE_ID))->getField('store_id , goods_examine,is_own_shop' , 1);
+        $store_goods_examine = $stores[STORE_ID]['goods_examine'];
+        if ($store_goods_examine) {
+            $data['goods_state'] = 0; // 待审核
+            $data['is_on_sale'] = 0; // 下架
+        } else {
+            $data['goods_state'] = 1; // 出售中
+        }
+        //总平台自营标识为2 , 第三方自营店标识为1
+        $is_own_shop = (STORE_ID == 1) ? 2 : ($stores[STORE_ID]['is_own_shop']);
+        $data['is_own_shop'] = $is_own_shop;
+        $data['goods_type'] = $type_id ? $type_id : 0;
+        $data['virtual_indate'] = !empty($virtual_indate) ? strtotime($virtual_indate) : 0;
+        $data['exchange_integral'] = ($is_virtual == 1) ? 0 : $exchange_integral;
+        if ($goods_id > 0) {
+            $Goods = \app\seller\model\Goods::get(['goods_id' => $goods_id, 'store_id' => STORE_ID]);
+            if(empty($Goods)){
+                $this->ajaxReturn(array('status' => 0, 'msg' => '非法操作','result'=>''));
+            }
+            if (empty($spec_goods_item) && $store_count != $Goods['store_count']) {
+                $real_store_count = $store_count - $Goods['store_count'];
+                update_stock_log(session('admin_id'), $real_store_count, array('goods_id' => $goods_id, 'goods_name' => $Goods['goods_name'], 'store_id' => STORE_ID));
+            } else {
+                unset($data['store_count']);
+            }
+            $Goods->data($data, true); // 收集数据
+            $update = $Goods->save(); // 写入数据到数据库
+            // 更新成功后删除缩略图
+            if($update !== false){
+                
+                delFile("./public/upload/goods/thumb/$goods_id", true);
+            }
+        } else {
+            $Goods = new \app\seller\model\Goods();
+            $Goods->data($data, true); // 收集数据
+            $Goods->save(); // 新增数据到数据库
+            $goods_id = $Goods->getLastInsID();
+            //商品进出库记录日志
+            if (empty($spec_goods_item)) {
+                update_stock_log(session('admin_id'), $store_count, array('goods_id' => $goods_id, 'goods_name' => $Goods['goods_name'], 'store_id' => STORE_ID));
+            }
+        }
+        $Goods->afterSave($goods_id, STORE_ID);
+        $GoodsLogic = new GoodsLogic();
+        $GoodsLogic->saveGoodsAttr($goods_id, $type_id); // 处理商品 属性
+        $this->ajaxReturn([ 'status' => 1, 'msg' => '操作成功', 'result' => ['goods_id'=>$Goods->goods_id]]);
+    }
+    
     /**
      * 更改指定表的指定字段
      */

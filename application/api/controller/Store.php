@@ -61,10 +61,29 @@ class Store extends Base {
         $collect = M('store_collect')->where(['store_id'=> $store_id, 'user_id' => $this->user_id])->find();
         $store['is_collect'] = $collect ? 1 : 0;
                 
+        
+        //背景
+        $bglist = explode(",", $store['mb_slide']);
+        $bg = [];
+        foreach ($bglist as $k=>$v){
+            if(empty($v)){
+                unset($bglist[$k]);
+            }
+            $bg[] = $v;
+        }
+        foreach ($bglist as $k=>$v){
+            $temp = $v;
+            $bg['bg'][] = $temp;
+        }
+        $store['store_bglist'] = $bg['bg'];
+        
+        //找到这家伙有没有实体店铺
+        $store['instance_shop'] = \think\Db::name("store_entry")->where("store_id",$store['store_id'])->find();
         $res = array('status'=>1,'msg'=>'获取成功','result'=>$store );
         $this->ajaxReturn($res);
     }
       
+
 
     /***
      * 店铺
@@ -149,6 +168,16 @@ class Store extends Base {
         $json_arr = array('status'=>1,'msg'=>'获取成功','result'=>$store_goods_class);
         $this->ajaxReturn($json_arr);
     }
+    
+    public function storeGrade(){
+        $list = db("store_grade")->field("sg_id,sg_name")->select();
+        /*$grade = [];
+        foreach ($list as $k=>$v){
+            $grade[$v['sg_id']] = $v['sg_name'];
+        }*/
+        $json_arr = array('status'=>1,'msg'=>'获取成功','result'=>$list);
+        $this->ajaxReturn($json_arr);
+    }
 
     /**
      * @author dyr
@@ -206,13 +235,20 @@ class Store extends Base {
         }
         
         $store_goods_where['is_on_sale'] = 1;
+        //只加载非众筹的商品
+        //$store_goods_where['goods_type_extend'] = 'NULL';
         $store_goods_list_new = M('goods')
             ->field('goods_remark,goods_id,cat_id3,goods_sn,goods_name,shop_price,comment_count,sales_sum,is_virtual,original_img')
             ->where($store_goods_where)
+            ->whereNull('is_crowd_goods')
+            ->whereNull('is_auction_goods')
             ->order($orderBy)
             ->page($page, 10)
             ->select();
         
+        foreach ($store_goods_list_new as $k=>$v){
+            $store_goods_list_new[$k]['shop_price'] = round($v['shop_price'],2);
+        }
         //获取各商品的星级指数
         $store_goods_list_new = $this->getstoreinfo_bygoods($store_goods_list_new);
         $store_goods_list['goods_list'] = $store_goods_list_new;
@@ -333,12 +369,22 @@ class Store extends Base {
     //获取店铺列表
     public function getshop_list()
     {
-        
        $page = I('p', 1);
+     
        $sort = I('sort','score');
-       
        $user_location = I('location');
-
+       $store_name = I("store_name");
+       //if($store_name){
+       //    $shoplist = \think\Db::name("store_entry")->field("store_id")->whereLike("shop_name","%$store_name%")->select();
+       //}else{
+           $shoplist = \think\Db::name("store_entry")->field("store_id")->select();
+       //}
+      
+       $store_id = [];
+       foreach ($shoplist as $k=>$v){
+           $store_id[] = $v['store_id'];
+       }
+       
        //获取茶馆　　默认按评分来处理
        $store_list = M('Store')->alias("s")
                         ->field('
@@ -348,13 +394,18 @@ class Store extends Base {
                             s.store_desccredit,
                             s.store_servicecredit,
                             s.store_deliverycredit,
+                            s.mb_slide,
                             se.shop_address,
+                            s.store_address,
                             se.shop_longitude,
-                            se.shop_latitude
+                            se.shop_latitude,
+                            se.shop_bglist
                             ')
                         ->join("__STORE_ENTRY__ se","s.store_id=se.store_id","LEFT")
+                        ->whereIn("s.store_id",$store_id)
                         ->where("s.store_state",1)  //开启中的店铺
                         ->where("deleted",0)
+                        ->whereLike("s.store_name","%$store_name%")
                         ->page($page, 10)
                         ->fetchSql(false)
                         ->select();
@@ -365,26 +416,116 @@ class Store extends Base {
        //2、获取所有的店铺的经纬度
        //3、调用第三方接口计算距离进行排序
        
-       
-       if($sort=='score'){
+       $x = I("longitude");
+       $y = I("latitude");
+       //if($sort=='score'){
            foreach ($store_list as $k=>$v){
-               
                $temp = round(($v['store_desccredit']+$v['store_servicecredit']+$v['store_deliverycredit'])/3,1);
-               
                $store_list[$k]['score'] = $temp;
+               $store_list[$k]['store_bglist'] = explode(",",$v['mb_slide']);
+               $distance = caldistance($x, $y, $v['shop_longitude'], $v['shop_latitude']);
+               $store_list[$k]['distance'] = $distance['results'][0]['distance']?:0;
+               
+               //$list[$k]['shop_address'] = (!empty($v['shop_address'])?:$v['store_address']);
+               if(empty($v['shop_address'])){
+                   $list[$k]['shop_address'] = $v['shop_address']?:'没有设置地址';
+               }else{
+                   $list[$k]['shop_address'] = $list[$k]['shop_address']?:'没有设置地址';
+               }
            }
+           $store = [];
+           foreach ($store_list as $k=>$v){
+               $store[$k.'a'] = $v;
+           }
+           //$store['list'] = $store;
+           $store_list_sort = array_sort($store, 'score');
+       //}
+       if($sort=="score"){
+           $store_list_sort = array_sort($store, 'score');
+       }elseif($sort=="distance"){
+           $store_list_sort = array_sort($store, 'distance');
        }
-       /*$score = [];
-       foreach ($store_list as $k=>$v){
-           $score[$v['store_id']] = $v['score'];
+       $all = [];
+       foreach ($store_list_sort as $k=>$v){
+           $temp = $v;
+           $all['list'][] = $temp;
        }
-       asort($score);
-       */
-       
-       $store_list_sort = $this->sortByField($store_list,'score');
-       print_r($store_list_sort);
-       
-       $this->ajaxReturn($store_list);
+       $this->ajaxReturn(['status'=>1, 'msg'=>'获取成功', 'result'=>$all]);
+    }
+    
+    //搜索店铺[茶馆]
+    public function searchshop_list()
+    {
+        $page = I('p', 1);
+        $keyword = I("keyword");
+        //empty($keyword)&&$this->ajaxReturn(['status'=>-1, 'msg'=>'店铺关键字参数必传']);
+        $sort = I('sort','score');
+        $user_location = I('location');
+        
+        $shoplist = \think\Db::name("store_entry")->field("store_id")->select();
+        $store_id = [];
+        foreach ($shoplist as $k=>$v){
+            $store_id[] = $v['store_id'];
+        }
+        
+        //获取茶馆　　默认按评分来处理
+        $store_list = M('Store')->alias("s")
+        ->field('
+                            s.store_name,
+                            s.store_zy,
+                            s.store_id,
+                            s.store_desccredit,
+                            s.store_servicecredit,
+                            s.store_deliverycredit,
+                            se.shop_address,
+             s.mb_slide,
+                            se.shop_longitude,
+                            se.shop_latitude,
+                            se.shop_bglist
+                            ')
+                                ->join("__STORE_ENTRY__ se","s.store_id=se.store_id","LEFT")
+                                ->whereIn("s.store_id",$store_id)
+                                ->where("s.store_state",1)  //开启中的店铺
+                                ->where("deleted",0)
+                                ->whereLike("s.store_name","%$keyword%")
+                                ->page($page, 10)
+                                ->fetchSql(false)
+                                ->select();
+         
+        //$this->ajaxReturn(['status'=>1, 'msg'=>'获取成功', 'result'=>$store_list]);
+        //按茶馆距离来算的处理流程
+        //1、先获取当前登录用户的经纬度
+        //2、获取所有的店铺的经纬度
+        //3、调用第三方接口计算距离进行排序
+         
+        $x = I("longitude");
+        $y = I("latitude");
+        //if($sort=='score'){
+        foreach ($store_list as $k=>$v){
+            $temp = round(($v['store_desccredit']+$v['store_servicecredit']+$v['store_deliverycredit'])/3,1);
+            $store_list[$k]['score'] = $temp;
+            $store_list[$k]['store_bglist'] = explode(",", $v['mb_slide']);
+            $distance = caldistance($x, $y, $v['shop_longitude'], $v['shop_latitude']);
+            $store_list[$k]['distance'] = $distance['results'][0]['distance']?:0;
+        }
+        $store = [];
+        foreach ($store_list as $k=>$v){
+            $store[$k.'a'] = $v;
+        }
+        //$store['list'] = $store;
+        $store_list_sort = array_sort($store, 'score');
+        //}
+        if($sort=="score"){
+            $store_list_sort = array_sort($store, 'score');
+        }elseif($sort=="distance"){
+            $store_list_sort = array_sort($store, 'distance');
+        }
+        $all = [];
+        foreach ($store_list_sort as $k=>$v){
+            $temp = $v;
+            $all['list'][] = $temp;
+        }
+        $this->ajaxReturn(['status'=>1, 'msg'=>'获取成功', 'result'=>$all?:null]);
     }
     
     /**

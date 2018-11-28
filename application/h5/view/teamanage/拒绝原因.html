@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>拒绝原因</title>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/static/plugins/dist/css/weui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/static/plugins/layui/css/layui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/static/css/style.css">
+</head>
+<body>
+<div class="container weui-bg-fff" >
+    <!--顶部start-->
+    <div class="page__bd page__bd_spacings">
+        <div class="weui-flex">
+            <div><span class="layui-icon" style="font-size: 20px">&#xe603;</span></div>
+            <div class="weui-flex__item weui-title">拒绝原因</div>
+            <a href="#"><div class="weui-title-right" onclick="refuse('{:Request()->param('order_id')}')">完成</div></a>
+        </div>
+    </div>
+    <!--顶部end-->
+    <!--内容 start-->
+    <div class="weui-flex">
+        <div class="weui-flex__item">
+            <div class="weui-form-preview__bd ">
+                <textarea class="weui-refuse" placeholder="请输入拒绝原因"/></textarea>
+            </div>
+        </div>
+
+    </div>
+   <!--内容end-->
+</div>
+<script src="/public/__STATIC__/h5/static/js/jquery.min.js"></script>
+<script src="/public/__STATIC__/h5/static/plugins/layui/layui.js"></script>
+<script type="text/javascript">
+        function setupWebViewJavascriptBridge(callback) {  
+            if (window.WebViewJavascriptBridge) {  
+                callback(WebViewJavascriptBridge)  
+            } else {  
+                document.addEventListener('WebViewJavascriptBridgeReady' , function() {  
+                    callback(WebViewJavascriptBridge)  
+                }, false );  
+            }  
+            // =====以下是iOS必须的特殊处理========  
+            if (window.WVJBCallbacks) { return window.WVJBCallbacks.push(callback); }  
+            window.WVJBCallbacks = [callback];  
+            var WVJBIframe = document.createElement('iframe');  
+            WVJBIframe.style.display = 'none';  
+            WVJBIframe.src = 'wvjbscheme://__BRIDGE_LOADED__';  
+            document.documentElement.appendChild(WVJBIframe);  
+            setTimeout(function() { document.documentElement.removeChild(WVJBIframe) }, 0);  
+            // =====以上是iOS必须的特殊处理========  
+        }
+
+          // 固定写法2 函数名字与1保持一致  
+            setupWebViewJavascriptBridge(function(bridge) {  
+                // Java 注册回调函数，第一次连接时调用 初始化函数  
+                 bridge.init();  
+            });
+     	//拒绝
+       function refuse(order_id){
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('refuse',  
+                    		order_id,
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+          });
+       }
+</script>
+</body>
+</html>

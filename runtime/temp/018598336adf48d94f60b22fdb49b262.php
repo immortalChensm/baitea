@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:3:{s:41:"./application/seller/new/index\index.html";i:1522050529;s:41:"./application/seller/new/public\head.html";i:1522050654;s:41:"./application/seller/new/public\foot.html";i:1517208469;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:3:{s:41:"./application/seller/new/index\index.html";i:1525944056;s:41:"./application/seller/new/public\head.html";i:1528699444;s:41:"./application/seller/new/public\foot.html";i:1525943636;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -22,6 +22,8 @@
 <script type="text/javascript" src="__PUBLIC__/js/myAjax.js"></script>
 <script type="text/javascript" src="__PUBLIC__/js/myFormValidate.js"></script>
 <script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate.js"></script>
+<script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate_new.js"></script>
+<script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate_hoursmin.js"></script>
 <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!--[if lt IE 9]>
       <script src="__PUBLIC__/static/js/html5shiv.js"></script>
@@ -164,22 +166,25 @@
 					<li><a href="<?php echo U('Goods/goodsList',array('goods_state'=>1)); ?>" class="num">出售中 <strong id="nc_online"><?php echo $count['pass_goods']; ?></strong></a></li>
 					<li><a href="<?php echo U('Goods/goods_offline',array('goods_state'=>0)); ?>" class="num">待审核 <strong id="nc_offline"><?php echo $count['verify_goods']; ?></strong></a></li>
 					<li><a href="<?php echo U('Goods/goods_offline',array('is_on_sale'=>2)); ?>" class="num">违规下架 <strong id="nc_lockup"><?php echo $count['off_sale_goods']; ?></strong></a></li>
-					<li><a href="<?php echo U('Service/ask_list'); ?>" class="num">待回复咨询 <strong id="nc_consult"><?php echo $count['consult']; ?></strong></a></li>
+					<!--
+					<li><a href="<?php echo U('Service/ask_list'); ?>" class="num">待回复咨询 <strong id="nc_consult"><?php echo $count['consult']; ?></strong></a></li>  -->
 		        </ul>
 		      </div>
 		    </div>
 		
 		    <div class="container type-b">
+		    <!-- 
 		      <div class="hd">
 		        <h3>系统公告</h3>
 		        <h5></h5>
-		      </div>
+		      </div> -->
 		      <div class="content">
+		      <!--
 		        <ul>
 		        	<li><a href="<?php echo U('Home/Article/detail',['article_id'=>30]); ?>" target="_blank" >罚款制度公告</a></li>
 		        	<li><a href="<?php echo U('Home/Article/detail',['article_id'=>29]); ?>" target="_blank" >关于举报罚款制度公告</a></li>
 		        	<li><a href="<?php echo U('Home/Article/detail',['article_id'=>28]); ?>" target="_blank" >关于伪劣货品举报说明</a></li>
-		        </ul>
+		        </ul>  -->
 		        <dl>
 		          <dt>平台联系方式</dt>
                     <dd>QQ1：<?php echo $tpshop_config['shop_info_qq']; ?></dd>
@@ -206,8 +211,9 @@
 		          <!--<li><a href="<?php echo U('Seller/Order/index',array('order_status'=>1)); ?>" class="num">待发货 <strong id="nc_delivery"><?php echo $count['wait_shipping']; ?></strong></a></li>-->
                     <li><a href="<?php echo U('Seller/Order/delivery_list'); ?>" class="num">待发货 <strong id="nc_delivery"><?php echo $count['wait_shipping']; ?></strong></a></li>
 		          <li><a href="<?php echo U('Seller/Service/refund_list'); ?>" class="num"> 退货申请 <strong id="nc_refund_lock"><?php echo $count['refund_pay']; ?></strong></a></li>
+		          <!-- 
 		          <li><a href="<?php echo U('Seller/Service/return_list'); ?>" class="num"> 换货/维修申请 <strong id="nc_return_lock"><?php echo $count['refund_goods']; ?></strong></a></li>
-		          <li><a href="<?php echo U('Seller/Order/delivery_list',array('shipping_status'=>2)); ?>" class="num"> 部分发货订单 <strong id="nc_return"><?php echo $count['part_shipping']; ?></strong></a></li>
+		          <li><a href="<?php echo U('Seller/Order/delivery_list',array('shipping_status'=>2)); ?>" class="num"> 部分发货订单 <strong id="nc_return"><?php echo $count['part_shipping']; ?></strong></a></li> -->
 		          <li><a href="<?php echo U('Seller/Order/index',array('order_status'=>0)); ?>" class="num"> 待确认订单 <strong id="nc_bill_confirm"><?php echo $count['wait_confirm']; ?></strong></a></li>
 		        </ul>
 		      </div>
@@ -343,6 +349,7 @@
 </div>
 
 <div id="footer">
+<!-- 
   <p><a href="/">首页</a>
                 | <a  href="#">招聘英才</a>
                 | <a  href="#">合作及洽谈</a>
@@ -351,8 +358,9 @@
                 | <a  href="#">物流自取</a>
                 | <a  href="#">友情链接</a>
   </p>
-  Copyright 2017 <a href="" target="_blank">掌心商城</a> All rights reserved.<br />本演示来源于
-  <a href="#" target="_blank">掌心商城</a>  
+   -->
+  Copyright 2017 <a href="" target="_blank">趣喝茶</a> All rights reserved.<br />
+  <a href="#" target="_blank">趣喝茶</a>  
 </div>
 <script type="text/javascript" src="__PUBLIC__/static/js/jquery.cookie.js"></script>
 <link href="__PUBLIC__/static/js/perfect-scrollbar.min.css" rel="stylesheet" type="text/css">

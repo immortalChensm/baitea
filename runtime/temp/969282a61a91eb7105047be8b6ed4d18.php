@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:1:{s:50:"./application/admin/view2/goods\ajaxGoodsList.html";i:1522060895;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:1:{s:50:"./application/admin/view2/goods\ajaxGoodsList.html";i:1528701128;}*/ ?>
 <table>
        <tbody>
        <?php if(empty($goodsList) || (($goodsList instanceof \think\Collection || $goodsList instanceof \think\Paginator ) && $goodsList->isEmpty())): ?>
@@ -21,10 +21,28 @@
                   <div style="text-align: left; width: 100px;"><?php echo $list['goods_sn']; ?></div>
                 </td>
                 <td align="center" axis="col0">
-                  <div style="text-align: center; width: 200px;"><?php echo $catList[$list[cat_id2]][name]; ?></div>
+                  <div style="text-align: center; width: 200px;">
+                  <?php if(!(empty($catList[$list[cat_id2]][name]) || (($catList[$list[cat_id2]][name] instanceof \think\Collection || $catList[$list[cat_id2]][name] instanceof \think\Paginator ) && $catList[$list[cat_id2]][name]->isEmpty()))): ?>
+                  	<?php echo $catList[$list[cat_id2]][name]; else: if($list['is_crowd_goods'] == 1): ?>
+          			众筹
+          			<?php elseif($list['is_auction_goods'] == 1): ?>
+          			
+          			拍品
+           				
+           			<?php endif; endif; ?>
+                  </div>
                 </td>
                 <td align="center" axis="col0">
-                  <div style="text-align: center; width: 50px;"><?php echo $list['shop_price']; ?></div>
+                  <div style="text-align: center; width: 50px;">
+                  	<?php if($list['is_crowd_goods'] == 1): ?>
+          			
+           				<span>&yen;<?php echo round($list['crowdfunding_money'],2); ?></span>
+           			<?php else: ?>
+           				<span>&yen;<?php echo round($list['shop_price'],2); ?></span>
+           			<?php endif; ?>
+                  	
+                  
+                  </div>
                 </td>
                 <td align="center" axis="col0">
                   <div style="text-align: center; width: 50px;"><?php echo $list['store_count']; ?></div>
@@ -61,7 +79,10 @@
                 </td>-->
                 <td align="center" axis="col0">
                   <div style="text-align: center; width: 60px;">
-                        <?php if($list[is_on_sale] == 0): ?>下架<?php endif; if($list[is_on_sale] == 1): ?>出售中<?php endif; if($list[is_on_sale] == 2): ?>违规下架<?php endif; ?>
+                        <?php if($list[is_on_sale] == 0): ?>下架<?php endif; ?>
+                        <if condition="$list[is_auction_goods] eq 1">
+                        
+                        <?php if($list[is_on_sale] == 1): ?>出售中<?php endif; if($list[is_on_sale] == 2): ?>违规下架<?php endif; ?>
                   </div>
                 </td>    
                 <td align="center" axis="col0">

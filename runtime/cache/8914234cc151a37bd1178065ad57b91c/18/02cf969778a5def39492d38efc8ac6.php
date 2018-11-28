@@ -1,3 +1,0 @@
-<?php
-//000000000000[{"id":3432,"name":"\u5e02\u8f96\u533a"},{"id":3433,"name":"\u957f\u6cbb\u5e02\u57ce\u533a"},{"id":3445,"name":"\u957f\u6cbb\u5e02\u90ca\u533a"},{"id":3454,"name":"\u957f\u6cbb\u53bf"},{"id":3466,"name":"\u8944\u57a3\u53bf"},{"id":3478,"name":"\u5c6f\u7559\u53bf"},{"id":3493,"name":"\u5e73\u987a\u53bf"},{"id":3506,"name":"\u9ece\u57ce\u53bf"},{"id":3516,"name":"\u58f6\u5173\u53bf"},{"id":3530,"name":"\u957f\u5b50\u53bf"},{"id":3543,"name":"\u6b66\u4e61\u53bf"},{"id":3558,"name":"\u6c81\u53bf"},{"id":3572,"name":"\u6c81\u6e90\u53bf"},{"id":3587,"name":"\u6f5e\u57ce\u5e02"}]
-?>

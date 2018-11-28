@@ -30,7 +30,7 @@ class Index extends Base
 //             }
 //         }
 
-        $web_list = S('web_index_data');
+        /*$web_list = S('web_index_data');
         if(!$web_list){
         	$web_list = M('web')->where(array('web_show'=>1))->order('web_sort')->select();
         	if($web_list){
@@ -47,7 +47,9 @@ class Index extends Base
         	}
         }
         $this->assign('web_list', $web_list);
-        return $this->fetch();
+        return $this->fetch();*/
+        
+        $this->redirect("admin/Index/index");
     }
 
     /**

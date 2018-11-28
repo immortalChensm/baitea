@@ -1,3 +1,0 @@
-<?php
-//000031104000[{"id":848,"name":"\u8336\u53f6","mobile_name":"","parent_id":0,"parent_id_path":"0_848","level":1,"sort_order":1,"is_show":1,"image":"","is_hot":0,"cat_group":0,"commission":0,"commission_rate":0,"type_id":0},{"id":849,"name":"\u8336\u5177","mobile_name":"","parent_id":0,"parent_id_path":"0_849","level":1,"sort_order":2,"is_show":1,"image":"","is_hot":0,"cat_group":0,"commission":0,"commission_rate":0,"type_id":0}]
-?>

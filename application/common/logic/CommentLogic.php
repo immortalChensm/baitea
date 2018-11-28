@@ -194,6 +194,49 @@ class CommentLogic extends Model
     }  
     
     /**
+     * 添加商品和服务评价  批量性评价
+     * @param array $data 评论相关数据
+     * @return type|array|bool
+     */
+    public function addGoodsAndServiceCommentlist($data)
+    {
+        // 晒图片
+        $img = $this->uploadCommentImgFile('comment_img_file');
+        if ($img['status'] !== 1) {
+            return $img;
+        }
+        $add['store_id']    = $data['store_id'];
+        $add['rec_id']      = $data['rec_id'];
+        $add['goods_id']    = $data['goods_id'] ?: 0;
+        $add['order_id']    = $data['order_id'] ?: 0;
+        $add['user_id']     = $data['user_id'] ?: 0;
+        $add['goods_rank']  = $data['goods_rank'] ?: 0;
+        $add['content']     = $data['content'] ?: '';
+        $add['img']         = $img['result'] ? serialize($img['result']) : ($data['img'] ? serialize($data['img']) : ''); //兼顾小程序图片上传
+        $add['add_time']    = time();
+        $add['ip_address']  = getIP();
+        $add['is_anonymous'] = $data['is_anonymous'] ? 1 : 0;
+        $add['spec_key_name'] = $data['spec_key_name'] ?: '';
+        $add['impression']  = $data['impression'] ?: '';
+        $add['zan_num']     = 0;
+        $add['reply_num']   = 0;
+        $add['parent_id']   = 0;
+    
+        //添加评论
+        $return = $this->addGoodsComment($add);
+        if ($return['status'] != 1) {
+            //return $return;
+        }
+    
+        //添加服务评论
+        if ($data['seller_score'] && $data['logistics_score'] &&  $data['describe_score']) {
+            $return = $this->addServiceComment($data['user_id'], $data['order_id'], $data['store_id'], $data['seller_score'], $data['logistics_score'], $data['describe_score']);
+        }
+    
+        //return $return;
+    }
+    
+    /**
      * 获取服务评论（目前是未评论列表）
      * @param type $user_id
      */

@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:41:"./application/admin/view2/user\index.html";i:1522810661;s:44:"./application/admin/view2/public\layout.html";i:1517208468;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:41:"./application/admin/view2/user\index.html";i:1522810661;s:44:"./application/admin/view2/public\layout.html";i:1525742439;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -129,7 +129,7 @@ function selectAll(name,obj){
 
 function get_help(obj){
 	
-	window.open("http://www.tp-shop.cn/");
+	
 	return false;
 	
     layer.open({

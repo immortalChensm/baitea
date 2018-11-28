@@ -1,0 +1,124 @@
+<table class="ncsc-default-table order">
+  <thead>
+    <tr>
+      <th class="w10"></th>
+      <th colspan="2">商品</th>
+      <th class="w100">单价（元）</th>
+      <th class="w40">数量</th>
+      <th class="w100">买家</th>
+      <th class="w100">订单金额</th>
+      <th class="w90">交易状态</th>
+      <th class="w120">交易操作</th>
+    </tr>
+  </thead>
+  <if condition="empty($crowdlist) eq true">
+  	<tbody>
+  		<tr>
+      		<td colspan="20" class="norecord"><div class="warning-option"><i class="icon-warning-sign"></i><span>暂无符合条件的数据记录</span></div></td>
+    	</tr>
+      </tbody>
+  <else/> 
+  <volist name="crowdlist" id="list">  
+  <tbody>
+    <tr>
+      <td colspan="20" class="sep-row"></td>
+    </tr>
+    <tr>
+      <th colspan="20">
+      		<!--
+      		<span class="ml10">订单编号：<em>{$list.order_sn}</em></span>
+		  	<span>下单时间：<em class="goods-time">{$list.add_time|date='Y-m-d H:i',###}</em></span>
+		  	<span>订单状态：<em class="goods-time">{$Think.config.ORDER_STATUS[$list[order_status]]}</em></span>
+      		<span class="fr mr10"><a href="{:U('Crowdorder/order_print',array('order_id'=>$list['order_id'],'template'=>'picking'))}" target="_blank" class="ncbtn-mini" title="打印配货单"><i class="icon-print"></i>打印配货单</a></span>
+      		  -->
+      		<span>众筹目标：{$crowdImage[$list['goods_id']]['crowdfunding_money']}</span>
+      		<span>认筹金额：
+      		<if condition="$crowdMoney[$list['goods_id']] gt 0">
+      			{$crowdMoney[$list['goods_id']]}
+      			<else/>
+      			0
+      		</if>
+      		</span>
+      		<span>距认筹结束时间：{$crowdImage[$list['goods_id']]['crowd_end_format']}</span>
+      		<span>支持的订单数量：{:count($list.orderinfo)}</span>
+       </th>
+    </tr>
+ 
+    
+    <volist name="list.orderinfo" id="good" key='k'>
+   
+     	<!--  第一行 -->
+     	<tr>
+	      <td class="bdl"></td>
+	      
+	      <td class="w70">
+	      <div class="ncsc-goods-thumb"><a href="{$crowdImage[$list['goods_id']]['original_img']}" target="_blank"><img src="{$crowdImage[$list['goods_id']]['original_img']}"  ></a></div></td>
+	      <td class="tl">
+	      	<dl class="goods-name">
+	          <dt><a target="_blank" href="{$crowdImage[$list['goods_id']]['original_img']}">{$list['goods_name']}</a></dt>
+	        </dl>
+	      </td>
+	      
+	      
+	      <td><p>{$list['goods_price']}</p></td>
+	      
+	      <td>{$list['goods_num']}</td>
+	      
+	      <!-- S 合并TD -->
+	      <td class="bdl" rowspan="{$goodsArr[$list['order_id']]|count}">
+	      	<div class="buyer">{$good.consignee} <p member_id="5"></p>
+	          <div class="buyer-info"> <em></em>
+	            <div class="con">
+	              <h3><i></i><span>联系信息 </span></h3>
+	              <dl>
+	                <dt>姓名：</dt>
+	                <dd>{$good.consignee}</dd>
+	              </dl>
+	              <dl>
+	                <dt>电话：</dt>
+	                <dd>{$good.mobile}</dd>
+	              </dl>
+	              <dl>
+	                <dt>地址：</dt>
+	                <dd>{$good.address}</dd>
+	              </dl>
+	            </div>
+	          </div>
+	        </div>
+	      </td>
+	      <td class="bdl" rowspan="{$goodsArr[$list['order_id']]|count}">
+	      	<p class="ncsc-order-amount">{$good.total_amount}</p>
+	        <p class="goods-freight"><if condition="($good.shipping_price lt 0.01)">（免运费）<else />邮费:{$good.shipping_price}</if></p>
+	        <p class="goods-pay" title="支付方式：{$good.pay_name}">{$good.pay_name}</p>
+	      </td>
+	      <td class="bdl bdr" rowspan="{$goodsArr[$list['order_id']]|count}"><p>{$pay_status[$good[pay_status]]} </p>
+	        <!-- 物流跟踪 -->
+	        <p></p>
+	       </td>
+	      <!-- 取消订单 -->
+	      <td class="nscs-table-handle" rowspan="{$goodsArr[$list['order_id']]|count}">
+	      	<span><a href="{:U('Crowdorder/detail',array('order_id'=>$good['order_id']))}" class="ncbtn-mint"><i class="icon-search"></i><p>详情</p></a></span>
+	      	<if condition="($good['order_status'] eq 5)">
+		      	<span><a href="{:U('Crowdorder/delete_order',array('order_id'=>$good['order_id']))}" class="btn-grapefruit"><i class="icon-trash"></i><p>删除</p></a></span>
+	      	<else/>
+	      		<!--<span><a href="javascript:void(0)" onclick="layer.alert('该订单不得删除!',{icon:2});" class="btn-grapefruit"><i class="icon-trash"></i><p>删除</p></a></span>-->
+	      	</if>
+	        </td>
+	    </tr>
+   
+    </volist>
+   </tbody> 
+   </volist>
+  <tfoot>
+  	<tr>
+		<td colspan="20">{$page}</td>
+	</tr>
+   </tfoot>
+  </if>
+</table>
+ <script>
+    $(".pagination  a").click(function(){
+        var page = $(this).data('p');
+        ajax_get_table('search-form2',page);
+    });
+</script>

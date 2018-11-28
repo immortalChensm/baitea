@@ -11,7 +11,8 @@
 	      	<th>会员id</th>
 	      	<th>会员名称</th>
 	      	<th class="w210">关注时间</th>
-	      	<th>操作</th>
+	      	<!-- 
+	      	<th>操作</th> -->
 	    </tr>
 		<tr>
 			<td class="tc"><input type="checkbox" id="all" class="checkall" onclick="$('input[name*=\'user_id\']').prop('checked', this.checked);"/></td>
@@ -35,7 +36,9 @@
 	      	<td class="">{$vo.user_id}</td>
 	      	<td class="">{$vo.user_name}</td>
 	      	<td class="">{$vo.add_time|date='Y-m-d H:i:s',###}</td>
+	      	<!-- 
 	      	<td class="nscs-table-handle"><a onclick="send_message({$vo.user_id});" class="ncbtn ncbtn-aqua"><p>活动通知</p></a></td>
+	      	  -->
 	    </tr>
 	  </foreach>
 	  </empty>

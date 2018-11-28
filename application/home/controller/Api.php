@@ -212,17 +212,23 @@ class Api extends Base
         }
     }
     
-    //创蓝的短信接口
+    /**
+     * 注册时要发送的验证码
+     * 仅聚合接口集成
+     * **/
     public function send_phone_code()
     {
     
         
             $mobile = I('mobile');
+            $scene =  I("scene");
+            
             //判断是否存在验证码
             $data = M('sms_log')->where(array('mobile' => $mobile, 'status'=>1))->order('id DESC')->find();
             //获取时间配置
             $sms_time_out = tpCache('sms.sms_time_out');
-            $sms_time_out = $sms_time_out ? $sms_time_out : 120;
+            $sms_time_out = $sms_time_out ? $sms_time_out : 300;
+            //echo $sms_time_out;
             //120秒以内不可重复发送
             if ($data && (time() - $data['add_time']) < $sms_time_out) {
                 ajaxReturn(array('status' => -1, 'msg' => $sms_time_out . '秒内不允许重复发送'));
@@ -248,7 +254,7 @@ class Api extends Base
                  D('SmsLog')->add($smsdata);
                  */
                 //发送记录存储数据库
-                $msg = "您的验证码是{$code}，3分钟内有效。如非本人操作，请忽略此短信。";
+                /*$msg = "您的验证码是{$code}，3分钟内有效。如非本人操作，请忽略此短信。";
             
                 $log_id = M('sms_log')->insertGetId(array('mobile' => $mobile,'code' => $code,'add_time' => time(),'status' => 0,'msg' => $msg));
             
@@ -267,6 +273,113 @@ class Api extends Base
             } else {
                 ajaxReturn(array('status' => -1, 'msg' => '发送失败' . $result['code']));
             }
+            */
+            if($scene=='reg'){
+                $exist_mobile = \think\Db::name("users")->where("mobile",$mobile)->find();
+                if($exist_mobile['mobile']){
+                    ajaxReturn(array('status' => -1, 'msg' => '此手机号已经注册'));
+                }
+                
+            }elseif($scene=='forgotpwd'){
+                $exist_mobile = \think\Db::name("users")->where("mobile",$mobile)->find();
+                if(!$exist_mobile['mobile']){
+                    ajaxReturn(array('status' => -1, 'msg' => '手机号不存在'));
+                }
+            }elseif($scene=='editmb'){
+                $exist_mobile = \think\Db::name("users")->where("mobile",$mobile)->find();
+                if($exist_mobile['mobile']){
+                    ajaxReturn(array('status' => -1, 'msg' => '此手机号已存在'));
+                }
+            }
+            /*
+            $msg = urlencode("#code#={$code}");
+            header('content-type:text/html;charset=utf-8');
+            
+            $sendUrl = 'http://v.juhe.cn/sms/send'; //短信接口的URL
+            
+            $smsConf = array(
+                'key'   => '399102f1109ffcd4b405650e074e4847', //您申请的APPKEY
+                'mobile'    => $mobile, //接受短信的用户手机号码
+                'tpl_id'    => '74139', //您申请的短信模板ID，根据实际情况修改
+                'tpl_value' =>$msg, //您设置的模板变量，根据实际情况修改
+                'dtype'=>'json'
+            );
+            */
+            $msg = "您的验证码为：${code},该验证码5分种内有效";
+            $log_id = M('sms_log')->insertGetId(array('mobile' => $mobile,'code' => $code,'add_time' => time(),'status' => 0,'msg' => $msg));
+            
+            /******阿里云短信**************/
+            include_once './vendor/aliyun-php-sdk-core/Config.php';
+            include_once './vendor/Dysmsapi/Request/V20170525/SendSmsRequest.php';
+            
+            $accessKeyId = 'LTAIJD3P8azAO0oh';
+            $accessKeySecret = 'J6HmGBwn0NbqJ8kwyPSsPCWams0Y9g';
+            
+            //短信API产品名
+            $product = "Dysmsapi";
+            //短信API产品域名
+            $domain = "dysmsapi.aliyuncs.com";
+            //暂时不支持多Region
+            $region = "cn-hangzhou";
+            
+            //初始化访问的acsCleint
+            $profile = \DefaultProfile::getProfile($region, $accessKeyId, $accessKeySecret);
+            \DefaultProfile::addEndpoint("cn-hangzhou", "cn-hangzhou", $product, $domain);
+            $acsClient= new \DefaultAcsClient($profile);
+            
+            $request = new \Dysmsapi\Request\V20170525\SendSmsRequest;
+            //必填-短信接收号码
+            $request->setPhoneNumbers($mobile);
+            //必填-短信签名
+            $request->setSignName('趣喝茶app');
+            //必填-短信模板Code
+            $request->setTemplateCode('SMS_134316014');
+            //选填-假如模板中存在变量需要替换则为必填(JSON格式)
+            $request->setTemplateParam(json_encode(array(  // 短信模板中字段的值
+            "code"=>$code,
+            ), JSON_UNESCAPED_UNICODE));
+            //选填-发送短信流水号
+            //$request->setOutId("1234");
+            
+            //发起访问请求
+            $resp = $acsClient->getAcsResponse($request);
+            
+            //短信发送成功返回True，失败返回false
+            if ($resp && $resp->Code == 'OK') {
+                //return array('status' => 1, 'msg' => $resp->Code);
+                M('sms_log')->where(array('mobile'=>$mobile,'status' => 0))->save(array('status' => 1));
+                ajaxReturn(array('status' => 1, 'msg' => "短信发送成功"));
+            } else {
+                ajaxReturn(array('status' => -1, 'msg' => $resp->Message . ' subcode:' . $resp->Code));
+            }
+            /******阿里云短信**************/
+            
+           
+            
+            //$content = juhecurl($sendUrl,$smsConf,1); //请求发送短信
+            /*
+            if($content){
+                $result = json_decode($content,true);
+               
+                $error_code = $result['error_code'];
+                if($error_code == 0){
+                    //状态为0，说明短信发送成功
+                    //echo "短信发送成功,短信ID：".$result['result']['sid'];
+                    M('sms_log')->where(array('mobile'=>$mobile,'status' => 0))->save(array('status' => 1));
+                    ajaxReturn(array('status' => 1, 'msg' => "短信发送成功,短信ID：".$result['result']['sid']));
+                }else{
+                    //状态非0，说明失败
+                    $msg = $result['reason'];
+                    //echo "短信发送失败(".$error_code.")：".$msg;
+                    ajaxReturn(array('status' => -1, 'msg' => "短信发送失败(".$error_code.")：".$msg));
+                }
+            }else{
+                //返回内容异常，以下可根据业务逻辑自行修改
+                ajaxReturn(array('status' => -1, 'msg' => '发送失败'));
+            }
+            */
+            
+            
                 
         
     }

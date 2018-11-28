@@ -390,11 +390,11 @@
         
         
          //登录接口
-          $url = "www.liketea.com/index.php/api/User/login";
+          $url = "http://www.liketea.com/index.php/api/User/login";
           
           $data = [
             'username'=>'18896871476',
-            'password'=>'123456'
+            'password'=>'654321'
             
           ];
           

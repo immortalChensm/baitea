@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:4:{s:49:"./application/seller/new/store\store_collect.html";i:1517208469;s:41:"./application/seller/new/public\head.html";i:1522050654;s:41:"./application/seller/new/public\left.html";i:1517208469;s:41:"./application/seller/new/public\foot.html";i:1517208469;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:4:{s:49:"./application/seller/new/store\store_collect.html";i:1526346592;s:41:"./application/seller/new/public\head.html";i:1528699444;s:41:"./application/seller/new/public\left.html";i:1517208469;s:41:"./application/seller/new/public\foot.html";i:1525943636;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -22,6 +22,8 @@
 <script type="text/javascript" src="__PUBLIC__/js/myAjax.js"></script>
 <script type="text/javascript" src="__PUBLIC__/js/myFormValidate.js"></script>
 <script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate.js"></script>
+<script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate_new.js"></script>
+<script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate_hoursmin.js"></script>
 <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!--[if lt IE 9]>
       <script src="__PUBLIC__/static/js/html5shiv.js"></script>
@@ -127,7 +129,8 @@
 	      	<th>会员id</th>
 	      	<th>会员名称</th>
 	      	<th class="w210">关注时间</th>
-	      	<th>操作</th>
+	      	<!-- 
+	      	<th>操作</th> -->
 	    </tr>
 		<tr>
 			<td class="tc"><input type="checkbox" id="all" class="checkall" onclick="$('input[name*=\'user_id\']').prop('checked', this.checked);"/></td>
@@ -150,7 +153,9 @@
 	      	<td class=""><?php echo $vo['user_id']; ?></td>
 	      	<td class=""><?php echo $vo['user_name']; ?></td>
 	      	<td class=""><?php echo date('Y-m-d H:i:s',$vo['add_time']); ?></td>
+	      	<!-- 
 	      	<td class="nscs-table-handle"><a onclick="send_message(<?php echo $vo['user_id']; ?>);" class="ncbtn ncbtn-aqua"><p>活动通知</p></a></td>
+	      	  -->
 	    </tr>
 	  <?php endforeach; endif; else: echo "" ;endif; endif; ?>
 	  </tbody>
@@ -173,6 +178,7 @@
 </div>
 
 <div id="footer">
+<!-- 
   <p><a href="/">首页</a>
                 | <a  href="#">招聘英才</a>
                 | <a  href="#">合作及洽谈</a>
@@ -181,8 +187,9 @@
                 | <a  href="#">物流自取</a>
                 | <a  href="#">友情链接</a>
   </p>
-  Copyright 2017 <a href="" target="_blank">掌心商城</a> All rights reserved.<br />本演示来源于
-  <a href="#" target="_blank">掌心商城</a>  
+   -->
+  Copyright 2017 <a href="" target="_blank">趣喝茶</a> All rights reserved.<br />
+  <a href="#" target="_blank">趣喝茶</a>  
 </div>
 <script type="text/javascript" src="__PUBLIC__/static/js/jquery.cookie.js"></script>
 <link href="__PUBLIC__/static/js/perfect-scrollbar.min.css" rel="stylesheet" type="text/css">

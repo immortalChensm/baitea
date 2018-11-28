@@ -76,7 +76,7 @@ function convert_arr_key($arr, $key_name)
 	return $arr2;
 }
 
-function encrypt($str){
+function encrypts($str){
 	return md5(C("AUTH_CODE").$str);
 }
             
@@ -122,6 +122,8 @@ function parse_url_param($str){
  * @param $keys
  * @param string $type
  * @return array
+ * 注意：排序的一维键下标必须是字符不可以是数字　　二维也必须是字符
+ * 总之必须是关联数组　不可以是索引数组
  */
 function array_sort($arr, $keys, $type = 'desc')
 {
@@ -467,7 +469,6 @@ function httpRequest($url, $method="GET", $postfields = null, $headers = array()
         print_r($response);
     }
     curl_close($ci);
-    //print_r($requestinfo);
     return $response;
 	//return array($http_code, $response,$requestinfo);
 }

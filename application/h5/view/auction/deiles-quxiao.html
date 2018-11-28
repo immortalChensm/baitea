@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>去喝茶</title>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/aui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/mobile.css">
+    <script src="/public/__STATIC__/h5/js/jquery.min.js"></script>
+</head>
+<body>
+<!-- 
+<header>
+    <a class="head-icon">
+        <div class="icon-return"></div>
+    </a>
+    <div class="head-words">
+        订单详情
+    </div>
+    <a class="head-empty"></a>
+</header>
+ -->
+ 
+<div class="main main-fill-bottom">
+    <div class="f-order-nopay">
+        <div class="m-top">
+            <div class="a-content">
+                <div class="a-t"><span>{$order.user.username}</span><span>{$order.user.mobile}</span></div>
+                <div class="a-b">{$order.user_address}</div>
+            </div>
+            <div class="a-icon"></div>
+        </div>
+        <div class="m-person-info">
+            <div class="a-nav">
+                <div class="a-l" style="background-image: url({:substr($order.tea_art.teart_headimg,1)})"></div>
+                <div class="a-r">
+                    <div class="a-t">{$order.tea_art.teart_name}</div>
+                    <div class="a-b">茶艺师</div>
+                </div>
+            </div>
+            <ul class="a-bottom">
+                <li>服务费：￥{$order.cost}小时</li>
+                <li>服务开始时间：{$order.serviceDate[0]}</li>
+                <li>服务结束时间：{$order.serviceDate[1]}</li>
+                <li>茶艺师位置：{$order.tea_art_location}</li>
+                <li>服务距离：{$order.service_distance/1000}km</li>
+            </ul>
+        </div>
+        <div class="m-person-money">
+            <div class="a-top">
+                <span>服务费用</span><i>￥{$order.pay}</i>
+            </div>
+            <div class="a-bottom">
+                <div class="a-t">取消原因</div>
+                <textarea name="cancel_desc" data="{$order.order_id}">输入取消原因</textarea>
+            </div>
+        </div>
+        <div class="m-order-info">
+            <div class="a-text"><span>订单编号：</span>{$order.order_sn}</div>
+            <div class="a-text"><span>创建时间：</span>{:date('Y-m-d H:i:s',strtotime($order.add_time))}</div>
+            <if condition="$order.pay_time gt 0">
+             <div class="a-text"><span>付款时间：</span>{:date('Y-m-d H:i:s',strtotime($order.pay_time))}</div>
+            </if>
+            
+            <if condition="$order.cancel_time gt 0">
+             <div class="a-text"><span>取消时间：</span>{:date('Y-m-d H:i:s',strtotime($order.cancel_time))}</div>
+            </if>
+            
+            <if condition="$order.comment_time gt 0">
+             <div class="a-text"><span>评价时间：</span>{:date('Y-m-d H:i:s',strtotime($order.comment_time))}</div>
+            </if>
+        </div>
+    </div>
+</div>
+<div class="footer-type">
+     	<a onclick="contact_teart('{$order['mobile']}','{$order['qq']}')">联系茶艺师</a>
+    
+	    <if condition="$order.cancelBtn eq 1">
+	    	<a onclick="cancelOrder('{$order.order_id}')">取消订单</a>
+	    </if>
+	    
+	    <if condition="$order.payBtn eq 1">
+	    	<a onclick="payOrder('{$order.order_sn}')" class="se-1">付款</a>
+	    </if>
+	    
+	    <if condition="$order.commentBtn eq 1">
+	    	<a onclick="comment('{$order.order_id}')" class="se-1">去评价</a>
+	    </if>
+</div>
+<script>
+    $(function(){
+
+    	$("#cancel_order").click(function(e){
+    		
+    		data = new Object();
+    		data['cancel_desc'] = $(":input[name=cancel_desc]").val();
+    		data['order_id'] = $(":input[name=cancel_desc]").attr("data");
+    		
+    		$.ajax({
+    			url:"{:Url('Teaorder/cancel')}",
+    			type:'post',
+    			data:{
+    				order_id:data['order_id'],
+    				cancel_desc:data['cancel_desc'],
+    			},
+    			success:function(data){
+    				alert(data.msg);
+    			},
+    		});
+    	});
+    })
+</script>
+
+<script type="text/javascript">
+        
+        function setupWebViewJavascriptBridge(callback) {  
+            if (window.WebViewJavascriptBridge) {  
+                callback(WebViewJavascriptBridge)  
+            } else {  
+                document.addEventListener('WebViewJavascriptBridgeReady' , function() {  
+                    callback(WebViewJavascriptBridge)  
+                }, false );  
+            }  
+
+            // =====以下是iOS必须的特殊处理========  
+            if (window.WVJBCallbacks) { return window.WVJBCallbacks.push(callback); }  
+            window.WVJBCallbacks = [callback];  
+            var WVJBIframe = document.createElement('iframe');  
+            WVJBIframe.style.display = 'none';  
+            WVJBIframe.src = 'wvjbscheme://__BRIDGE_LOADED__';  
+            document.documentElement.appendChild(WVJBIframe);  
+            setTimeout(function() { document.documentElement.removeChild(WVJBIframe) }, 0);  
+            // =====以上是iOS必须的特殊处理========  
+        }
+
+          // 固定写法2 函数名字与1保持一致  
+            setupWebViewJavascriptBridge(function(bridge) {  
+                // Java 注册回调函数，第一次连接时调用 初始化函数  
+                 bridge.init();  
+            });
+        //联系茶艺师
+       function contact_teart(mobile,qq){
+    	   
+    	   /*WebViewJavascriptBridge.callHandler(
+                   'payOrder'
+                   , ordersn
+                   , function(responseData) {
+                       //document.getElementById("show").innerHTML = "send get responseData from java, data = " + responseData
+                   }
+          );*/
+    	   data = {};
+           data['qq'] = qq;
+           data['mobile'] = mobile;
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('contact_teart',  
+                    		data,  
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+           
+    	   
+       }
+      
+        
+       //付款
+       function payOrder(ordersn){
+    	   
+    	   /*WebViewJavascriptBridge.callHandler(
+                   'payOrder'
+                   , ordersn
+                   , function(responseData) {
+                       //document.getElementById("show").innerHTML = "send get responseData from java, data = " + responseData
+                   }
+          );*/
+    	  
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('payOrder',  
+                    		ordersn,  
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+           
+    	   
+       }
+       
+       
+       //取消订单
+       function cancelOrder(order_id){
+    	   
+    	   /*WebViewJavascriptBridge.callHandler(
+                   'payOrder'
+                   , ordersn
+                   , function(responseData) {
+                       //document.getElementById("show").innerHTML = "send get responseData from java, data = " + responseData
+                   }
+          );*/
+    	  
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('cancelOrder',  
+                    		order_id,  
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+           
+    	   
+       }
+       
+</script>
+
+
+</body>
+</html>

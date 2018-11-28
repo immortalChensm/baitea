@@ -310,4 +310,166 @@ class Index extends Base {
         $data = M('region')->field('id,name')->where("parent_id", $parent_id)->select();
         $this->ajaxReturn(['status' => 1, 'msg' => '获取成功', 'result' => $data]);
     }
+    
+    //app端首页数据
+    //@wroteby jackcsm
+    public function app_home(\app\common\logic\Teacomment $tea)
+    {
+        $ad = M("ad")->where("pid",1)->select();
+        $sort = "score";
+        //人气茶艺师列表
+        $list = M("tea_art")->order("add_time")->where("teart_state",2)->select();
+       
+        $teartId = [];
+        foreach ($list as $k=>$v){
+            
+            $teartId[] = $v['teart_id'];
+        }
+        if($sort=='score'){
+            //获取评综合评分
+            $star = $tea->getcomment($teartId);
+            $subscribe = $this->subscribe_teart($teartId);
+            foreach ($list as $k=>$v){
+                $list[$k]['star'] = $star[$v['teart_id']];
+                $list[$k]['subscribe'] = $subscribe[$v['teart_id']];
+                
+             
+            }
+            $ret = [];
+            foreach ($list as $k=>$v){
+                $ret[$k.'a'] = $v;
+            }
+            //评分由高到低
+            $ret = array_sort($ret,'star','desc');
+            $TeaArt = [];
+            foreach ($ret as $k=>$v){
+                $TeaArt['list'][] = $v;
+            }
+        }
+        
+        //人气茶馆
+
+        $sort_tea = I('sort','score');
+         
+        $user_location = I('location');
+        
+        $shoplist = \think\Db::name("store_entry")->field("store_id")->select();
+        $store_id = [];
+        foreach ($shoplist as $k=>$v){
+            $store_id[] = $v['store_id'];
+        }
+        //print_r($store_id);
+        //获取茶馆　　默认按评分来处理
+        $store_list = M('Store')->alias("s")
+                            ->field('
+                            s.store_name,
+                            s.store_zy,
+                            s.store_id,
+                            s.store_desccredit,
+                            s.store_servicecredit,
+                            s.store_deliverycredit,
+                            s.longitude,
+                            s.latitude,
+                            s.store_slide,
+                            s.mb_slide,
+                            s.store_address,
+                            se.shop_address,
+                            se.shop_longitude,
+                            se.shop_latitude
+                            ')
+                            ->join("__STORE_ENTRY__ se","s.store_id=se.store_id","LEFT")
+                            ->whereIn("s.store_id",$store_id)
+                            ->where("s.store_state",1)  //开启中的店铺
+                            ->where("deleted",0)
+                            ->fetchSql(false)
+                            ->select();
+ 
+        if($sort_tea=='score'){
+            foreach ($store_list as $k=>$v){
+                 
+                $temp = round(($v['store_desccredit']+$v['store_servicecredit']+$v['store_deliverycredit'])/3,1);
+                 
+                $store_list[$k]['score'] = $temp;
+                
+                
+            }
+            $store = [];
+            $location = [];
+            foreach ($store_list as $k=>$v){
+                $location[$v['store_id']] = [
+                    'longitude'=>($v['shop_longitude']?$v['shop_longitude']:$v['longitude']),
+                    'latitude'=>($v['shop_latitude']?$v['shop_latitude']:$v['latitude']),
+                ];
+            }
+            //用户没有登录的话无法计算距离的
+            $distance = $this->getstoredistance($location);
+            foreach ($store_list as $k=>$v){
+                $temp = explode(",", $v['mb_slide']);
+                $store_list[$k]['store_bglist'] = $temp;
+                
+                $store_list[$k]['distance'] = is_null($distance)?'0':$distance[$v['store_id']];
+            }
+            foreach ($store_list as $k=>$v){
+                $store[$k.'a'] =$v;
+            }
+            
+            $storeList = [];
+            foreach ($store as $k=>$v){
+                $storeList['list'][] = $v;
+            }
+        }
+        $store = array_sort($store,'score','desc');
+        $json = ['status' => 1, 'msg' => '获取成功', 'result' => ['ad'=>$ad,'tea_art'=>$TeaArt,'store'=>$storeList]];
+        $this->ajaxReturn($json);
+    }
+    //获取当前用户距离茶馆的距离　　如果用户不登录则为0
+    private function getstoredistance($location)
+    {
+        $longitude = I("longitude");
+        $latitude  = I("latitude");
+        //未登录时
+        if(Isempty([$latitude,$longitude])){
+            return null;
+        }
+        $dis = '';
+        foreach ($location as $k=>$v){
+            if($v['longitude']&&$v['latitude']){
+    
+                $temp = caldistance($longitude, $latitude, $v['longitude'], $v['latitude']);
+                $dis[$k] = $temp['results'][0]['distance']?:0;
+            }else{
+                $dis[$k] = 0;
+            }
+    
+        }
+        return $dis;
+    }
+    
+    //判断当前用户是否关注这些茶艺师
+    private function subscribe_teart($teartId)
+    {
+        if(empty($this->user_id))return false;
+        /* 
+        $list = \think\Db::name("teart_collect")->where(function($query)use($teartId){
+            $query->whereIn("teart_id",$teartId);
+        })->select();
+        
+        $sub = [];
+        foreach ($list as $k=>$v){
+            if($this->user_id==$v['user_id']){
+                $sub[$v['user_id'].$v['teart_id']] = '1';
+            }else{
+                $sub[$v['user_id'].$v['teart_id']] = '2';
+            }
+        }
+        return $sub;
+        */
+        $list = \think\Db::name("teart_collect")->whereIn("user_id",$this->user_id)->select();
+        
+        $sub = [];
+        foreach ($list as $k=>$v){
+            $sub[$v['teart_id']] = "1";
+        }
+        return $sub;
+    }
 }

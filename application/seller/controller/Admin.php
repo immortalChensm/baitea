@@ -25,6 +25,7 @@ class Admin extends Base
 
     public function index()
     {
+        
         $list = array();
         $keywords = I('keywords');
         if (empty($keywords)) {
@@ -157,7 +158,7 @@ class Admin extends Base
                 		exit(json_encode(array('status' => 0, 'msg' => '店铺已到期自动关闭，请联系平台客服')));
                 	}
                 	
-                    $user_where = array('user_id' => $seller['user_id'],'password' => encrypt($password));
+                    $user_where = array('user_id' => $seller['user_id'],'password' => encrypts($password));
                     $user = M('users')->where($user_where)->find();
                     if ($user) {
                         if ($seller['is_admin'] == 0 && $seller['enabled'] == 1) {

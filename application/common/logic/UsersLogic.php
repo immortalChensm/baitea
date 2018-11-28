@@ -39,7 +39,7 @@ class UsersLogic extends Model
         $user = Db::name('users')->where("mobile='{$username}' OR email='{$username}'")->find();
         if (!$user) {
             $result = array('status' => -1, 'msg' => '账号不存在!');
-        } elseif (encrypt($password) != $user['password']) {
+        } elseif (encrypts($password) != $user['password']) {
             $result = array('status' => -2, 'msg' => '密码错误!');
         } elseif ($user['is_lock'] == 1) {
             $result = array('status' => -3, 'msg' => '账号异常已被锁定！！！');
@@ -70,7 +70,7 @@ class UsersLogic extends Model
         $user = Db::name('users')->where("mobile='{$username}' OR email='{$username}'")->find();
         if (!$user) {
             $result = array('status' => -1, 'msg' => '账号不存在!');
-        } elseif (encrypt($password) != $user['password']) {
+        } elseif (encrypts($password) != $user['password']) {
             $result = array('status' => -2, 'msg' => '密码错误!');
         } elseif ($user['is_lock'] == 1) {
             $result = array('status' => -3, 'msg' => '账号异常已被锁定！！！');
@@ -383,7 +383,8 @@ class UsersLogic extends Model
         if (check_mobile($username)) {
             $is_validated = 1;
             $map['mobile_validated'] = 1;
-            $map['nickname'] = $map['mobile'] = $username; //手机注册
+            //$map['nickname'] = $map['mobile'] = $username; //手机注册
+            $map['mobile']  = $username;
         }
 
         if (!empty($nickname)) {
@@ -407,7 +408,7 @@ class UsersLogic extends Model
         if (get_user_info($username, 1) || get_user_info($username, 2))
             return array('status' => -1, 'msg' => '账号已存在', 'result' => '');
 
-        $map['password'] = encrypt($password);
+        $map['password'] = encrypts($password);
         $map['reg_time'] = time();
 
         //邀请码
@@ -748,9 +749,10 @@ class UsersLogic extends Model
         $page = new Page($count, 10);
         $show = $page->show();
         //获取我的收藏列表
-        $sql = "SELECT c.collect_id,c.add_time,g.goods_id,g.cat_id3,g.goods_name,g.is_virtual,g.shop_price,g.original_img,g.is_on_sale,g.store_count,g.prom_id,g.comment_count FROM __PREFIX__goods_collect c " .
+        //get goods add is_sale_on=1
+        $sql = "SELECT c.collect_id,c.add_time,g.goods_remark,g.goods_id,g.cat_id3,g.goods_name,g.is_virtual,g.shop_price,g.original_img,g.is_on_sale,g.store_count,g.prom_id,g.comment_count FROM __PREFIX__goods_collect c " .
             "inner JOIN __PREFIX__goods g ON g.goods_id = c.goods_id " .
-            "WHERE c.user_id = " . $user_id . $where .
+            "WHERE g.is_on_sale=1 and c.user_id = " . $user_id . $where .
             " ORDER BY c.add_time DESC LIMIT {$page->firstRow},{$page->listRows}";
         $result = Db::query($sql);
         $return['status'] = 1;
@@ -827,6 +829,8 @@ class UsersLogic extends Model
         }
 
         $row = Db::name('users')->where('user_id', $user_id)->save($data);
+        //echo $row;
+        //exit();
         return $row !== false;
     }
 
@@ -924,12 +928,12 @@ class UsersLogic extends Model
             return array('status' => -1, 'msg' => '密码不能低于6位字符', 'result' => '');
         if ($new_password != $confirm_password)
             return array('status' => -1, 'msg' => '两次密码输入不一致', 'result' => '');
-        if ($user['password'] == encrypt($new_password))
+        if ($user['password'] == encrypts($new_password))
             return array('status' => -1, 'msg' => '新密码不得与旧密码相同！', 'result' => '');
         //验证原密码
-        if ($is_update && ($user['password'] != '' && encrypt($old_password) != $user['password']))
+        if ($is_update && ($user['password'] != '' && encrypts($old_password) != $user['password']))
             return array('status' => -1, 'msg' => '密码验证失败', 'result' => '');
-        $row = Db::name('users')->where("user_id", $user_id)->save(array('password' => encrypt($new_password)));
+        $row = Db::name('users')->where("user_id", $user_id)->save(array('password' => encrypts($new_password)));
         if (!$row)
             return array('status' => -1, 'msg' => '修改失败', 'result' => '');
         return array('status' => 1, 'msg' => '修改成功', 'result' => '');
@@ -949,9 +953,9 @@ class UsersLogic extends Model
             return array('status' => -1, 'msg' => '密码不能低于6位字符', 'result' => '');
         if ($new_password != $confirm_password)
             return array('status' => -1, 'msg' => '两次密码输入不一致', 'result' => '');
-        if ($user['paypwd'] == encrypt($new_password))
+        if ($user['paypwd'] == encrypts($new_password))
             return array('status' => -1, 'msg' => '新密码不得与旧密码相同！', 'result' => '');
-        $row = Db::name('users')->where("user_id", $user_id)->update(array('paypwd' => encrypt($new_password)));
+        $row = Db::name('users')->where("user_id", $user_id)->update(array('paypwd' => encrypts($new_password)));
         if (!$row) {
             return array('status' => -1, 'msg' => '修改失败', 'result' => '');
         }

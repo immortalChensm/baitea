@@ -110,7 +110,9 @@ class User extends MobileBase
         $logic = new UsersLogic();
         $data = $logic->get_account_log($this->user_id, I('get.type'));
         $account_log = $data['result'];
-
+        //print_r($user);
+        //print_r($account_log);
+        
         $this->assign('user', $user);
         $this->assign('account_log', $account_log);
         $this->assign('page', $data['show']);

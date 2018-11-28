@@ -349,12 +349,12 @@ class OrderLogic extends Model
 				$resp = sendSms("3", $sender, $params);
 			}
 			*/
-			
+			/*由于用户频繁切换短信在此无法使用
 			$store = M('store')->where("store_id = ".$k)->find();
 			$sender = (!empty($store) && !empty($store['service_phone'])) ? $store['service_phone'] : false;
 			$params = array('consignee'=>$order['consignee'] , 'mobile' => $order['mobile']);
 			$msg = "用户在".date("Y-m-d H:i",time())."在您的平台已经下单,用户电话：".$params['mobile'];
-			smsnotice($msg,$sender);
+			smsnotice($msg,$sender);*/
 		}
 
 		return array('status'=>1,'msg'=>'提交订单成功','result'=>$master_order_sn); // 返回新增的订单id
@@ -522,22 +522,21 @@ class OrderLogic extends Model
         if ((time() - $order['confirm_time']) > $confirm_time && !empty($order['confirm_time'])) {
             return ['result'=>-1,'msg'=>'已经超过' . $confirm_time_config . "天内退货时间"];
         }
-        
         $img = $this->uploadReturnGoodsImg();
         if ($img['status'] !== 1) {
             return $img;
         }
-        $data['imgs'] = $img['result'] ?: ($data['imgs'] ?: ''); //兼容小程序，多传imgs
-
+        //$data['imgs'] = $img['result'] ?: ($data['imgs'] ?: ''); //兼容小程序，多传imgs
+        //$data['imgs']
         $data['addtime'] = time();
         $data['user_id'] = $order['user_id'];
         $data['store_id'] = $order['store_id'];
+        $data['order_sn'] = $order['order_sn'];
+        
         $order_goods = M('order_goods')->where(array('rec_id'=>$rec_id))->find();
         if($data['type'] < 2){
         	//退款申请，若该商品有赠送积分或优惠券，在平台操作退款时需要追回
-        	
             $rate = round($order_goods['member_goods_price']*$data['goods_num']/$order['goods_price'],2);
-           
             if($order['order_amount']>0){
                 $data['refund_money'] = $rate*$order['order_amount'];//退款金额
                 $data['refund_deposit'] = $rate*$order['user_money'];//该退余额支付部分
@@ -559,6 +558,56 @@ class OrderLogic extends Model
         }
         return ['status'=>-1,'msg'=>'申请失败'];
     }
+    
+    
+    /**
+     * 申请售后  批量性申请退款售后服务
+     * @param $rec_id
+     * @param $order
+     */
+    public function addReturnGoodspatch($rec_id,$order,$data)
+    {
+    
+        //$data = I('post.');
+        $confirm_time_config = tpCache('shopping.auto_service_date');
+        $confirm_time = $confirm_time_config * 24 * 60 * 60;
+        if ((time() - $order['confirm_time']) > $confirm_time && !empty($order['confirm_time'])) {
+            return ['result'=>-1,'msg'=>'已经超过' . $confirm_time_config . "天内退货时间"];
+        }
+        $img = $this->uploadReturnGoodsImg();
+        if ($img['status'] !== 1) {
+            return $img;
+        }
+        $data['imgs'] = $img['result'] ?: ($data['imgs'] ?: ''); //兼容小程序，多传imgs
+        $data['addtime'] = time();
+        $data['user_id'] = $order['user_id'];
+        $data['store_id'] = $order['store_id'];
+        $order_goods = M('order_goods')->where(array('rec_id'=>$rec_id))->find();
+        if($data['type'] < 2){
+            //退款申请，若该商品有赠送积分或优惠券，在平台操作退款时需要追回
+            $rate = round($order_goods['member_goods_price']*$data['goods_num']/$order['goods_price'],2);
+            if($order['order_amount']>0){
+                $data['refund_money'] = $rate*$order['order_amount'];//退款金额
+                $data['refund_deposit'] = $rate*$order['user_money'];//该退余额支付部分
+                $data['refund_integral'] = floor($rate*$order['integral']);//该退积分支付
+            }else{
+                $data['refund_deposit'] = $rate*$order['user_money'];//该退余额支付部分
+                $data['refund_integral'] = floor($rate*$order['integral']);//该退积分支付
+            }
+        }
+        if(!empty($data['id'])){
+            $result = M('return_goods')->where(array('id'=>$data['id']))->save($data);
+        }else{
+             
+            $result = M('return_goods')->add($data);
+        }
+    
+        //if($result){
+        //    return ['status'=>1,'msg'=>'申请成功'];
+        //}
+        //return ['status'=>-1,'msg'=>'申请失败'];
+    }
+    
     
     /**
      * 删除订单

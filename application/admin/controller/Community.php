@@ -42,6 +42,7 @@ class Community extends Base {
         return $this->fetch();
     }
     
+    //帖子的列表
     public function articleList(){
         $Article =  M('ArticleTea'); 
         $res = $list = array();
@@ -58,25 +59,164 @@ class Community extends Base {
         $pager = new Page($count,$size);// 实例化分页类 传入总记录数和每页显示的记录数
         //$page = $pager->show();//分页显示输出
         $articleId = [];
+        $admin_articleId = [];
         foreach ($res as $k=>$v){
             $res[$k]['add_time'] = date("Y-m-d H:i",$v['add_time']);
-            $articleId[] = $v['id'];
+            //if($v['type']==1){
+            //    $admin_articleId[] = $v['id'];
+            //}else{
+                $articleId[] = $v['id'];
+            //}
         }
        
         $comment = \think\Db::name("article_comment")->whereIn("article_id",$articleId)->select();
         $commentNum = [];
         foreach ($comment as $k=>$v){
            
-            $commentNum[$v['article_id']][] = $v['cid'];
+            $commentNum[$v['article_id']][] = $v['user_id'];
         }
+        
+       
+        $subnum = $this->getpraise($articleId);
+        $userId = [];
         foreach ($res as $k=>$v){
-            $res[$k]['commentNum'] = count($commentNum[$v['id']]); 
+            $res[$k]['subscribe_num'] = count($subnum[$v['id']]);
+            $res[$k]['commentNum'] = count($commentNum[$v['id']]);
+            $userId[]= $v['user_id']; 
+        }
+        $user = $this->getuserinfo($userId);
+        $admin_user = $this->getadminuser($userId);
+        foreach ($res as $k=>$v){
+            if($v['type']==1){
+                $res[$k]['user'] = $admin_user[$v['user_id']];
+            }else{
+                $res[$k]['user'] = $user[$v['user_id']];
+            }
+            
         }
         $this->assign('list',$res);// 赋值数据集
         $this->assign('pager',$pager);// 赋值分页输出        
 		return $this->fetch('articleList');
     }
+    //取得后台管理员发布的帖子公告
+    public function getadminuser($admin_articleId)
+    {
+        $list = \think\Db::name("admin")->whereIn("admin_id",$admin_articleId)->select();
+        $user = [];
+        foreach ($list as $k=>$v){
+            $user[$v['admin_id']] = $v['user_name'];
+        }
+        return $user;
+    }
+
+    //添加社区公告
+    public function add_articletea()
+    {
+        if($this->request->param("act")=='edit'){
+            $info = \think\Db::name("article_tea")->where("id",$this->request->param("article_id"))->find();
+            $info['thumb'] = explode(",", $info['imglist']);
+            $this->assign("info",$info);
+        }
+        $this->assign("act",I("act"));
+        return $this->fetch("community");
+    }
     
+    public function getuserinfo($userId)
+    {
+        $list = db("users")->whereIn("user_id",$userId)->select();
+        $user = [];
+        foreach($list as $k=>$v){
+            $user[$v['user_id']] = $v['realname']?:$v['nickname'];
+        }
+        return $user;
+    }
+    //获取所有帖子的点赞数据
+    public function getpraise($articleId)
+    {
+        $list = \think\Db::name("article_teasub")->whereIn("article_id",$articleId)->where("status",1)->select();
+        $article_sub = [];
+        foreach ($list as $k=>$v){
+            $article_sub[$v['article_id']][] = $v['user_id'];
+        }
+        //print_r($articleId);
+        //print_r($article_sub);
+        return $article_sub;
+    
+    }
+    
+    //帖子详情
+    public function detail()
+    {
+        $id = I("article_id");
+        $info = \think\Db::name("article_tea")->where("id",$id)->find();
+        $info['img'] = explode(",", $info['imglist']);
+        $img = [];
+        foreach ($info['img'] as $v){
+                if($v[0]=='.'){
+                    $img[] = substr($v,1);
+                }else{
+                    $img[] = $v;
+                }
+               
+        }
+        $info['imgs'] = $img;
+        //该帖子的评论量
+        $info['commentNum'] = \think\Db::name("article_comment")->whereIn("article_id",$info['id'])->count("user_id");
+        //帖子的点赞量
+        $info['clickNum']   = \think\Db::name("article_teasub")->where(function($query)use($info){
+            $query->whereIn("article_id",$info['id'])->where("status",1);
+        })->count("user_id");
+        
+        if($info['type']==1){
+            $user = \think\Db::name("admin")->where("admin_id",$info['user_id'])->find();
+            $info['username'] = $user['user_name'];
+            
+        }else{
+            $user = \think\Db::name("users")->where("user_id",$info['user_id'])->find();
+            $info['username'] = $user['realname']?:$user['nickname'];
+        }
+       
+        
+        
+        $this->assign("info",$info);
+       
+        return $this->fetch("details");
+    }
+    
+    //评论列表
+    public function commentList(){
+        $Article =  M('ArticleComment');
+        $res = $list = array();
+        $p = empty($_REQUEST['p']) ? 1 : $_REQUEST['p'];
+        $size = empty($_REQUEST['size']) ? 20 : $_REQUEST['size'];
+    
+        $where = " 1 = 1 ";
+        $keywords = trim(I('keywords'));
+        $keywords && $where.=" and `title` like '%$keywords%' ";
+    
+    
+        $res = $Article->where($where)
+        ->alias("ac")
+        ->join("__ARTICLE_TEA__ a","a.id=ac.article_id")
+        ->join("__USERS__ u","u.user_id=ac.user_id")
+        ->order('ac.cid desc')
+        ->page("$p,$size")
+        ->select();
+         
+        $count = $Article->where($where)
+        ->alias("ac")
+        ->join("__ARTICLE_TEA__ a","a.id=ac.article_id")
+        ->join("__USERS__ u","u.user_id=ac.user_id")
+        ->order('ac.cid desc')->count("id");// 查询满足要求的总记录数
+        $pager = new Page($count,$size);// 实例化分页类 传入总记录数和每页显示的记录数
+        //$page = $pager->show();//分页显示输出
+        foreach ($res as $k=>$v){
+            $res[$k]['add_time'] = date("Y-m-d H:i",$v['add_time']);
+        }
+        $this->assign('list',$res);// 赋值数据集
+        $this->assign('pager',$pager);// 赋值分页输出
+        return $this->fetch('commentList');
+    }
     public function article(){
         $ArticleCat = new ArticleCatLogic();
  		$act = I('GET.act','add');
@@ -132,25 +272,31 @@ class Community extends Base {
         $this->ajaxReturn(['status' => 1, 'msg' => '操作成功']);
     }
     
+    
+    //帖子的删除操作
     public function aticleHandle()
     {
         $data = I('post.');
         $data['publish_time'] = strtotime($data['publish_time']);
+        $data['type'] = 1;  //表示平台发布的
+        $data['user_id'] = session("admin_id");
+       
         //$referurl = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : U('Admin/Article/articleList');
         
-        $result = $this->validate($data, 'Article.'.$data['act'], [], true);
+        $result = $this->validate($data, 'ArticleTea.'.$data['act'], [], true);
         if ($result !== true) {
             $this->ajaxReturn(['status' => 0, 'msg' => '参数错误', 'result' => $result]);
         }
-        
         if ($data['act'] == 'add') {
+            $data['imglist'] = implode(",", $data['imglist']);
             $data['click'] = mt_rand(1000,1300);
         	$data['add_time'] = time(); 
-            $r = M('article')->add($data);
+            $r = M('ArticleTea')->add($data);
         } elseif ($data['act'] == 'edit') {
-            $r = M('article')->where('article_id='.$data['article_id'])->save($data);
+            $data['imglist'] = implode(",", $data['imglist']);
+            $r = M('ArticleTea')->where('id='.$data['article_id'])->save($data);
         } elseif ($data['act'] == 'del') {
-        	$r = M('article')->where('article_id='.$data['article_id'])->delete(); 	
+        	$r = M('ArticleTea')->where('id='.$data['article_id'])->delete(); 	
         }
         
         if (!$r) {

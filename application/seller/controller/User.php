@@ -113,7 +113,7 @@ class User extends Base
      * 商家发送活动消息
      */
     public function doSendMessage()
-    {
+    {/*
         $call_back = I('call_back');//回调方法
         $type = I('post.type', 0);//个体or全体
         $seller_id = session('seller_id');
@@ -135,10 +135,42 @@ class User extends Base
             'category' => $category,
             'type' => $type
         ];
-
+        $users[] = (string)57;
         $msglogic = new \app\common\logic\MessageLogic;
         $msglogic->sendMessage($msg_data, $raw_data, $users);
         
-        exit("<script>parent.{$call_back}(1);</script>");
+        exit("<script>parent.{$call_back}(1);</script>");*/
+        $type = I('post.type', 0);//个体or全体
+        
+        $call_back = I('call_back');
+        $users = I('post.user/a');//个体id
+        
+        $category = I('post.category/d', 0); //0系统消息，1物流通知，2优惠促销，3商品提醒，4我的资产，5商城好店
+        
+        $raw_data = [
+            'title'       => I('post.title', ''),
+            'order_id'    => I('post.order_id', 0),
+            'discription' => I('post.text', ''), //内容
+            'goods_id'    => I('post.goods_id', 0),
+            'change_type' => I('post.change_type/d', 0),
+            'money'       => I('post.money/d', 0),
+            'cover'       => I('post.cover', '')
+        ];
+        $url = "http://127.0.0.1:9888/sendmsgios";
+        $url_android = "http://127.0.0.1:9888/sendmsgandroid";
+        $postData = [
+            "type"=>$type,
+            "userid"=>implode(",", $users),
+            "msg"=>$raw_data['discription']
+        ];
+        $result = json_decode(httpRequest($url,"post",$postData),true);
+        if($result['status']==1){
+            $result_android = json_decode(httpRequest($url_android,"post",$postData),true);
+            if($result_android['status']==1){
+                //$this->ajaxReturn($result);
+                exit("<script>parent.{$call_back}(1);</script>");
+            }
+        }
+        
     }
 }

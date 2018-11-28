@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>去喝茶</title>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/aui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/mobile.css">
+    <script src="/public/__STATIC__/h5/js/jquery.min.js"></script>
+</head>
+<body>
+<!--
+<header>
+    <a class="head-icon">
+        <div class="icon-return"></div>
+    </a>
+    <div class="head-words">
+        查看物流
+    </div>
+    <a class="head-empty"></a>
+</header>
+-->
+
+<div class="main">
+    <div class="f-logistics">
+        <div class="m-top">
+        
+            <div class="a-top">
+                <div class="a-img" style="background-image: url({$order.goods_imgs})">
+                	<div class="num-goods" style="position: absolute;bottom: 0;width: 100%;text-align: center;background: rgba(14, 13, 13, 0.84);">
+                        <p id="goods_num">{$order.goods_num}件商品</p>
+            		</div>
+            	</div>
+                <div class="a-right">
+                    <span></span>
+                    <i data-code="{$order.shipping_code}" data-invoice={$order.invoice_no} id="express">物流单号：{$order.shipping_name}：{$order.invoice_no}</i>
+                </div>
+            </div>
+            
+        </div>
+        <div class="m-before">
+            <div class="a-con">
+                <p>【收货地址】{$order.address}</p>
+            </div>
+        </div>
+        <div class="m-warp" id="list">
+        
+        	
+            
+            <!-- 
+            
+            <div class="a-list active">
+                <div class="a-l">
+                    <span>02-02</span>
+                    <i>12:15</i>
+                </div>
+                <div class="a-r">
+                    <span>运输中</span>
+                    <p>江苏省苏州市苏州分部</p>
+                </div>
+            </div>
+            
+            
+            
+            <div class="a-list">
+                <div class="a-l">
+                    <span>02-02</span>
+                    <i>12:15</i>
+                </div>
+                <div class="a-r">
+                    <span>已发货</span>
+                    <p>江苏省苏州市苏州分部</p>
+                </div>
+            </div>
+            <div class="a-list act-ts">
+                <div class="a-l">
+                    <span>02-02</span>
+                    <i>12:15</i>
+                </div>
+                <div class="a-r">
+                    <span>已发货</span>
+                    <p>江苏省苏州市苏州分部</p>
+                </div>
+            </div>
+            <div class="a-list act-ts">
+                <div class="a-l">
+                    <span>02-02</span>
+                    <i>12:15</i>
+                </div>
+                <div class="a-r">
+                    <span>已发货</span>
+                    <p>江苏省苏州市苏州分部</p>
+                </div>
+            </div>
+            <div class="a-list">
+                <div class="a-l">
+                    <span>02-02</span>
+                    <i>12:15</i>
+                </div>
+                <div class="a-r">
+                    <span>已发货</span>
+                    <p>江苏省苏州市苏州分部</p>
+                </div>
+            </div>
+             -->
+        </div>
+    </div>
+</div>
+<script>
+    $("body").css("background-color","#fff")
+    
+    $(function(){
+    	
+    	$.ajax({
+    		type:'post',
+    		url:"{:Url('Order/express')}",
+    		dataType:'json',
+    		data:{
+    			code:$("#express").attr("data-code"),
+    			invoice:$("#express").attr("data-invoice")
+    		},
+    		success:function(data){
+    			if(data.status==1){
+    				var item = '';
+    				for(var i=0;i<data.data.length;i++){
+    					item+="<div class='a-list active'>"+
+			                "<div class='a-l'>"+
+			                    "<span>"+data.data[i].month+"</span>"+
+			                    "<i>"+data.data[i].hour+"</i>"+
+			                "</div>"+
+			                "<div class='a-r'>"+
+			                    "<p>"+data.data[i].context+"</p>"+
+			                "</div>"+
+			            "</div>";
+    				}
+    				
+    				$("#list").prepend($(item));
+    			}else{
+    				$("#list").html("没有查到物流...");
+    			}
+    		}
+    	});
+    });
+</script>
+</body>
+</html>

@@ -526,11 +526,11 @@
 				<tr>
 					<th>店铺负责人身份证：</th>
 					<td colspan="20">
-						<a href="{$apply.store_person_cert}" target="_blank">
+						<a href="__ROOT__/{$apply.store_person_cert}" target="_blank">
 							<if condition="$apply[store_person_cert] eq ''">
 								<img id="store_person_cert" src="__PUBLIC__/images/not_adv.jpg" height="120">
 								<else/>
-								<img id="store_person_cert" src="{$apply.store_person_cert}" height="120">
+								<img id="store_person_cert" src="__ROOT__/{$apply.store_person_cert}" height="120">
 							</if>
 						</a>
 						<input type="hidden" name="store_person_cert" value="{$apply.store_person_cert}">
@@ -541,11 +541,11 @@
 				<tr>
 					<th>企业营业执照副本：</th>
 					<td colspan="20">
-						<a target="_blank" href="{$apply.business_licence_cert}">
+						<a target="_blank" href="__ROOT__/{$apply.business_licence_cert}">
 							<if condition="$apply[business_licence_cert] eq ''">
 								<img id="business_licence_cert" src="__PUBLIC__/images/not_adv.jpg" height="120">
 								<else/>
-								<img id="business_licence_cert" src="{$apply.business_licence_cert}" height="120">
+								<img id="business_licence_cert" src="__ROOT__/{$apply.business_licence_cert}" height="120">
 							</if>
 						</a>
 						<input type="hidden" name="business_licence_cert" value="{$apply.business_licence_cert}">

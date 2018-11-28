@@ -72,36 +72,44 @@
 	              <th align="center" abbr="consignee" axis="col4" class="">
 	                <div style="text-align: center;  width:60px;" class="">退款金额</div>
 	              </th>
+	              
+	              <!-- 
                     <th align="center" abbr="consignee" axis="col4" class="">
 	                <div style="text-align: center;  width:60px;" class="">退还预存款</div>
 	              </th>
 	              <th align="center" abbr="" axis="col5" class="">
 	                <div style="text-align: center;  width: 60px;" class="">申请图片</div>
 	              </th>
+	               -->
 	              <th align="center" abbr="" axis="col5" class="">
 	                <div style="text-align: center; width: 100px;" class="">申请原因</div>
 	              </th>
 	              <th align="center" abbr="" axis="col5" class="">
 	                <div style="text-align: center; width: 120px;" class="">申请时间</div>
 	              </th>
+	              <!--
 	              <th align="center" abbr="" axis="col5" class="">
 	              	<div style="text-align: center;  width: 50px;" class="">商品ID</div>
 	              </th>
+	               
 	              <th align="center" abbr="" axis="col5" class="">
 	                <div style="text-align: center; width: 160px;" class="">涉及商品名称</div>
 	              </th>
+	               -->
 	              <th align="center" abbr="" axis="col5" class="">
 	                <div style="text-align: center; width: 50px;" class="">退货数量</div>
 	              </th>
 	              <th align="center" abbr="" axis="col6" class="">
 	                <div style="text-align: center; width: 80px;" class="">商家处理</div>
 	              </th>
+	              <!--
 	              <th align="center" abbr="" axis="col6" class="">
 	                <div style="text-align: center; width: 160px;" class="">商家处理备注</div>
 	              </th>
 	              <th align="center" abbr="" axis="col6" class="">
 	                <div style="text-align: center; width: 120px;" class="">商家审核时间</div>
 	              </th>
+	                -->
 	              <th align="center" abbr="" axis="col6" class="">
 	                <div style="text-align: center; width: 120px;" class="">商家名称</div>
 	              </th>
@@ -141,6 +149,7 @@
 		        <td align="center" abbr="consignee" axis="col4" class="">
 		          <div style="text-align: center; width: 60px; ;" class="">{$vo.refund_money}</div>
 		        </td>
+		        <!-- 
                 <td align="center" abbr="consignee" axis="col4" class="">
                     <div style="text-align: center; width: 60px; ;" class="">{$vo.refund_deposit}</div>
                 </td>
@@ -158,21 +167,28 @@
 					</empty>
 				 </div>
 		        </td>
+		         -->
+		         
+		         
+		         
+		         
 		        <td align="center" abbr="" axis="col6" class="">
 		          <div style="text-align: center;width: 100px;" class="">{$vo.reason}</div>
 		        </td>
 		        <td align="center" abbr="" axis="col6" class="">
 		          <div style="text-align: center;width: 120px;" class="">{$vo.addtime|date='Y-m-d H:i',###}</div>
 		        </td>
+		        
+		        <!-- 
 		        <td align="center" abbr="" axis="col6" class="">
 		          <div style="text-align: center;width: 50px;" class="">{$vo.goods_id}</div>
 		        </td>
 		        <td align="center" abbr="" axis="col6" class="">
 		          <div style="text-align: center;width: 160px;" class="">     
-		          <a href="{:U('Home/Goods/goodsInfo',array('id'=>$vo['goods_id']))}" target="_blank">
+		          
 		          {$goods_list[$vo['goods_id']]|getSubstr=0,50}
-		          </a></div>
-		        </td>
+		          </div>
+		        </td> -->
 		        <td align="center" class="handle-s">
 		        	 <div style="text-align: center;width: 50px;" class="">{$vo.goods_num}</div>
 		        </td>
@@ -180,12 +196,14 @@
 		          <div style="text-align: center;width: 80px;" class=""><if condition="$vo[status] eq -2">服务单取消
 		          <elseif condition="$vo[status] eq -1"/>不同意<elseif condition="$vo[status] eq 0"/>待审核<else/>同意</if></div>
 		        </td>
+		        <!--
 		        <td align="center" abbr="" axis="col6" class="">
 		          <div style="text-align: center;width: 160px;" class="">{$vo.remark|default='无'}</div>
 		        </td>
 		        <td align="center" abbr="" axis="col6" class="">
 		          <div style="text-align: center;width: 120px;" class=""><if condition="$vo[checktime] gt 0">{$vo.checktime|date='Y-m-d H:i',###}<else/>无</if></div>
 		        </td>
+		          -->
 		        <td align="center" abbr="" axis="col6" class="">
 		          <div style="text-align: center;width: 120px;" class="">{$store_list[$vo[store_id]]}</div>
 		        </td>

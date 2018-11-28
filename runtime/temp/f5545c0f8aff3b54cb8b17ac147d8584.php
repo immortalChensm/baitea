@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:47:"./application/admin/view2/store\store_list.html";i:1522052585;s:44:"./application/admin/view2/public\layout.html";i:1517208468;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:47:"./application/admin/view2/store\store_list.html";i:1531280990;s:44:"./application/admin/view2/public\layout.html";i:1525742439;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -129,7 +129,7 @@ function selectAll(name,obj){
 
 function get_help(obj){
 	
-	window.open("http://www.tp-shop.cn/");
+	
 	return false;
 	
     layer.open({
@@ -302,11 +302,12 @@ function publicHandle(ids,handle_type){
 							<div style="text-align: center; width: 120px;" class="">卖家账号</div>
 						</th>
 						
-						<!--
+						
 						
 						<th align="center" abbr="article_time" axis="col6" class="">
 							<div style="text-align: center; width: 80px;" class="">所属等级</div>
 						</th>
+						<!--
 						<th align="center" abbr="article_time" axis="col6" class="">
 							<div style="text-align: center; width: 100px;" class="">店铺类别</div>
 						</th>
@@ -368,10 +369,11 @@ function publicHandle(ids,handle_type){
 									<?php echo $vo['seller_name']; ?>
 								</div>
 							</td>
-							<!-- 
+						
 							<td align="center" class="">
 								<div style="text-align: center; width: 80px;"><?php echo $store_grade[$vo[grade_id]]; ?></div>
 							</td>
+								<!-- 
 							<td align="center" class="">
 								<div style="text-align: center; width: 100px;"><?php echo $store_class[$vo[sc_id]]; ?></div>
 							</td>

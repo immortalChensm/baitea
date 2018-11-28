@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>去喝茶</title>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/aui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/mobile.css">
+    <script src="/public/__STATIC__/h5/js/jquery.min.js"></script>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/plugins/layui/css/layui.css">
+</head>
+<body>
+<!-- 
+<header>
+    <a class="head-icon">
+        <div class="icon-return"></div>
+    </a>
+    <div class="head-words">
+        茶艺师管理
+    </div>
+    <a class="head-words">
+        管理 
+    </a>
+</header> -->
+<div class="main">
+    <div class="f-tea-mage">
+        <div class="m-catgory">
+            <a href="" class="active">我发布的服务</a>
+            <a href="">我的预约订单</a>
+        </div>
+        <div id="list">
+       
+        </div>
+        <a href="{:Url('Teaserver/addteaservice')}" class="compont-btn">发布服务</a>
+    </div>
+</div>
+<script src="/public/__STATIC__/h5/plugins/layui/layui.js"></script>
+<script type="text/javascript">
+
+
+	layui.use('flow', function(){
+		
+		
+		  var $ = layui.jquery; //不用额外加载jQuery，flow模块本身是有依赖jQuery的，直接用即可。
+		  
+		  
+		  var flow = layui.flow;
+		  
+		  flow.load({
+			  //isAuto:false,
+		    elem: '#list' //指定列表容器
+		    ,done: function(page, next){ //到达临界点（默认滚动触发），触发下一页
+		      var lis = [];
+		      //以jQuery的Ajax请求为例，请求下一页数据（注意：page是从2开始返回）
+		      $.get('/h5/Teaserver/myteaservicelist?page='+page, function(res){
+		    	  res = JSON.parse(res);
+		        //假设你的列表返回在data集合中
+		        //layui.each(res.data, function(index, item){
+		        	
+		          var list_data = '';
+		          for(var i=0;i<res.data.length;i++){
+		        	  list_data+='<div class="m-warp">'+
+			            '<div class="m-list">'+
+		                '<div class="a-nav">'+res.data[i].add_time+'</div>'+
+		                '<div class="a-list">'+
+		                    '<ul>'+
+		                        '<li>'+
+		                            '接单时间：'+res.data[i].service_time+''+
+		                        '</li>'+
+		                        '<li>'+
+		                            '服务范围：'+res.data[i].orbit+'km以内'+
+		                        '</li>'+
+		                        '<li>'+
+		                           ' 注意事项：服务时间至少2小时'+
+		                        '</li>'+
+		                    '</ul>'+
+		                    '<div class="a-bottom">'+
+		                        '<span>茶艺师服务费</span>'+
+		                        '<span class="a-r">￥<i>'+res.data[i].cost+'</i>/小时</span>'+
+		                    '</div>'+
+		                '</div>'+
+		            '</div>'+
+		        '</div>';
+		        
+		        
+		          }
+		          lis.push(list_data);
+		        //}); 
+		        
+		        
+		        //执行下一页渲染，第二参数为：满足“加载更多”的条件，即后面仍有分页
+		        //pages为Ajax返回的总页数，只有当前页小于总页数的情况下，才会继续出现加载更多
+		        next(lis.join(''), page < res.pages);    
+		      });
+		    }
+		  });
+		});
+	
+	
+</script>
+</body>
+</html>

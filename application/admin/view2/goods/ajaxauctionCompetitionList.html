@@ -1,0 +1,58 @@
+<table>
+       <tbody>
+       <empty name="auctionList">
+           <tr>
+               <td class="no-data" align="center" axis="col0" colspan="50">
+                   <i class="fa fa-exclamation-circle"></i>没有符合条件的记录
+               </td>
+           </tr>
+           <else/>
+            <volist name="auctionList" id="list">
+              <tr>
+                <td align="center" axis="col0">
+                  <div style="width: 50px;">                  
+                  	<input type="checkbox" name="goods_id[]" value="{$list.goods_id}"/>{$list.goods_id}
+                  </div>
+                </td>                
+                <td align="center" axis="col0">
+                  <div style="text-align: left; width: 300px;">{$list.goods_name|getSubstr=0,33}</div>
+                </td>
+                <td align="center" axis="col0">
+                  <div style="text-align: center; width: 100px;">{:date('Y-m-d H',$list.auction_end)}</div>
+                </td>  
+                <td align="center" axis="col0">
+                  <div style="text-align: center; width: 200px;">{:round($list.shop_price)}</div>
+                </td> 
+                
+                <td align="center" axis="col0">
+                  <div style="text-align: center; width: 50px;">{$list.auction_num}</div>
+                </td>  
+                    
+                 <td align="center" axis="col0">
+                  <div style="text-align: center; width: 100px;">{$list.user}</div>
+                </td>  
+                                                                   
+                <td align="center" axis="col0">
+                  <div style="text-align: center; width: 120px; max-width:120px;">
+                 
+                  	<a class="btn blue"  href="{:U('Goods/auctionDetails',array('goods_id'=>$list['goods_id'],'identity'=>'admin'))}"><i class="fa fa-search"></i>查看拍卖现场详情</a>
+                  	
+                  </div>
+                </td>
+                <td align="" class="" style="width: 100%;">
+                  <div>&nbsp;</div>
+                </td>
+              </tr>
+            </volist>          
+            
+           </empty>
+          </tbody>
+        </table>
+        <!--分页位置--> {$page}
+		<script>
+            // 点击分页触发的事件
+            $(".pagination  a").click(function(){
+                cur_page = $(this).data('p');
+                ajax_get_table('search-form2',cur_page);
+            });
+        </script>        

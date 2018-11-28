@@ -21,10 +21,32 @@
                   <div style="text-align: left; width: 100px;">{$list.goods_sn}</div>
                 </td>
                 <td align="center" axis="col0">
-                  <div style="text-align: center; width: 200px;">{$catList[$list[cat_id2]][name]}</div>
+                  <div style="text-align: center; width: 200px;">
+                  <notempty name="catList[$list[cat_id2]][name]">
+                  	{$catList[$list[cat_id2]][name]}
+                  <else />
+                  	<if condition="$list.is_crowd_goods eq 1">
+          			众筹
+          			<elseif condition="$list.is_auction_goods eq 1">
+          			
+          			拍品
+           				
+           			</if>
+                  	
+                  </notempty>
+                  </div>
                 </td>
                 <td align="center" axis="col0">
-                  <div style="text-align: center; width: 50px;">{$list.shop_price}</div>
+                  <div style="text-align: center; width: 50px;">
+                  	<if condition="$list.is_crowd_goods eq 1">
+          			
+           				<span>&yen;{:round($list.crowdfunding_money,2)}</span>
+           			<else />
+           				<span>&yen;{:round($list.shop_price,2)}</span>
+           			</if>
+                  	
+                  
+                  </div>
                 </td>
                 <td align="center" axis="col0">
                   <div style="text-align: center; width: 50px;">{$list.store_count}</div>
@@ -62,7 +84,11 @@
                 <td align="center" axis="col0">
                   <div style="text-align: center; width: 60px;">
                         <if condition="$list[is_on_sale] eq 0">下架</if>
+                        <if condition="$list[is_auction_goods] eq 1">
+                        
                         <if condition="$list[is_on_sale] eq 1">出售中</if>
+                       
+                        
                         <if condition="$list[is_on_sale] eq 2">违规下架</if>
                   </div>
                 </td>    

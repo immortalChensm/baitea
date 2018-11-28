@@ -98,6 +98,8 @@ class Order extends Base {
         I('user_id') ? $condition['user_id'] = trim(I('user_id')) : false;
         I('order_statis_id') != '' ? $condition['order_statis_id'] = I('order_statis_id') : false; // 结算统计的订单
         if($condition['order_statis_id'] > 0) unset($condition['add_time']);
+        //非众筹
+        $condition['status'] = 0;
         $sort_order = I('order_by','DESC').' '.I('sort');
         $count = M('order'.$select_year)->where($condition)->count();
         $Page  = new AjaxPage($count,20);

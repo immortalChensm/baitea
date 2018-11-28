@@ -391,7 +391,8 @@ class MessageLogic extends Model
         //推送消息
         $push_ids = [];
         if (!$msg['type']) {
-            $push_ids = M('users')->where(['user_id' => ['IN', $user_ids]])->column('push_id');
+            //$push_ids = M('users')->where(['user_id' => ['IN', $user_ids]])->column('push_id');
+            $push_ids = M('users')->where(['user_id' => ['IN', $user_ids]])->column('user_id');
         }
         $push = new PushLogic;
         $res = $push->push($push_data, $msg['type'], $push_ids);

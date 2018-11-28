@@ -72,9 +72,31 @@ class Tea extends Base{
 	                   ->join("__USERS__ u","t.user_id=u.user_id",'LEFT')
 	                   ->where('t.teart_id',$this->request->get("teart_id"))
 	                   ->find();
+        if(strpos($list['teart_logo'],'.')==0){
+            $list['teart_logo'] = substr($list['teart_logo'], 1);
+        }
+        if(strpos($list['teart_fcert'],'.')==0){
+            $list['teart_fcert'] = substr($list['teart_fcert'], 1);
+        }
+        if(strpos($list['teart_bcert'],'.')==0){
+            $list['teart_bcert'] = substr($list['teart_bcert'], 1);
+        }
+        if(strpos($list['idcard_fpic'],'.')==0){
+            $list['idcard_fpic'] = substr($list['idcard_fpic'], 1);
+        }
+
 	    $this->assign('list',$list);
 	    
 	    return $this->fetch();
+	}
+	public function tea_del(){
+	    $teart_id = I('del_id');
+	    if($teart_id){
+	        $store = \think\Db::name("tea_art")->where("teart_id",$teart_id)->find();
+	        if(\think\Db::name("tea_art")->where("teart_id",$teart_id)->delete()){
+	            $this->ajaxReturn(['status' => 1, 'msg' => '删除'.$store['teart_name'].'成功']);
+	        }
+	    }
 	}
 }
 

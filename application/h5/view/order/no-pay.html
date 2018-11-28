@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>去喝茶</title>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/aui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/mobile.css">
+    <script src="/public/__STATIC__/h5/js/jquery.min.js"></script>
+    <style>
+        .right-li{
+            height: 2rem;
+            line-height: 2rem;
+            width: 100%;
+            /*background-color: red;*/
+        }
+        .right-nam{
+            position: inherit !important;
+            color: #333!important;
+        }
+        .tig-float-right{
+            float: right;
+        }
+        .right-tk{
+            color: #85c34d;
+            border-color: #85c34d;
+            border: 1px solid #85c34d;
+            padding: 5px 15px;
+            font-size: 12px;
+            border-radius: 25px;
+        }
+.a-top1{padding: 0.5rem 0.6rem 0.5rem 0.5rem!important;}
+		
+</style>
+</head>
+<body>
+
+    
+<!-- 
+<header>
+    <a class="head-icon">
+        <div class="icon-return"></div>
+    </a>
+    <div class="head-words">
+        订单详情
+    </div>
+    <a class="head-empty"></a>
+</header>
+ -->
+<div class="main main-fill-bottom">
+    <div class="f-order-nopay">
+        <div class="m-top">
+            <div class="a-content">
+                <div class="a-t"><span>{$order.consignee}</span><span>{$order.mobile}</span></div>
+                <div class="a-b">{$order.total_address}</div>
+            </div>
+            <div class="a-icon"></div>
+        </div>
+        <div class="m-leave">
+            <div class="a-content">
+                <div class="a-t"><span>买家留言</span></div>
+                <div class="a-b"><span>{$order.user_note}</span></div>
+            </div>
+            <div class="a-icon"></div>
+        </div>
+        <div class="m-info">
+            <div class="a-nav">
+                <div class="a-l" style="background-image: url({$order.store.store_logo})"></div>
+                <span>{$order.store.store_name}</span>
+                <div class="a-icon"></div>
+            </div>
+            
+            <volist name="order.new_goods_list" id="vo">
+            <div class="a-top">
+                <div class="a-img" style="background-image: url({$order.img[$vo.goods_id]})" data="{$vo.rec_id}"></div>
+                <div class="a-right">
+                    <div class="a-top　a-top1">
+                <div class="a-img" style="background-image: url(images/img-2.jpg)"></div>
+                <div class="a-right">
+                
+                         <div class="right-li">
+                             <p>
+                                 <span class="right-nam">{$vo.goods_name}</span>
+                                 <span class="right-nam tig-float-right">x{$vo.goods_num}</span>
+                             </p>
+                         </div>
+                         
+                         <div class="right-li">
+                             <p>
+                                 <span class="right-nam">￥{$vo.goods_price}</span>
+                                 <span class="right-nam tig-float-right">
+                                 
+                                 	
+						                <!-- 这个订单每件商品的申请退款按钮 -->
+						                	
+						                <if condition="$order.pay_status eq 1 and $orer.order_status eq 0 and $order.shipping_status eq 0">
+						                <!-- 
+									    	<a href="{:Url('Order/refund',['rec_id'=>$vo.rec_id])}" class="right-tk">退款</a>
+									     -->  
+									     <a  onclick="refund('{$vo['order_id']}','{$vo['rec_id']}','{$vo['goods_id']}','{$order.img[$vo.goods_id]}')" class="right-tk">退款</a>
+									    </if>
+						
+									    <if condition="$order.order_button.receive_btn eq 1">
+									            <if condition="$order.pay_status eq 1">
+									            <!-- 
+									            	<a href="{:Url('Order/refund',['rec_id'=>$vo.rec_id])}" class="right-tk">退款</a>
+									             -->   
+									             <a  onclick="refund('{$vo['order_id']}','{$vo['rec_id']}','{$vo['goods_id']}','{$order.img[$vo.goods_id]}')" class="right-tk">退款</a>
+									            </if>  
+									    </if>
+									        
+									    <if condition="$order.order_button.comment_btn eq 1">
+									    <a ordersn="{$order['order_id']}" onclick="comment('{$vo['order_id']}','{$vo['rec_id']}','{$vo['goods_id']}','{$order.img[$vo.goods_id]}')" class="right-tk">去评价</a>
+									            <if condition="$order.pay_status eq 1">
+									            <!--
+									            	<a href="{:Url('Order/refund',['rec_id'=>$vo.rec_id])}" class="right-tk">退款</a
+									              -->  
+									              <a  onclick="refund('{$vo['order_id']}','{$vo['rec_id']}','{$vo['goods_id']}','{$order.img[$vo.goods_id]}')" class="right-tk">退款</a>
+									            </if>
+									            
+									    </if>
+									     
+									
+    
+    
+						    			<!-- 这个订单每件商品的申请退款按钮 -->
+                                     	<!--<a href="#" class="right-tk">退款</a>  -->
+			                      </span>
+			                  </p>
+			                  </div>
+			                </div>
+			            </div>
+
+                </div>
+                
+                
+    
+            </div>
+            </volist>
+            
+            
+            <ul class="a-warp">
+                <li><span>小计</span><span>￥{$order.total_amount}</span></li>
+                <li><span>优惠</span><span>￥-{$order.coupon_price?:0}</span></li>
+                <li class="active">需付款：<span>￥{$order.order_amount}</span></li>
+            </ul>
+            
+            
+        </div>
+        <div class="m-order-info">
+            <div class="a-text"><span>订单编号：</span>{$order.order_sn}</div>
+            <div class="a-text"><span>创建时间：</span>{:date('Y-m-d H:i',$order.add_time)}</div>
+            <notempty name="order.pay_time">
+            	<div class="a-text"><span>付款时间：</span>{:date('Y-m-d H:i',$order.pay_time)}</div>
+            </notempty>
+            <notempty name="order.shipping_time">
+            	<div class="a-text"><span>发货时间：</span>{:date('Y-m-d H:i',$order.shipping_time)}</div>
+            </notempty>
+            <notempty name="order.confirm_time">
+            	<div class="a-text"><span>成交时间：</span>{:date('Y-m-d H:i',$order.confirm_time)}</div>
+            </notempty>
+        </div>
+    </div>
+</div>
+<div class="footer-type">
+
+
+    <a id="contact" data-phone="{$order.store.store_phone}" data-qq="{$order.store.store_qq}" onclick="contact(this)">联系客服</a>
+    <!-- 
+    
+    <a href="">取消订单</a>
+    
+    
+    <a href="" class="se-1">付款</a>
+     -->
+     
+     <!-- 未付款的订单－取消操作 -->
+    <if condition="$order.order_button.cancel_btn eq 1 && $order.pay_status eq 0">
+           <a ordersn="{$order['master_order_sn']}" class="order_btn" onclick="cancel_order('{$order['order_id']}')">取消订单</a>
+    </if>
+     <!-- 已付款的订单－取消操作 -->
+     
+    <if condition="$order.order_button.cancel_btn eq 1 && $order.pay_status eq 1">
+           
+            
+    </if>  
+    
+    <if condition="$order.pay_status eq 1 and $orer.order_status eq 0 and $order.shipping_status eq 0">
+    	<!--
+    	<a href="{:Url('Order/refund',['order_id'=>$order.order_id])}">退款</a>  
+    	  
+    	  <a data="{$order.order_id}" onclick="refund(this)">退款</a>  
+    	  -->
+    </if>
+    
+    <if condition="$order.order_button.pay_btn eq 1">
+            <a ordersn="{$order['master_order_sn']}" onclick="payOrder(this)">立即付款</a>
+            
+    </if>
+    <if condition="$order.order_button.receive_btn eq 1">
+            <a ordersn="{$order['master_order_sn']}" onclick="order_confirm('{$order['order_id']}')">收货确认</a>
+            <if condition="$order.pay_status eq 1">
+            	<!--<a data="{$order.order_id}" onclick="refund(this)">退款</a>-->  
+            </if>  
+    </if>
+    <if condition="$order.order_button.shipping_btn eq 1">
+            <a href="{:Url('Order/delivery',['order_id'=>$order.order_id])}">查看物流</a>
+    </if>
+    <!--
+    <if condition="$order.order_button.comment_btn eq 1">
+            <a ordersn="{$order['order_id']}" onclick="comment('{$order['order_id']}')">去评价</a>
+            <if condition="$order.pay_status eq 1">
+            	<a data="{$order.order_id}" onclick="refund(this)">退款</a>  
+            </if>
+            
+    </if>  -->
+       <!--
+     <if condition="$order.order_button.return_btn eq 1">
+            <a ordersn="{$order['master_order_sn']}">退款</a>
+    </if>
+      -->
+      <if condition="$order.pay_status eq 1 and $order.order_status eq 4 and $order.shipping_status eq 1">
+      	<a ordersn="{$order['master_order_sn']}" onclick="delete_order('{$order['order_id']}')">删除订单</a>
+      </if>
+</div>
+<script>
+/*
+//确认取消订单
+function cancel_order(id){
+    $.ajax({
+        type: 'POST',
+        //url:"/index.php?m=Mobile&c=Order&a=cancel_order&id="+id,
+        url:"{:Url('Order/cancel')}",
+        data:{
+        	orderid:id
+        },
+        dataType:'JSON',
+        success:function(data){
+            if(data.status == 1){
+                alert("订单取消成功");
+            }else{
+            	alert("订单取消失败");
+            }
+            //console.log(data);
+        },
+        error:function(){
+            alert('网络失败，请刷新页面后重试');
+        },
+    });
+    
+}
+
+
+//确认收货
+function order_confirm(orderId)
+{
+    if(!confirm("确认收货?"))
+        return false;
+    $.ajax({
+        url:"{:U('Order/order_confirm')}",
+        type:'POST',
+        dataType:'JSON',
+        data:{order_id:orderId},
+        success:function(data){
+            if(data.status == 1){
+                //layer.open({content:data.msg, time:2});
+                //location.href ='/index.php?m=mobile&c=Order&a=order_detail&id='+orderId;
+                alert("操作成功");
+            }else{
+                //layer.open({content:data.msg, time:2});
+                 alert("操作失败");
+                //location.href ='/index.php?m=mobile&c=Order&a=order_list&type={$Request.param.type}&p={$Request.param.p}';
+            }
+        },
+        error : function() {
+            layer.open({content:'网络失败，请刷新页面后重试', time: 2});
+        }
+    })
+}
+*/
+</script>
+<script type="text/javascript">
+        
+        function setupWebViewJavascriptBridge(callback) {  
+            if (window.WebViewJavascriptBridge) {  
+                callback(WebViewJavascriptBridge)  
+            } else {  
+                document.addEventListener('WebViewJavascriptBridgeReady' , function() {  
+                    callback(WebViewJavascriptBridge)  
+                }, false );  
+            }  
+
+            // =====以下是iOS必须的特殊处理========  
+            if (window.WVJBCallbacks) { return window.WVJBCallbacks.push(callback); }  
+            window.WVJBCallbacks = [callback];  
+            var WVJBIframe = document.createElement('iframe');  
+            WVJBIframe.style.display = 'none';  
+            WVJBIframe.src = 'wvjbscheme://__BRIDGE_LOADED__';  
+            document.documentElement.appendChild(WVJBIframe);  
+            setTimeout(function() { document.documentElement.removeChild(WVJBIframe) }, 0);  
+            // =====以上是iOS必须的特殊处理========  
+        }
+
+          // 固定写法2 函数名字与1保持一致  
+            setupWebViewJavascriptBridge(function(bridge) {  
+                // Java 注册回调函数，第一次连接时调用 初始化函数  
+                 bridge.init();  
+            });
+   
+            //返回
+        function goodslist(){
+            var u = navigator.userAgent, app = navigator.appVersion;
+            var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+            var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                     WebViewJavascriptBridge.callHandler('goodslist',  
+                          '',  
+                          function (response) {  
+                            // 移动端回传的数据  
+                            //alert('移动端回传的数据:' + response);  
+                          });  
+        }
+
+        function purchase(id){
+            var u = navigator.userAgent, app = navigator.appVersion;
+            var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+            var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                     WebViewJavascriptBridge.callHandler('purchase',  
+                          id,  
+                          function (response) {  
+                            // 移动端回传的数据  
+                            //alert('移动端回传的数据:' + response);  
+                          });
+        }
+        
+        
+        //立即付款
+       function payOrder(order){
+    	   ordersn = $(order).attr("ordersn");
+    	   //alert("123");
+    	   /*WebViewJavascriptBridge.callHandler(
+                   'payOrder'
+                   , ordersn
+                   , function(responseData) {
+                       //document.getElementById("show").innerHTML = "send get responseData from java, data = " + responseData
+                   }
+          );*/
+    	   
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('payOrder',  
+                    		ordersn,  
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+           
+    	   
+       }
+       //联系客服
+       function contact(order){
+    	   data = {};
+    	   data['qq'] = $(order).attr("data-qq");
+    	   data['mobile'] = $(order).attr("data-phone");
+
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('contact',  
+                    		data,
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+           
+    	   
+       }
+       
+       //取消订单
+       function cancel_order(order_id){
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('cancel_order',  
+                    		order_id,
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+       }
+       
+       //退款
+       function refund(order_id,rec_id,goods_id,imgsurl){
+    	   //order_id = $(order).attr("data");
+    	   data = {};
+    	   data['order_id'] = order_id;
+    	   data['rec_id'] = rec_id;
+    	   data['goods_id'] = goods_id;
+    	   data['imgulr'] = imgsurl;
+    	   console.log(data);
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('refund',  
+                    		data,
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+       }
+       
+       //确认收货
+       function order_confirm(order_id){
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('order_confirm',  
+                    		order_id,
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+       }
+       
+       //去评价
+        function comment(order_id,rec_id,goods_id,imgsurl){
+    	   data = {};
+    	   data['order_id'] = order_id;
+    	   data['rec_id']   = rec_id;
+    	   data['goods_id'] = goods_id;
+    	   data['imgulr'] = imgsurl;
+    	   
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('comment',  
+                    		data,
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+       }
+       
+       //删除订单
+       function delete_order(order_id){
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('delete_order',  
+                    		order_id,
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+       }
+</script>
+</body>
+</html>

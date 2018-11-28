@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>去喝茶</title>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/aui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/mobile.css">
+    <script src="/public/__STATIC__/h5/js/jquery.min.js"></script>
+</head>
+<body>
+<!-- 
+<header>
+    <a class="head-icon">
+        <div class="icon-return"></div>
+    </a>
+    <div class="head-words">
+        用户详情
+    </div>
+    <a class="head-empty"></a>
+</header>
+ -->
+<div class="main main-fill-bottom">
+    <div class="f-person-xq">
+        <div class="m-nav">
+        
+        	<notempty name="user.head_pic">
+            		<div class="a-img" style="background-image: url({$user.head_pic})"></div>
+            	<else />
+            		<div class="a-img" style="background-image: url(/public/__STATIC__/h5/images/3cai.png)"></div>
+            </notempty>
+            
+            <div class="a-right">
+                <div class="a-name">{$user.realname} <img src="/public/__STATIC__/h5/images/icon/icon_woman.png"></div>
+                <div class="a-tel">账号：{$user.mobile}</div>
+            </div>
+        </div>
+        <ul>
+            <li>
+                <span>地址</span>
+                <span>{$user.address} </span>
+            </li>
+            <li>
+                <span>手机</span>
+                <span>{$user.mobile} </span>
+            </li>
+        </ul>
+        <div class="m-con">
+            <p>简介：{$user.info}</p>
+        </div>
+        <div class="m-bottom">
+            <div class="a-title">视频直播</div>
+            <div class="a-warp">
+                <div class="video-warp">
+                    <img src="/public/__STATIC__/h5/images/video-img.jpg">
+                </div>
+                <div class="video-warp">
+                    <img src="/public/__STATIC__/h5/images/video-img.jpg">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

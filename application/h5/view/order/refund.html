@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>去喝茶</title>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/aui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/mobile.css">
+    <script src="/public/__STATIC__/h5/js/jquery.min.js"></script>
+</head>
+<body>
+<!--
+<header>
+    <a class="head-icon">
+        <div class="icon-return"></div>
+    </a>
+    <div class="head-words">
+        申请退款
+    </div>
+    <a class="head-empty"></a>
+</header>
+  -->
+<div class="main main-fill-bottom">
+    <div class="f-order-refund">
+    
+        <div class="m-nav">
+        	
+            <span>申请服务：</span><div class="a-list type" data-type="0">仅退款</div>
+            <if condition="$info.order_state eq '1'">
+            	<div class="a-list type" data-type="1">退货退款</div>
+            </if>
+            
+            <input type="hidden" name="return_type" id="return_type"/>
+        </div>
+        
+        
+        <div class="m-info">
+            <div class="a-nav">
+                <div class="a-l" style="background-image: url({$info.store.store_logo})"></div>
+                <span>{$info.store.store_name}</span>
+                <div class="a-icon"></div>
+            </div>
+            <div class="a-top">
+                <div class="a-img" style="background-image: url({$info.goods_info.original_img})"></div>
+                <div class="a-right">
+                    {$info.goods_info.goods_name}
+                    <span>¥{$info.goods_price}</span>
+                    <i>×{$info.goods_num}</i>
+                </div>
+            </div>
+            <ul class="a-warp">
+                <li>
+                    <span>退款原因</span>
+                    <div class="a-r">
+                        <select name="reason">
+                            <option value="">请选择</option>
+                            <option value="">这茶叶不好喝不想要了</option>
+                            <option value="">这茶叶太贵了不想要了</option>
+                        </select>
+                        <img src="/public/__STATIC__/h5/images/icon/icon_more-r.png">
+                    </div>
+                </li>
+                <li><span>退款金额：</span><span>￥-{$info.goods_price}</span></li>
+                <li class="active">退款说明：<input type="text" placeholder="选填" id="describe"></li>
+            </ul>
+        </div>
+        <div class="m-ping">
+            <div class="a-title">上传凭证</div>
+            <div class="a-bottom" id="zhenglist">
+            
+            	<!-- 
+                <label style="background-image: url(/public/__STATIC__/h5/images/img-2.jpg)">
+                    <input type="file">
+                    <div class="a-close"></div>
+                </label>
+                 -->
+                <label style="background-image: url(/public/__STATIC__/h5/images/add_image.png)">
+                    
+                    <input type="file" id="zheng" name="zheng[]" accept="image/*"  onchange="upload_img(this.id,'imgslist')">
+                    <div class="a-close"></div>
+                </label>
+         
+                <!--
+                 <div class="upimg active" id="upload_img_code" style="background-image: url(__ROOT__/Public/Home/week/image/upimg-6.png)">
+                     <input type="file" id="zheng" name="zheng" accept="image/*"  onchange="upload_img(this.id,'zcode','upload_img_code')">
+                     <input type="hidden" id="zcode" name="workhourpic[]"  />
+                </div>
+                  -->
+                
+                <input type="hidden" name="imgslist[]" id="imgslist"/>
+            </div>
+        </div>
+        <a class="compont-btn"　onclick="refund()">提交</a>
+    </div>
+</div>
+<script src="/public/__STATIC__/h5/js/jQuery-2.1.4.min.js"></script>
+<script src="/public/__STATIC__/h5/js/common.js"></script>
+<script src="/public/__STATIC__/h5/js/ajaxfileupload.js"></script>
+
+<script type="text/javascript">
+
+				$(function(){
+					
+					$("div.type").click(function(e){
+						
+					});
+					
+					$(".type").click(function(e){
+						$("#return_type").val($(this).attr("data-type"));
+					});
+					/*
+					$("a.compont-btn").click(function(e){
+						var data = new Object();
+						
+				    	data['type']       = $("#return_type").val();
+				    	data['goods_num']  = "{$info.goods_num}";
+				    	//data['is_receive'] = "";
+				    	data['describe']   = $("#describe").val();
+				    	data['order_id']   = "{$info.order_id}";
+				    	data['order_sn']   = "{$info.order_sn}";
+				    	data['goods_id']   = "{$info.goods_id}";
+				    	//data['consignee']  = "";
+				    	//data['mobile']     = "";
+				    	data['rec_id']  = "{$Request.param.rec_id}";
+				    	
+				    	data['reason']  = $(":input[name=reason]").val();
+				    	imgs   = $("#zhenglist label");
+				    	var imglist = '';
+				    	
+				    	for(var i=0;i<imgs.length;i++){
+				    		if($(imgs[i]).attr("data")!=undefined){
+				    			imglist+=$(imgs[i]).attr("data")+",";
+				    		}
+				    		
+				    	}
+				    	data['imgs'] = imglist.substring(0,imglist.length-1);
+				    	
+				    	
+				    	
+				       $.post("{:U('Workhour/addattendance')}",$('#dataForm').serializeArray(),function(data){
+				            if(data.status ==1){
+				            	 //layermsg(data.info);
+				            	 //layer.msg(data.msg,{time:1000},function(){
+				            		 //window.location.reload();
+				            		 window.location.href = "{:U('H5/Workhour/index')}";
+				            	 //});
+				            	 //setTimeout("location.href='"+data.url+"'",1000);
+				            }else{
+				                //layermsg(data.info);
+				            	//layer.msg(data.info,{time:1000});
+				            }
+				        });
+				       
+					})
+					
+					
+				})*/
+				
+				function upload_img(ele_id,save_id){
+
+			        upload(ele_id,function(data){
+
+			            if(data.status == '1'){
+			            	
+			      //console.log(data);
+			            	//alert(123);
+			            	$.ajax({
+			               		 url:"{:U('Order/getrandid')}",
+			               		 type:'post',
+			               		 success:function(html){
+			               			$("#zhenglist").append($(html));
+			               		},
+			            	});
+			            	
+			            	$("#"+ele_id).parent().css("background-image","url("+data.result.substring(1)+")");
+			            	$("#"+ele_id).parent().attr("data",data.result.substring(1));
+			            	$("#"+ele_id).val(data.result);
+			            	//console.log(data);
+			            	
+			            }else{
+			                alert("error");
+			            }
+		
+			    	});
+				}
+
+		    function save(){
+		    	/**
+		    	
+		    	[type] => 0  　　　　　　　　　　　　　　退款类型　　　　　　　１
+	            [goods_num] => 1　　　　　　　　　　　退款商品数量　　　　　１
+	            [is_receive] => 0　　　　　　　　　　 商品物流状态　　　　　
+	            [describe] =>                   我测试一下哈　　描述　　１
+	            [order_id] => 616　　　　　　                 订单id　　　　　　　　　１
+	            [order_sn] => 201804281337168145  订单叼　　　　　　　　　　１
+	            [goods_id] => 169　　                                商品id　　　　　　　　　１
+	            [spec_key] =>
+	            [consignee] => 张飞  　                              收货人　　　　　　　　　　
+	            [mobile] => 18896871476　　               电话　　　　　　　　　　　
+	            [id] =>
+	            [rec_id] => 725                                           订单商品的id　　　　　　　１
+	            [reason] => 订单不能按预计时间送达        退款原因　　　　　　　　　　１
+		    	**/
+		    	var data = new Object();
+		    	data['type']       = "";
+		    	data['goods_num']  = "{$info.goods_num}";
+		    	data['is_receive'] = "";
+		    	data['describe']   = document.getElementById("describe").value;
+		    	data['order_id']   = "{$info.order_id}";
+		    	data['order_sn']   = "{$info.order_sn}";
+		    	data['goods_id']   = "{$info.goods_id}";
+		    	data['consignee']  = "";
+		    	data['mobile']     = "";
+		    	data['rec_id']  = "{$Request.param.rec_id}";
+		    	data['reason']  = document.getElementsByNam("reason")[0].text;
+		    	
+		    	alert(data);
+		    	
+		    	
+		    	
+		       /* $.post("{:U('Workhour/addattendance')}",$('#dataForm').serializeArray(),function(data){
+		            if(data.status ==1){
+		            	 //layermsg(data.info);
+		            	 //layer.msg(data.msg,{time:1000},function(){
+		            		 //window.location.reload();
+		            		 window.location.href = "{:U('H5/Workhour/index')}";
+		            	 //});
+		            	 //setTimeout("location.href='"+data.url+"'",1000);
+		            }else{
+		                //layermsg(data.info);
+		            	//layer.msg(data.info,{time:1000});
+		            }
+		        });
+		       */
+		    }
+</script>
+
+<script type="text/javascript">
+        
+        function setupWebViewJavascriptBridge(callback) {  
+            if (window.WebViewJavascriptBridge) {  
+                callback(WebViewJavascriptBridge)  
+            } else {  
+                document.addEventListener('WebViewJavascriptBridgeReady' , function() {  
+                    callback(WebViewJavascriptBridge)  
+                }, false );  
+            }  
+
+            // =====以下是iOS必须的特殊处理========  
+            if (window.WVJBCallbacks) { return window.WVJBCallbacks.push(callback); }  
+            window.WVJBCallbacks = [callback];  
+            var WVJBIframe = document.createElement('iframe');  
+            WVJBIframe.style.display = 'none';  
+            WVJBIframe.src = 'wvjbscheme://__BRIDGE_LOADED__';  
+            document.documentElement.appendChild(WVJBIframe);  
+            setTimeout(function() { document.documentElement.removeChild(WVJBIframe) }, 0);  
+            // =====以上是iOS必须的特殊处理========  
+        }
+
+          // 固定写法2 函数名字与1保持一致  
+            setupWebViewJavascriptBridge(function(bridge) {  
+                // Java 注册回调函数，第一次连接时调用 初始化函数  
+                 bridge.init();  
+            });
+   
+            //返回
+        function goodslist(){
+            var u = navigator.userAgent, app = navigator.appVersion;
+            var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+            var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                     WebViewJavascriptBridge.callHandler('goodslist',  
+                          '',  
+                          function (response) {  
+                            // 移动端回传的数据  
+                            //alert('移动端回传的数据:' + response);  
+                          });  
+        }
+
+        function purchase(id){
+            var u = navigator.userAgent, app = navigator.appVersion;
+            var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+            var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                     WebViewJavascriptBridge.callHandler('purchase',  
+                          id,  
+                          function (response) {  
+                            // 移动端回传的数据  
+                            //alert('移动端回传的数据:' + response);  
+                          });
+        }
+
+       
+       //退款
+       function refund(){
+    	   var data = new Object();
+			
+	    	data['type']       = $("#return_type").val();
+	    	data['goods_num']  = "{$info.goods_num}";
+	    	//data['is_receive'] = "";
+	    	data['describe']   = $("#describe").val();
+	    	data['order_id']   = "{$info.order_id}";
+	    	data['order_sn']   = "{$info.order_sn}";
+	    	data['goods_id']   = "{$info.goods_id}";
+	    	//data['consignee']  = "";
+	    	//data['mobile']     = "";
+	    	data['rec_id']  = "{$Request.param.rec_id}";
+	    	
+	    	data['reason']  = $(":input[name=reason]").val();
+	    	imgs   = $("#zhenglist label");
+	    	var imglist = '';
+	    	
+	    	for(var i=0;i<imgs.length;i++){
+	    		if($(imgs[i]).attr("data")!=undefined){
+	    			imglist+=$(imgs[i]).attr("data")+",";
+	    		}
+	    		
+	    	}
+	    	data['imgs'] = imglist.substring(0,imglist.length-1);
+	    	
+    	   
+    	   var u = navigator.userAgent, app = navigator.appVersion;
+           var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+           var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+                    WebViewJavascriptBridge.callHandler('refund',  
+                    		data,
+                         function (response) {  
+                           // 移动端回传的数据  
+                           //alert('移动端回传的数据:' + response);  
+                         });
+       }
+
+</script>
+</body>
+</html>

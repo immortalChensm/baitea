@@ -112,14 +112,17 @@ class Payment extends Base
         
         include_once(PLUGIN_PATH.'payment/alipay/app_notify/lib/alipay_sign.class.php');
 
-        $payBody = getPayBody($order['order_id']);
+        //$payBody = getPayBody($order[0]['order_id']);
+        $payBody = "趣喝茶商城订单支付";
         $sign = new \AlipaySign;
         $sign->partner = $cfgVal['alipay_partner'];
         $sign->rsaPrivateKey = $cfgVal['alipay_private_key'];
         $sign->seller_id = $cfgVal['alipay_account'];
         $sign->notifyUrl = SITE_URL.'/index.php/Api/Payment/alipayNotify';
+        //print_r($cfgVal);;
         $result = $sign->execute($storeName, $payBody, $orderAmount, $orderSn);
-        
+        file_put_contents("alipay.txt", json_encode($result,JSON_UNESCAPED_UNICODE));
+        file_put_contents("aliconfig.txt", json_encode($cfgVal,JSON_UNESCAPED_UNICODE));
 		$this->ajaxReturn(['status' => 1, 'msg' => '签名成功', 'result' => $result]);
     }
     

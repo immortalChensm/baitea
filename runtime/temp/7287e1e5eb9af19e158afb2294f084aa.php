@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:46:"./application/admin/view2/goods\goodsList.html";i:1522045916;s:44:"./application/admin/view2/public\layout.html";i:1517208468;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:46:"./application/admin/view2/goods\goodsList.html";i:1525934747;s:44:"./application/admin/view2/public\layout.html";i:1525742439;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -129,7 +129,7 @@ function selectAll(name,obj){
 
 function get_help(obj){
 	
-	window.open("http://www.tp-shop.cn/");
+	
 	return false;
 	
     layer.open({
@@ -333,11 +333,12 @@ function publicHandle(ids,handle_type){
     <div class="tDiv">
         <div class="tDiv2">
             <div class="fbutton">
+            <!--
                 <a href="<?php echo U('Admin/Goods/initGoodsSearchWord'); ?>">
                     <div class="add" title="初始化商品搜索关键词">
                         <span><i class="fa fa-plus"></i>初始化商品搜索关键词</span>
                     </div>
-                </a>
+                </a>  -->
             </div>
 <!--            <div class="fbutton">
               <a href="javascript:;" onclick="delAll()">

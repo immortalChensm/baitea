@@ -15,6 +15,7 @@ namespace app\admin\controller;
 use app\admin\logic\GoodsLogic;
 use think\Db;
 use think\Cache;
+use think\Page;
 class Active extends Base{
 	
 	/*
@@ -379,5 +380,135 @@ class Active extends Base{
 		Db::name('order')->where('order_prom_type',6)->update(['order_prom_type' => 0, 'order_prom_id' => 0]);
 		Db::name('order_goods')->where('prom_type',6)->update(['prom_type' => 0, 'prom_id' => 0]);
 		$this->success('清除拼团活动数据成功');
+	}
+	
+	//活动列表
+	public function activeList(){
+	    $Article =  M('Active');
+	    $res = $list = array();
+	    $p = empty($_REQUEST['p']) ? 1 : $_REQUEST['p'];
+	    $size = empty($_REQUEST['size']) ? 20 : $_REQUEST['size'];
+	
+	    $where = " 1 = 1 ";
+	    $keywords = trim(I('keywords'));
+	    $keywords && $where.=" and title like '%$keywords%' ";
+	
+	     
+	    $res = $Article->where($where)->order('id desc')->page("$p,$size")->select();
+	    $count = $Article->where($where)->count();// 查询满足要求的总记录数
+	    $pager = new Page($count,$size);// 实例化分页类 传入总记录数和每页显示的记录数
+	    //$page = $pager->show();//分页显示输出
+	    $articleId = [];
+	    foreach ($res as $k=>$v){
+	        $res[$k]['add_time'] = date("Y-m-d H:i",$v['add_time']);
+	        $res[$k]['active_time'] = date("Y-m-d H:i",$v['active_time']);
+	        $articleId[] = $v['id'];
+	    }
+	     
+	    $comment = \think\Db::name("active_comment")->whereIn("active_id",$articleId)->select();
+	    $commentNum = [];
+	    foreach ($comment as $k=>$v){
+	         
+	        $commentNum[$v['active_id']][] = $v['cid'];
+	    }
+	
+	     
+	    
+	    foreach ($res as $k=>$v){
+	      
+	        $res[$k]['commentNum'] = count($commentNum[$v['id']]);
+	    }
+	
+	
+	    $this->assign('list',$res);// 赋值数据集
+	    $this->assign('pager',$pager);// 赋值分页输出
+	    return $this->fetch('activeList');
+	}
+	
+	//评论列表
+	public function commentList(){
+	    $Article =  M('ActiveComment');
+	    $res = $list = array();
+	    $p = empty($_REQUEST['p']) ? 1 : $_REQUEST['p'];
+	    $size = empty($_REQUEST['size']) ? 20 : $_REQUEST['size'];
+	
+	    $where = " 1 = 1 ";
+	    $keywords = trim(I('keywords'));
+	    $keywords && $where.=" and `title` like '%$keywords%' ";
+	
+	
+	    $res = $Article->where($where)
+	                   ->alias("ac")
+	                   ->join("__ACTIVE__ a","a.id=ac.active_id")
+	                   ->join("__USERS__ u","u.user_id=ac.user_id")
+	                   ->order('ac.cid desc')
+	                   ->page("$p,$size")
+	                   ->select();
+	    
+	    $count = $Article->where($where)
+	                   ->alias("ac")
+	                   ->join("__ACTIVE__ a","a.id=ac.active_id")
+	                   ->join("__USERS__ u","u.user_id=ac.user_id")
+	                   ->order('ac.cid desc')->count("id");// 查询满足要求的总记录数
+	    $pager = new Page($count,$size);// 实例化分页类 传入总记录数和每页显示的记录数
+	    //$page = $pager->show();//分页显示输出
+	    foreach ($res as $k=>$v){
+	        $res[$k]['add_time'] = date("Y-m-d H:i",$v['add_time']);
+	    }
+
+	    $this->assign('list',$res);// 赋值数据集
+	    $this->assign('pager',$pager);// 赋值分页输出
+	    return $this->fetch('commentList');
+	}
+	
+	//删除操作
+	public function aticleHandle()
+	{
+	    $data = I('post.');
+	    $data['publish_time'] = strtotime($data['publish_time']);
+	    //$referurl = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : U('Admin/Article/articleList');
+	
+	    //$result = $this->validate($data, 'Article.'.$data['act'], [], true);
+	    //if ($result !== true) {
+	    //    $this->ajaxReturn(['status' => 0, 'msg' => '参数错误', 'result' => $result]);
+	    //}
+	    if ($data['act'] == 'add') {
+	        $data['click'] = mt_rand(1000,1300);
+	        $data['add_time'] = time();
+	        $r = M('Active')->add($data);
+	    } elseif ($data['act'] == 'edit') {
+	        $r = M('Active')->where('article_id='.$data['article_id'])->save($data);
+	    } elseif ($data['act'] == 'del') {
+	        //print_r($data);
+	        $r = M('Active')->where('id='.$data['article_id'])->delete();
+	    }
+	
+	    if (!$r) {
+	        $this->ajaxReturn(['status' => -1, 'msg' => '操作失败']);
+	    }
+	
+	    $this->ajaxReturn(['status' => 1, 'msg' => '操作成功']);
+	}
+	
+	//活动详情查看
+	public function active_info()
+	{
+	    $id = I("active_id");
+	    $info = \think\Db::name("active")->where("id",$id)->find();
+	    $temp = explode(",", $info['imgs']);
+	    $imgs = [];
+	    foreach ($temp as $k=>$v){
+	        $imgs[] = $this->request->domain().$v;
+	    }
+	    $info['img'] = $imgs;
+	    if(time()<$info['active_time']){
+	        $info['status'] = '报名中';//报名中
+	    }else{
+	        $info['status'] = '已结束';//已结束
+	    }
+	    
+	    $this->assign("info",$info);
+	    
+	    return $this->fetch();
 	}
 }

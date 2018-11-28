@@ -456,7 +456,7 @@ class Store extends Base{
 			}else{
 				M('store')->where("store_id", $store_id)->delete();
 				M('seller')->where("store_id", $store_id)->delete();
-				M('users')->where("user_id", $store['user_id'])->delete();
+				//M('users')->where("user_id", $store['user_id'])->delete();
 				adminLog("删除店铺".$store['store_name']);
 				$this->ajaxReturn(['status' => 1, 'msg' => '删除店铺'.$store['store_name'].'成功', 'result' => '']);
 			}
@@ -485,6 +485,18 @@ class Store extends Base{
 	                       ->join("__USERS__ u","s.user_id=u.user_id")
 	                       ->where("s.id=".$store_id)
 	                       ->find();
+	    
+	   
+	    if(strpos($store['shop_licence_img'],'.')==0){
+	        $store['shop_licence_img'] = substr($store['shop_licence_img'], 1);
+	    }
+	    if(strpos($store['idcard_fpic'],'.')==0){
+	        $store['idcard_fpic'] = substr($store['idcard_fpic'], 1);
+	    }
+	    if(strpos($store['shop_cert'],'.')==0){
+	        $store['shop_cert'] = substr($store['shop_cert'], 1);
+	    }
+	    
 	    $this->assign('store',$store);
 
 	    return $this->fetch();

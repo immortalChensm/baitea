@@ -73,8 +73,8 @@ class Admin extends Base {
     
         if(IS_POST){
             //修改密码
-            $enOldPwd = encrypt($oldPwd);
-            $enNewPwd = encrypt($newPwd);
+            $enOldPwd = encrypts($oldPwd);
+            $enNewPwd = encrypts($newPwd);
             $admin = M('admin')->where('admin_id' , $admin_id)->find();
             if(!$admin || $admin['password'] != $enOldPwd){
                 exit(json_encode(array('status'=>-1,'msg'=>'旧密码不正确')));
@@ -99,7 +99,7 @@ class Admin extends Base {
     	if(empty($data['password'])){
     		unset($data['password']);
     	}else{
-    		$data['password'] = encrypt($data['password']);
+    		$data['password'] = encrypts($data['password']);
     	}
     	if($data['act'] == 'add'){
     		unset($data['admin_id']);    		
@@ -140,7 +140,7 @@ class Admin extends Base {
             $condition['user_name'] = I('post.username');
             $condition['password'] = I('post.password');
             if(!empty($condition['user_name']) && !empty($condition['password'])){
-                $condition['password'] = encrypt($condition['password']);               	
+                $condition['password'] = encrypts($condition['password']);               	
 				$admin_info = M('admin')->alias('a')->join('__ADMIN_ROLE__ r','a.role_id=r.role_id','INNER')->where($condition)->find();
                 if(is_array($admin_info)){
                     if (IS_SAAS && !SAAS_BASE_USER) {

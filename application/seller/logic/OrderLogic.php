@@ -274,8 +274,23 @@ class OrderLogic extends Model
 		$data['city'] = $order['city'];
 		$data['district'] = $order['district'];
 		$data['address'] = $order['address'];
+		
+		/*
 		$data['shipping_code'] = $order['shipping_code'];
 		$data['shipping_name'] = $order['shipping_name'];
+		*/
+		
+		//merchant delivery add shipping_code thrust order table
+		$shipping = M('Plugin')->where("code",$data['shipping_code'])->cache(true,TPSHOP_CACHE_TIME)->find();
+		
+		
+		\think\Db::name("order")->where("order_id",$data['order_id'])->save([
+		    'shipping_code'=>$data['shipping_code'],
+		    'shipping_name'=>$shipping['name']
+		]);
+		//merchant delivery add shipping_code thrust order table
+		
+		
 		$data['shipping_price'] = $order['shipping_price'];
 		$data['create_time'] = time();
         $data['store_id'] = $store_id;      

@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:4:{s:53:"./application/seller/new/finance\order_no_statis.html";i:1517208469;s:41:"./application/seller/new/public\head.html";i:1522050654;s:41:"./application/seller/new/public\left.html";i:1517208469;s:41:"./application/seller/new/public\foot.html";i:1517208469;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:4:{s:53:"./application/seller/new/finance\order_no_statis.html";i:1524102010;s:41:"./application/seller/new/public\head.html";i:1522050654;s:41:"./application/seller/new/public\left.html";i:1517208469;s:41:"./application/seller/new/public\foot.html";i:1517208469;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -152,9 +152,13 @@
                     <th class="w120">下单时间</th>
                     <th class="w80">订单总价</th>
                     <th class="w80">付款金额</th>
+                    <!--
                     <th class="w80">积分金额</th>
+                      -->
                     <th class="w80">优惠金额</th>
+                      <!--
                     <th class="w80">余额抵扣</th>
+                     -->
                     <th class="w80">商品总价</th>
                     <th class="w80">订单状态</th>
                     <th class="w100">发货状态</th>
@@ -169,9 +173,13 @@
                         <td><?php echo date("Y-m-d H:i",$v['add_time']); ?></td>
                         <td><?php echo $v['total_amount']; ?></td>
                         <td><?php echo $v['order_amount']; ?></td>
+                        <!-- 
                         <td><?php echo $v['integral_money']; ?></td>
+                         -->
                         <td><?php echo (isset($v['coupon_price']) && ($v['coupon_price'] !== '')?$v['coupon_price']:'0.00'); ?></td>
+                        <!-- 
                         <td><?php echo $v['user_money']; ?></td>
+                         -->
                         <td><?php echo $v['goods_price']; ?></td>
                         <td><?php echo $order_status[$v['order_status']]; ?></td>
                         <td><?php echo $shipping_status[$v['shipping_status']]; ?></td>

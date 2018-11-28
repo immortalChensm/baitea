@@ -39,7 +39,7 @@ class Goods extends Base {
         $parent_id = I("parent_id/d",0);
         $new_ad = I("new_ad/d",0);
         $where = array("parent_id"=>$parent_id);
-        $goodsCategoryList = M('GoodsCategory')->where("is_show=1")->where($where)->order("sort_order desc,parent_id_path desc")->cache(7200)->select();
+        $goodsCategoryList = M('GoodsCategory')->where("is_show=1")->where($where)->order("sort_order desc,parent_id_path desc")->select();
         
         //查找广告
         $start_time = strtotime(date('Y-m-d H:00:00'));
@@ -101,12 +101,12 @@ class Goods extends Base {
      */
     public function goodsList()
     {
-        $id = I('get.id/d',0); // 当前分类id 
-        $brand_id = I('get.brand_id/d',0);
-        $attr = I('get.attr',''); // 属性        
-        $sort = I('get.sort','goods_id'); // 排序
-        $sort_asc = I('get.sort_asc','asc'); // 排序
-        $price = I('get.price',''); // 价钱
+        $id = I('id/d',0); // 当前分类id 
+        $brand_id = I('brand_id/d',0);
+        $attr = I('attr',''); // 属性        
+        $sort = I('sort','goods_id'); // 排序
+        $sort_asc = I('sort_asc','asc'); // 排序
+        $price = I('price',''); // 价钱
         $start_price = trim(I('post.start_price','0')); // 输入框价钱
         $end_price = trim(I('post.end_price','0')); // 输入框价钱       
         
@@ -138,6 +138,7 @@ class Goods extends Base {
     		$goods_id_1 = $goodsLogic->getGoodsIdByBrandPrice($brand_id, $price); // 根据 品牌 或者 价格范围 查找所有商品id
     		$filter_goods_id = array_intersect($filter_goods_id, $goods_id_1); // 获取多个帅选条件的结果 的交集
     	}
+    	
     	if ($attr) {// 属性
     		$goods_id_3 = $goodsLogic->getGoodsIdByAttr($attr); // 根据 规格 查找当所有商品id
     		$filter_goods_id = array_intersect($filter_goods_id, $goods_id_3); // 获取多个帅选条件的结果 的交集
@@ -153,17 +154,37 @@ class Goods extends Base {
     	if ($count > 0) {
     		$goods_list = M('goods')->field('store_id,goods_remark,goods_id,cat_id3,goods_sn,goods_name,shop_price,comment_count,sales_sum,is_virtual,original_img')
                     ->where("goods_id in (".  implode(',', $filter_goods_id).")")
+                    ->whereNull("goods_type_extend")//区分普通商品和众筹商品列表
                     ->order("$sort $sort_asc")
                     ->limit($page->firstRow.','.$page->listRows)
                     ->select();
-            foreach ($goods_list as &$g) {
-                $gc = $goodsLogic->commentStatistics($g['goods_id']);
-                $g['good_comment_rate'] = $gc['rate1'];
-            }
+    		
+    		
+    		//获取各商品对应的店铺信息
+    		if(isset($goods_list)){
+    		    
+    		
+    		
+                foreach ($goods_list as &$g) {
+                    $gc = $goodsLogic->commentStatistics($g['goods_id']);
+                    $g['good_comment_rate'] = $gc['rate1'];
+                }
+    		}
+    		
     	}
     	
     	//获取各商品对应的店铺信息
-    	$goods_list = $this->getstoreinfo_bygoods($goods_list);
+    	if(isset($goods_list)){
+    	   $goods_list = $this->getstoreinfo_bygoods($goods_list);
+    	   foreach ($goods_list as $k=>$v){
+    	       $goods_list[$k]['shop_price'] = round($v['shop_price'],2);
+    	   }
+    	}
+    	
+    	
+    	
+    	//print_r($list);
+    	
     	$list['goods_list'] = $goods_list;
         
         //数据格式转换：
@@ -174,6 +195,7 @@ class Goods extends Base {
             unset($v['text']);
             $list['filter_menu'][] = $v;  // 帅选规格
         }
+        
         // 属性
         foreach ($filter_attr as $k => $v) {
             $items['name'] = $v['attr_name'];
@@ -187,6 +209,7 @@ class Goods extends Base {
         foreach ($filter_brand as $k => $v) {
             $list['filter_brand'][] = array('name'=>$v['name'],'hreg'=>$v['href'],'id'=>$i++);
         }
+        
         // 价格
         foreach ($filter_price as $k => $v) {       
             $list['filter_price'][] = array('name'=>$v['value'],'href'=>$v['href'],'id'=>$i++);
@@ -201,21 +224,25 @@ class Goods extends Base {
         $list['orderby_comment_count'] = urldecode(U("Goods/goodsList",array_merge($filter_param,array('sort'=>'comment_count','sort_asc'=>'desc')),'')); // 评论
         $list['orderby_is_new'] = urldecode(U("Goods/goodsList",array_merge($filter_param,array('sort'=>'is_new','sort_asc'=>'desc')),'')); // 新品
 
+        
         $this->ajaxReturn(['status' => 1, 'msg' => '获取成功', 'result' => $list]);
     }    
 
     //获取店铺信息　用于获取商品列表时
     private function getstoreinfo_bygoods($goodslist)
     {
-        $list = Db::name("store")->field("store_id,store_name")->select();
+        if(empty($goodslist))return null;
+        $list = Db::name("store")->alias("s")->field("s.store_id,s.grade_id,s.store_name,sg.sg_name")->join("store_grade sg","s.grade_id=sg.sg_id","LEFT")->select();
         $store = [];
+        $grade = [];
         foreach($list as $k=>$v){
             $store[$v['store_id']] = $v['store_name'];
+            $grade[$v['store_id']] = $v['sg_name'];
         }
-        
         foreach($goodslist as $k=>$v){
             $goodslist[$k]['store_name'] = $store[$v['store_id']];
             $goodslist[$k]['comment_score'] = $this->commentStatistics($v['goods_id']);
+            $goodslist[$k]['grade_name'] = $grade[$v['store_id']];
         }
         return $goodslist;
     }
@@ -227,7 +254,7 @@ class Goods extends Base {
      * @param $goods_id
      * @return array
      */
-    private  function commentStatistics($goods_id)
+    public  function commentStatistics($goods_id)
     {
         $commonWhere = ['is_show' => 1,'goods_id' => $goods_id,'user_id'=>['gt',0],'deleted'=>0]; //公共条件
         
@@ -376,10 +403,12 @@ class Goods extends Base {
     {
     
         $list = Db::name("search")->field("keyword")->where(['keyword'=>$keyword])->find();
+        
         if(!empty($list['keyword'])){
             
             Db::name("search")->where(['keyword'=>$keyword,'userid'=>$this->user_id])->setInc("count");
         }else{
+            
             Db::name("search")->insert([
                 'keyword'=>$keyword,
                 'add_time'=>time(),
@@ -408,20 +437,32 @@ class Goods extends Base {
         $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$list]);
     }
     
+    //获取热门搜索
+    public function gethotsearch()
+    {
+        $list = Db::name("search")->order("count","desc")->select();
+        $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$list]);
+    }
     /**
      * 获取商品信息
      */
     public function goodsInfo()
     {
-        $goods_id = I("get.id/d", 0);
+        $goods_id = I("id/d", 0);
         $where['goods_id'] = $goods_id;
         $where['is_on_sale'] = 1;
      
         $goods  = M('goods')->where($where)->find();
+        $goods['shop_price'] = round($goods['shop_price'],2);
         if (empty($goods)) {
             $this->ajaxReturn(['status'=>-1, 'msg'=>'此商品不存在或者已下架']);
         }
+        if (empty($goods['shop_price'])) {
+            $this->ajaxReturn(['status'=>-1, 'msg'=>'此商品不存在或者已下架']);
+        }
+        //if this goods of is_on_sale=2 the price will be null
 
+        $goods['category'] = \think\Db::name("goods_category")->where("id",$goods['cat_id3'])->getField("name");
         // 添加浏览记录
         $goodsLogic = new GoodsLogic();
         if ($this->user_id) {
@@ -497,7 +538,25 @@ class Goods extends Base {
         
         //查询店铺信息
         $store = M("store")->where("store_id" , $goods['store_id'])->find();
+        
+        //背景
+        $bglist = explode(",", $store['mb_slide']);
+        $bg = [];
+        foreach ($bglist as $k=>$v){
+            if(empty($v)){
+                unset($bglist[$k]);
+            }
+            $bg[] = $v;
+        }
+        foreach ($bglist as $k=>$v){
+            $temp = $v;
+            $bg['bg'][] = $temp;
+        }
+        $store['store_bglist'] = $bg['bg'];
+        
         $return['store'] = $store;
+        
+        
         
         // 推荐商品
         if (isset($goods['cat_id3'])) {
@@ -520,6 +579,11 @@ class Goods extends Base {
                 ->where(['c.goods_id' => $goods_id, 'c.is_show' => 1, 'c.parent_id' => 0])
                 ->limit(2)->cache(true, 300)
                 ->select();
+        
+        foreach ($return['comment'] as $k=>$v){
+            $return['comment'][$k]['add_time'] = date("Y-m-d H:i",$v['add_time']);
+            $return['comment'][$k]['score'] = (int)($v['goods_rank']);
+        }
         foreach ($return['comment'] as &$one_comment) {
             $one_comment['img'] = $one_comment['img'] ? unserialize($one_comment['img']) : [];
         }
@@ -542,7 +606,9 @@ class Goods extends Base {
         } else {
             $json_arr = array('status'=>1,'msg'=>'获取成功','result'=>$return);
         }
-  
+        
+        //file_put_contents("goods.txt", json_encode($json_arr));
+        
         $this->ajaxReturn($json_arr);
     }
 
@@ -587,7 +653,7 @@ class Goods extends Base {
     public function goodsContent()
     {
         $is_json = I('is_json', 0);
-        $goods_id = I("get.id/d" , 0);
+        $goods_id = I("id/d" , 0);
         $goods = M('Goods')->field('goods_content')->where("goods_id" , $goods_id)->find();
         if(empty($goods)){
         	$this->error('此商品不存在或者已下架');
@@ -595,7 +661,6 @@ class Goods extends Base {
 
         $goods_attribute = M('GoodsAttribute')->getField('attr_id,attr_name'); // 查询属性
         $goods_attr_list = M('GoodsAttr')->where("goods_id" , $goods_id)->select(); // 查询商品属性表                        
-
         if ($is_json) {
             foreach ($goods_attr_list as &$attr) {
                 $attr['attr_name'] = $goods_attribute[$attr['attr_id']];
@@ -669,8 +734,20 @@ class Goods extends Base {
             }
             $list[$key]['img'] = $val['img'] ?: []; 
         }
-
-        $this->ajaxReturn(['status'=>1,'msg'=>'获取成功', 'result'=>$list]);
+        
+        $total = M('comment')->alias('c')
+                ->field('c.*,u.nickname,u.head_pic')
+                ->join('__USERS__ u', 'u.user_id = c.user_id', 'left')
+                ->where($where)->bind(['goods_id'=>$goods_id])
+                ->order("c.comment_id desc")
+                ->count();
+        
+        $page = ceil($total/10);
+        foreach ($list as $k=>$v){
+            $list[$k]['add_time'] = date("Y-m-d H:i",$v['add_time']);
+        }
+        $all = $this->commentStatistics($goods_id);
+        $this->ajaxReturn(['status'=>1,'msg'=>'获取成功', 'result'=>['list'=>$list,'all'=>$all,'pages'=>$page]]);
     }
     
     /**
@@ -799,5 +876,18 @@ class Goods extends Base {
         $dispatching_data['shipping_info'] = $shipping;
         
         $this->ajaxReturn($dispatching_data);
+    }
+
+    /*众筹商品列表*/
+    public function crowdList(){
+        $list = Model('Goods')->goodsList(I('p',1));
+       $this->ajaxReturn(['status' => 1, 'msg' => '','result'=>$list]);
+    }
+
+    /*商品详情*/
+    public function crowdDetail(){
+        !I('goodsId') && $this->ajaxReturn(['status' => -1, 'msg' => '商品id不存在']);
+        $info = Model('Goods')->getItem(I('goodsId'));
+        $this->ajaxReturn(['status' => 1, 'msg' => '','result'=>$info]);
     }
 }

@@ -139,6 +139,55 @@ class Order extends Model
     }
 
     /**
+     * 获取订单状态对应的中文
+     * @param $value
+     * @param $data
+     * @return mixed
+     */
+    public function getCrowdOrderStatusDetailAttr($value, $data)
+    {
+        $data_status_arr = C('ORDER_STATUS_DESC');
+        // 货到付款
+        if ($data['pay_code'] == 'cod') {
+            if (in_array($data['order_status'], array(0, 1)) && $data['shipping_status'] == 0) {
+                return $data_status_arr['WAITSEND']; //'待发货',
+            }
+        } else {
+            // 非货到付款
+            if ($data['pay_status'] == 0 && $data['order_status'] == 0) {
+                return $data_status_arr['WAITPAY']; //'待支付',
+            }
+            if ($data['pay_status'] == 1 && in_array($data['order_status'], array(0, 1)) && $data['shipping_status'] != 1) {
+                if ($data['order_prom_type'] == 5) { //虚拟商品
+                    return $data_status_arr['WAITRECEIVE']; //'待收货',
+                } elseif($data['order_prom_type'] == 6){
+                    if($data['order_status'] == 0){
+                        return '待处理';
+                    }else{
+                        return $data_status_arr['WAITSEND']; //'待发货',
+                    }
+                }
+                else {
+                    return $data_status_arr['WAITSEND']; //'待发货',
+                }
+            }
+        }
+        if (($data['shipping_status'] == 1) && ($data['order_status'] == 1)) {
+            return $data_status_arr['WAITRECEIVE']; //'待收货',
+        } elseif ($data['order_status'] == 2){
+            return $data_status_arr['FINISH']; //'待评价',
+        } elseif ($data['order_status'] == 3 && $data['pay_status']==3) {
+            return $data_status_arr['CANCEL_REFUND']; //'已取消&已退款',
+        }elseif ($data['order_status'] == 3) {
+            return $data_status_arr['CANCEL']; //'已取消',
+        } elseif ($data['order_status'] == 4) {
+            return $data_status_arr['FINISH']; //'已完成',
+        } elseif ($data['order_status'] == 5) {
+            return $data_status_arr['CANCELLED'];
+        }
+        return $data_status_arr['OTHER'];
+    }
+    /**
      * 获取订单状态的 显示按钮
      * @param $value
      * @param $data
@@ -260,5 +309,21 @@ class Order extends Model
             }
         }
         return $address;
+    }
+
+    public function orderInfo($orderId){
+        $list = D('Order')->where(['order_id'=>$orderId])->field('order_id,order_sn,master_order_sn,consignee,province,city,district,twon,address,mobile,order_amount,add_time,confirm_time,pay_time,pay_status,order_status,shipping_status,user_note')->find();
+        $list['pay_time'] = date('Y-m-d H:i:s',$list['pay_time']);
+        $list['add_time'] = date('Y-m-d H:i:s',$list['add_time']);
+        $list['confirm_time'] = date('Y-m-d H:i:s',$list['confirm_time']);
+        $list['goods'] = $this->hasOne('OrderGoods','order_id')->where(['order_id'=>$orderId])->field('goods_id,goods_name,goods_num,item_name,store_id')->find();
+        $list['goods']['goods_remark'] = D('Goods')->where(['goods_id'=>$list['goods']['goods_id']])->getField('goods_remark');
+        $list['goods']['original_img'] = D('Goods')->where(['goods_id'=>$list['goods']['goods_id']])->getField('original_img');
+        $crowd_end = D('Goods')->where(['goods_id'=>$list['goods']['goods_id']])->getField('crowd_end');
+        $list['purchase'] = $list['pay_status'] =='1' ?count_down($crowd_end) : 0;   //距离结束时间
+        $list['address'] = $this->getAddressRegionAttr('',$list);
+        $list['orderButton'] = $this->getVirtualOrderButtonAttr('',$list);
+        $list['store'] = D('Store')->where(['store_id'=>$list['goods']['store_id']])->field('store_name AS seller_name,store_logo,store_phone,store_qq')->find();
+        return $list;
     }
 }

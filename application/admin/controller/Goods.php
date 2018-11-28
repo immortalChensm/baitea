@@ -177,6 +177,258 @@ class Goods extends Base {
 
     }
 
+    //拍卖品竞拍情况
+    public function auctionCompetitionList()
+    {
+        
+        $model = M('goods');
+        $count = $model->where("is_auction_goods",1)->count();
+        $Page  = new AjaxPage($count,1);
+        $show = $Page->show();
+        $auctionList = $model->where("is_auction_goods",1)->order("auction_end")->limit($Page->firstRow.','.$Page->listRows)->select();
+        
+        $auctionGoods = $this->getAuctionGoods();
+        $userinfo = M("users")->field("user_id,nickname,mobile")->select();
+        foreach ($userinfo as $k=>$v){
+            $userinfo[$v['user_id']] = $v['nickname']?:$v['mobile'];
+        }
+        foreach ($auctionList as $k=>$v){
+            $temp = $auctionGoods[$v['goods_id']];
+            $auctionList[$k]['auction_num'] = count(array_unique($temp));
+            $price = [];
+            if(count($temp)){
+                foreach ($temp as $kk=>$vv){
+                    $price[$vv['id'].'-'.$vv['user_id']] = $vv['offer_price'];
+                }
+                asort($price);
+                $price = array_reverse($price);
+                $user = explode("-", array_keys($price)[0])[1];
+                //print_r($user);
+            }
+            $auctionList[$k]['user'] = $userinfo[$user];
+            
+        }
+        $this->assign('auctionList',$auctionList);
+        $this->assign('page',$show);// 赋值分页输出
+        return $this->fetch();
+    }
+    
+    //拍卖品竞拍情况
+    public function ajaxauctionCompetitionList()
+    {
+    
+        $model = M('goods');
+        $count = $model->where("is_auction_goods",1)->count();
+        $Page  = new AjaxPage($count,15);
+        $show = $Page->show();
+        $auctionList = $model->where("is_auction_goods",1)->order("auction_end")->limit($Page->firstRow.','.$Page->listRows)->select();
+    
+        $auctionGoods = $this->getAuctionGoods();
+        //print_r($auctionGoods);
+        $userinfo = M("users")->field("user_id,nickname,mobile")->select();
+        foreach ($userinfo as $k=>$v){
+            $userinfo[$v['user_id']] = $v['nickname']?:$v['mobile'];
+        }
+        foreach ($auctionList as $k=>$v){
+            $temp = $auctionGoods[$v['goods_id']];
+            //得到该拍卖品的出价人数
+            $auctioN = [];
+            if(count($temp)){
+                foreach ($temp as $kk=>$vv){
+                    $auctioN[$vv['user_id']] = $vv['user_id'];
+                }
+            }
+            $auctionList[$k]['auction_num'] = count($auctioN);
+            $price = [];
+            if(count($temp)){
+                foreach ($temp as $kk=>$vv){
+                    $price[$vv['id'].'-'.$vv['user_id']] = $vv['offer_price'];
+                }
+                asort($price);
+                $price = array_reverse($price);
+                $user = explode("-", array_keys($price)[0])[1];
+                //print_r($user);
+            }
+            $auctionList[$k]['user'] = $userinfo[$user];
+    
+        }
+        $this->assign('auctionList',$auctionList);
+        $this->assign('page',$show);// 赋值分页输出
+        return $this->fetch();
+    }
+    
+    //拍卖品竞拍详情[拍卖现场的数据]
+    public function auctionDetails()
+    {
+        $goodsid = input("goods_id");
+        $ret = M("goods")->where("goods_id",$goodsid)->find();
+        $ret['userList'] = M("auction_room")
+                            ->field([
+                                "ar.*",
+                                "u.nickname",
+                                "u.mobile"
+                            ])
+                            ->alias("ar")
+                            ->where("goods_id",$ret['goods_id'])
+                            ->where("type",1)
+                            ->join("users u","ar.user_id=u.user_id")
+                            ->order("offer_price","desc")
+                            ->select();
+        $auctionNum = [];//出价人数
+        foreach ($ret['userList'] as $k=>$v){
+            $ret['userList'][$k]['nickname'] = $v['nickname']?:$v['mobile'];
+            $auctionNum[$v['user_id']] = $v['user_id'];
+        }
+        $ret['auctionnum'] = count($auctionNum);
+        $this->assign("info",$ret);
+        return $this->fetch();
+    }
+    
+    //每件拍卖品的出价数据
+    private function getAuctionGoods()
+    {
+        $ret = M("auction_room")->where("type",1)->select();
+        $goods = [];
+        foreach ($ret as $k=>$v){
+            $goods[$v['goods_id']][] = $v;
+        }
+        return $goods;
+    }
+   
+    //拍场处理
+    public function addEditAuction()
+    {
+        if($this->request->isPost()){
+            
+            //更新动作
+            if($this->request->param("id")){
+                $data = [
+                    "title"=>input("title"),
+                    "cover"=>input("image"),
+                    "auction_idlist"=>input("auction_idlist")
+                ];
+                $vali = $this->validate($data, 'AuctionSquare');
+                
+                Db::name("auction_square")->where("id",input("id"))->save($data)&&$this->ajaxReturn(array(
+                        'status' => 1,
+                        'msg' => '更新成功',
+                        'data' => array('url' => U('Admin/Goods/auctionList')),
+                ));
+                
+            }else{
+                //添加
+                $vali = $this->validate([
+                    "title"=>input("title"),
+                    "cover"=>input("image"),
+                    "auction_idlist"=>input("auction_idlist")
+                ], 'AuctionSquare');
+                
+                if($vali!='true'){
+                    $this->ajaxReturn(array(
+                        'status' => 0,
+                        'msg' => $vali,
+                        'data' => '',
+                    ));
+                }
+                $goodsid = explode(",", input("auction_idlist"));
+                $data = [
+                    "title"=>input("title"),
+                    "cover"=>input("image"),
+                    "auction_end"=>Db::name("goods")->where("goods_id",$goodsid[0])->value("auction_end"),
+                    "auction_idlist"=>input("auction_idlist")
+                ];
+                Db::name("auction_square")->add($data)&&$this->ajaxReturn(array(
+                        'status' => 1,
+                        'msg' => '添加成功',
+                        'data' => array('url' => U('Admin/Goods/auctionList')),
+                    ));
+            }
+        }else{
+            if($this->request->param("id")){
+                //查找
+                $info = Db::name("auction_square")->where("id",input("id"))->find();
+                $this->assign("info",$info);
+            }
+            return $this->fetch("auction");
+        }
+        
+    
+    }
+    
+    //拍卖品列表
+    public function auctionGoodsList()
+    {
+        $where = ' 1 = 1 '; // 搜索条件
+        (I('is_on_sale') !== '') && $where = "$where and is_on_sale = 1";
+        $cat_id = I('cat_id');
+        // 关键词搜索               
+        $key_word = I('key_word') ? trim(I('key_word')) : '';
+        if($key_word)
+        {
+            $where = "$where and (goods_name like '%$key_word%' or goods_sn like '%$key_word%')" ;
+        }      
+        
+        $model = M('Goods');
+        $count = $model->where($where)->where("is_auction_goods",1)->whereTime("auction_end",">",time())->count();
+        $Page  = new AjaxPage($count,10);
+        $show = $Page->show();
+        $order_str = "on_time desc";
+        $goodsList = $model->where($where)->where("is_auction_goods",1)->whereTime("auction_end",">",time())->order($order_str)->limit($Page->firstRow.','.$Page->listRows)->select();
+		$store_id_list = get_arr_column($goodsList, 'store_id');
+		if (!empty($store_id_list)) {
+			$store_list = M('store')->where("store_id", "in", implode(',', $store_id_list))->getField('store_id,store_name');
+		}
+		$this->assign('store_list',$store_list);
+        $catList = M('goods_category')->cache(true)->select();
+        $catList = convert_arr_key($catList, 'id');
+        $store_type = array('加盟店','平台联营','平台自营');
+        $this->assign('store_type',$store_type);
+        $goods_state = C('goods_state');
+        $this->assign('catList',$catList);
+        foreach ($goodsList as $k=>$v){
+            if($v['is_auction_goods']==1){
+                $goodsList[$k]['goods_sn'] = "无";
+                $goodsList[$k]['store_count'] = "无";
+            }
+        }
+        $this->assign('goodsList',$goodsList);
+        $this->assign('goods_state',$goods_state);
+        $this->assign('page',$show);// 赋值分页输出
+        return $this->fetch();
+    }
+    
+    //拍卖场删除
+    public function delAuctionGoods()
+    {
+     
+        $id = I('id/d');
+        if (empty($id)) {
+            $this->error('非法操作');
+        }
+        $del = Db::name('auction_square')->where("id", $id)->delete();
+        if ($del !== false) {
+            $this->success("删除成功!!!", U('Admin/Goods/auctionList'));
+        } else {
+            $this->error("删除失败!!!", U('Admin/Goods/auctionList'));
+        }
+    }
+    
+    //拍卖专场
+    public function auctionList()
+    {
+        $model = M('AuctionSquare');
+        $count = $model->count();
+        $Page  = new AjaxPage($count,10);
+        $show = $Page->show();
+        $auctionList = $model->order("auction_end")->limit($Page->firstRow.','.$Page->listRows)->select();
+        foreach ($auctionList as $k=>$v){
+            $auctionList[$k]['auction_num'] = count(explode(",", $v['auction_idlist']));
+        }
+        $this->assign('auctionList',$auctionList);
+        $this->assign('page',$show);// 赋值分页输出
+        return $this->fetch();
+    }
+    
     /**
      * 删除分类
      */
@@ -212,6 +464,8 @@ class Goods extends Base {
         $GoodsLogic = new GoodsLogic();        
         $brandList = $GoodsLogic->getSortBrands();
         $categoryList = $GoodsLogic->getSortCategory();
+        //print_r($categoryList);
+        //print_r($brandList);
         $this->assign('categoryList',$categoryList);
         $this->assign('brandList',$brandList);
         return $this->fetch();                                           
@@ -255,12 +509,62 @@ class Goods extends Base {
         $this->assign('store_type',$store_type);
         $goods_state = C('goods_state');
         $this->assign('catList',$catList);
+        foreach ($goodsList as $k=>$v){
+            if($v['is_auction_goods']==1){
+                $goodsList[$k]['goods_sn'] = "无";
+                $goodsList[$k]['store_count'] = "无";
+            }
+        }
         $this->assign('goodsList',$goodsList);
         $this->assign('goods_state',$goods_state);
         $this->assign('page',$show);// 赋值分页输出
+      
+
         return $this->fetch();
     }
 
+    public function ajaxAuctionGoodsList(){
+        $where = ' 1 = 1 '; // 搜索条件
+        
+        (I('is_on_sale') !== '') && $where = "$where and is_on_sale = 1";
+        
+        // 关键词搜索
+        $key_word = I('key_word') ? trim(I('key_word')) : '';
+        if($key_word)
+        {
+            $where = "$where and (goods_name like '%$key_word%' or goods_sn like '%$key_word%')" ;
+        }
+    
+        $model = M('Goods');
+        $count = $model->where($where)->where("is_auction_goods",1)->whereTime("auction_end",">",time())->count();
+        $Page  = new AjaxPage($count,10);
+        $show = $Page->show();
+        $order_str = "`{$_POST['orderby1']}` {$_POST['orderby2']}";
+        $goodsList = $model->where($where)->where("is_auction_goods",1)->whereTime("auction_end",">",time())->order($order_str)->limit($Page->firstRow.','.$Page->listRows)->select();
+        $store_id_list = get_arr_column($goodsList, 'store_id');
+        if (!empty($store_id_list)) {
+            $store_list = M('store')->where("store_id", "in", implode(',', $store_id_list))->getField('store_id,store_name');
+        }
+        $this->assign('store_list',$store_list);
+        $catList = M('goods_category')->cache(true)->select();
+        $catList = convert_arr_key($catList, 'id');
+        $store_type = array('加盟店','平台联营','平台自营');
+        $this->assign('store_type',$store_type);
+        $goods_state = C('goods_state');
+        $this->assign('catList',$catList);
+        foreach ($goodsList as $k=>$v){
+            if($v['is_auction_goods']==1){
+                $goodsList[$k]['goods_sn'] = "无";
+                $goodsList[$k]['store_count'] = "无";
+            }
+        }
+        $this->assign('goodsList',$goodsList);
+        $this->assign('goods_state',$goods_state);
+        $this->assign('page',$show);// 赋值分页输出
+    
+    
+        return $this->fetch();
+    }
     /**
      * 库存日志
      * @return mixed

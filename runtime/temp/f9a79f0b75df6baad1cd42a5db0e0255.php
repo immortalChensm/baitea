@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:4:{s:46:"./application/seller/new/goods\addStepOne.html";i:1522050869;s:41:"./application/seller/new/public\head.html";i:1522050654;s:41:"./application/seller/new/public\left.html";i:1517208469;s:41:"./application/seller/new/public\foot.html";i:1517208469;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:4:{s:46:"./application/seller/new/goods\addStepOne.html";i:1525916235;s:41:"./application/seller/new/public\head.html";i:1528699444;s:41:"./application/seller/new/public\left.html";i:1517208469;s:41:"./application/seller/new/public\foot.html";i:1525943636;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -22,6 +22,8 @@
 <script type="text/javascript" src="__PUBLIC__/js/myAjax.js"></script>
 <script type="text/javascript" src="__PUBLIC__/js/myFormValidate.js"></script>
 <script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate.js"></script>
+<script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate_new.js"></script>
+<script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate_hoursmin.js"></script>
 <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!--[if lt IE 9]>
       <script src="__PUBLIC__/static/js/html5shiv.js"></script>
@@ -220,6 +222,7 @@
 </div>
 
 <div id="footer">
+<!-- 
   <p><a href="/">首页</a>
                 | <a  href="#">招聘英才</a>
                 | <a  href="#">合作及洽谈</a>
@@ -228,8 +231,9 @@
                 | <a  href="#">物流自取</a>
                 | <a  href="#">友情链接</a>
   </p>
-  Copyright 2017 <a href="" target="_blank">掌心商城</a> All rights reserved.<br />本演示来源于
-  <a href="#" target="_blank">掌心商城</a>  
+   -->
+  Copyright 2017 <a href="" target="_blank">趣喝茶</a> All rights reserved.<br />
+  <a href="#" target="_blank">趣喝茶</a>  
 </div>
 <script type="text/javascript" src="__PUBLIC__/static/js/jquery.cookie.js"></script>
 <link href="__PUBLIC__/static/js/perfect-scrollbar.min.css" rel="stylesheet" type="text/css">
@@ -395,7 +399,9 @@ $(document).ready(function(){
             $(this).addClass('classDivClick');
             var cat_1 = $('#class_div_1').find('.classDivClick');
             var cat_2 = $('#class_div_2').find('.classDivClick');
-            $('#commoditydd').empty().html(cat_1.attr('data-title')+'<i class="icon-double-angle-right"></i>'+cat_2.attr('data-title')+'<i class="icon-double-angle-right"></i>'+$(this).attr('data-title'));
+            
+            $('#commoditydd').empty().html(cat_1.attr('data-title')+'<i class="icon-double-angle-right"></i>'+cat_2.attr('data-title'));//+'<i class="icon-double-angle-right"></i>'+$(this).attr('data-title')
+            
             $("input[name=cat_id3]").attr('value',$(this).attr('data-goods-cat-id'));
         })
     })

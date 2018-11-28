@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/style.css">
+     <link rel="stylesheet" href="/public/__STATIC__/h5/plugins/layui/css/layui.css">
+    <title>帮助与反馈</title>
+    <style>
+        .btns-tj{
+            text-align: center;
+        }
+        .btns-tj button{
+            color: #ffffff;
+            padding: 10px 150px;
+            background-color: #35B20D;
+            border: none;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="body-container">
+   
+    <div class="form-info">
+        <textarea class="info-nr" placeholder="请输入您的反馈信息（必填，500字以内）" name="context" maxlength="500"></textarea>
+        <div class="info-list">
+            <p class="list-p">
+                <span>邮箱</span>
+                <span>
+                    <input type="email" class="list-input" name="email" placeholder="请输入邮箱(选填)"/>
+                </span>
+            </p>
+        </div>
+        <div class="info-list">
+            <p class="list-p">
+                <span>手机</span>
+                <span>
+                    <input type="tel" class="list-input" name="mobile" placeholder="请输入手机号码"/>
+                </span>
+            </p>
+        </div>
+    </div>
+    <p class="info-sm">
+        如果您需要了解反馈结果，请留下邮箱或者手机号码
+    </p>
+    <!--内容end-->
+    
+   
+    <p class="btns-tj" id="feedback"><button>提交</button></p>
+</div>
+<script src="/public/__STATIC__/h5/js/jquery.min.js"></script>
+<script src="/public/__STATIC__/js/layer/layer.js"></script>
+<script>
+
+	/**
+	 * layer提示消息
+	 * msg 消息内容
+	 * time 停留时间，可省略
+	 */
+	function layermsg(msg,time){
+		if(msg == 'undefined' || msg == '') return false;
+		time = time? time : 5;
+		layer.open({content:msg,time: time,skin: 'msg'});
+	}
+	
+    $("body").css("background-color","#fff")
+    
+    $("input[name=mobile]").on("blur",function(e){
+    	
+    	if(!/1[34578]\d{9}$/.test($(this).val())){
+    		layer.msg("手机号码不正确");
+    	}
+    });
+	$("input[name=email]").on("blur",function(e){
+		var reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$"); //正则表达式
+		
+    	if(!reg.test($(this).val())){
+    		layer.msg("邮箱不对");
+    	}
+    });
+    $(function(){
+    	
+    	$("#feedback").click(function(){
+    		
+    		if(!/1[34578]\d{9}$/.test($(":input[name=mobile]").val())){
+        		
+        		layer.msg("手机号码不正确");
+        		return false;
+        	}
+    		var reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$"); //正则表达式
+    		
+        	if(!reg.test($(":input[name=email]").val())){
+        		
+        		layer.msg("邮箱不对");
+        		return false;
+        	}
+    		
+    		$.ajax({
+        		type:'post',
+        		url:"{:Url('Users/feedback')}",
+        		dataType:'json',
+        		data:{
+        			mobile:$("input[name=mobile]").val(),
+        			email:$("input[name=email]").val(),
+        			context:$(":input[name=context]").val()
+        		},
+        		success:function(data){
+        			if(data.status==1){
+        				
+        				layer.msg('提交成功',function(){
+        					setTimeout("location.href='"+"{:U('Users/helpentrance')}"+"'",10);
+        				});
+                        
+                        
+        			}else{
+        				layer.msg(data.msg);
+        			}
+        		}
+        	});
+    	})
+    	
+    });
+</script>
+
+</body>
+</html>

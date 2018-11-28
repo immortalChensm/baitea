@@ -1,0 +1,175 @@
+<include file="public/layout" />
+<style>
+.ncm-goods-gift {
+	text-align: left;
+}
+.ncm-goods-gift ul {
+    display: inline-block;
+    font-size: 0;
+    vertical-align: middle;
+}
+.ncm-goods-gift li {
+    display: inline-block;
+    letter-spacing: normal;
+    margin-right: 4px;
+    vertical-align: top;
+    word-spacing: normal;
+}
+.ncm-goods-gift li a {
+    background-color: #fff;
+    display: table-cell;
+    height: 30px;
+    line-height: 0;
+    overflow: hidden;
+    text-align: center;
+    vertical-align: middle;
+    width: 30px;
+}
+.ncm-goods-gift li a img {
+    max-height: 30px;
+    max-width: 30px;
+}
+
+.ncap-order-style .ncap-order-details{
+	margin:20px auto;
+}
+</style>
+<div class="page">
+  <div class="fixed-bar">
+    <div class="item-title"><a class="back" href="javascript:history.back(-1)" title="返回列表"><i class="fa fa-arrow-circle-o-left"></i></a>
+      <div class="subject">
+        <h3>拍卖品竞拍</h3>
+        <h5>商城拍卖现场竞拍详情</h5>
+      </div>
+    </div>
+     
+    
+  </div>
+  <div class="ncap-order-style">
+    <div class="titile">
+      <h3></h3>
+    </div>
+
+
+    <div class="ncap-order-details">
+      
+      <div class="tabs-panels">
+          
+        
+  
+        
+        <div class="goods-info">
+          <h4>拍卖品信息</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>拍卖品名称</th>
+                <th>拍卖价格</th>
+                <th>结拍时间</th>
+                <th>出价人数</th>
+              </tr>
+            </thead>
+            <tbody>
+           	<tr>
+                <td ><div style="float:left;margin:0px 5px;">{$info.goods_name}</div><div class="goods-thumb" style="float:left;"><a href="{$info.original_img}" target="_blank"><img alt="" src="{$info.original_img}" /> </a></div></td>
+                <td >{:round($info.shop_price)}</td>
+                <td>{:date('Y-m-d H',$info.auction_end)}</td>
+                <td>{$info.auctionnum}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div class="goods-info">
+          <h4>拍卖现场</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>出价人</th>
+                <th>出价时间</th>
+                <th>出价金额</th>
+              </tr>
+            </thead>
+            <tbody>
+            <volist name="info.userList" id="vo">
+	           	<tr>
+	                <td ><div style="float:left;margin:0px 5px;">{$vo.nickname}</div></td>
+	                <td >{:date('Y-m-d H:i',$vo.add_time)}</td>
+	                <td>{:round($vo.offer_price)}</td>
+	            </tr>
+            </volist>
+          </table>
+        </div>
+        
+        
+        </div>
+        
+      </div>
+  	</div>
+  </div>
+</div>
+<script type="text/javascript">
+     $(function(){
+    	 
+    	 $("#pay").click(function(e){
+    		 //layer.alert('订单中至少要有一个商品', {icon: 2});
+    		 //layConfirm("确定要删除吗?" , function(){
+    		//		location.href = del_url;
+    		//});
+    		layConfirm("您确定吗?" , function(){
+    			$.ajax({
+       			 url:"{:Url('Auction/editAuction')}",
+       			 type:'post',
+       			 dataType:'json',
+       			 data:{
+       				 id:"{$order.id}",
+       				 type:2
+       			 },
+       			 success:function(data){
+       				 if(data.ret==1){
+       					 layer.msg('操作成功', {icon: 1},function(){
+       	 						window.location.href = "{:Url('Auction/index')}";
+       	 					});
+       				 }else{
+       					 layer.alert('操作失败', {icon: 2});
+       				 }
+       				 
+       			 }
+       		 });
+    		});
+    		 
+    	 })
+    	 
+    	 $("#cancel").click(function(e){
+    		 //layer.alert('订单中至少要有一个商品', {icon: 2});
+    		 //layConfirm("确定要删除吗?" , function(){
+    		//		location.href = del_url;
+    		//});
+    		 
+    		 layConfirm("您确定吗?" , function(){
+    			 $.ajax({
+        			 url:"{:Url('Auction/editAuction')}",
+        			 type:'post',
+        			 dataType:'json',
+        			 data:{
+        				 id:"{$order.id}",
+        				 type:0
+        			 },
+        			 success:function(data){
+        				 if(data.ret==1){
+        					 layer.msg('操作成功', {icon: 1},function(){
+        	 						window.location.href = "{:Url('Auction/index')}";
+        	 					});
+        				 }else{
+        					 layer.alert('操作失败', {icon: 2});
+        				 }
+        				 
+        			 }
+        		 });
+    		});
+    		 
+    		 
+    	 })
+     })
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:1:{s:50:"./application/seller/new/public\dispatch_jump.html";i:1517208469;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:1:{s:50:"./application/seller/new/public\dispatch_jump.html";i:1530692695;}*/ ?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -67,7 +67,7 @@ em{font-style: normal;}
 			</div>
 			<div class="recigle">
 				<p>Copyright©2014-2017<em class="copyright"><a class="copyright" href="http://shopb2c2b.mppstore.com"></a></em></p>
-				<p><em class="copyright"><a class="copyright" href="http://shopb2c2b.mppstore.com">掌心网络有限公司</a></em>出品</p>
+				<p><em class="copyright"><a class="copyright" href="http://shopb2c2b.mppstore.com">杭州淘最科技有限公司</a></em>出品</p>
 			</div>
 		</div>
 		<script type="text/javascript">

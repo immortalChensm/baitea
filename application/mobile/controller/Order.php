@@ -556,6 +556,8 @@ class Order extends MobileBase {
     	if(!$order) $this->error('非法操作');
     	if(IS_POST)
     	{
+    	    print_r($_POST);
+    	    exit;
     		$model = new OrderLogic();
     		$res = $model->addReturnGoods($rec_id,$order);  //申请售后
     		if($res['status']==1){

@@ -38,6 +38,13 @@ class Order extends Base
         $this->ajaxReturn($return);
     }
 
+    /*订单详情*/
+    public function OrderDetail(){
+        !I('orderId') && $this->ajaxReturn(['status' => -1, 'msg' => '请携带订单id']);
+        $list = Model('Order')->orderInfo(I('orderId'));
+        $this->ajaxReturn(['status' => 1, 'msg' => '','result'=>$list]);
+    }
+
     /*
      * 获取订单详情
      */
@@ -89,7 +96,31 @@ class Order extends Base
             }
             $v['item_id'] = empty($item_id) ? 0 : $item_id;
         }
+        
+        /**************@wroteby jackcsm 2018 4 24***************/
+
+        //获取这个订单的商品
+        $order_info['new_goods_list'] = \think\Db::name("order_goods")->where("order_id",$order_info['order_id'])->select();
+        $orderGoodsIdArr = [];
+        foreach ($order_info['new_goods_list'] as $k=>$v){
+            $orderGoodsIdArr[$v['goods_id']] = $v['goods_id'];
+        }
+
+        $order_info['img'] = $this->goodsimg($orderGoodsIdArr);
+       
+        /*****************************/
+     
         $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result'=>$order_info]);
+    }
+    
+    public function goodsimg($orderGoodsIdArr)
+    {
+        $a = \think\Db::name("goods")->field("goods_id,original_img")->whereIn("goods_id",$orderGoodsIdArr)->select();
+        $b = [];
+        foreach ($a as $key=>$v){
+            $b[$v['goods_id']] = $v['original_img'];
+        }
+        return $b;
     }
     
     /*
@@ -187,7 +218,7 @@ class Order extends Base
     //传递id 订单id
     public function order_confirm()
     {
-    	$id = I('get.id/d', 0);
+    	$id = I('id/d', 0);
     	$data = confirm_order($id, $this->user_id);
     	if($this->request->param("isajax")){
     	    $this->ajaxReturn($data);
@@ -248,6 +279,11 @@ class Order extends Base
     	$goods_id = I('goods_id/d',0);
     	$spec_key = I('spec_key','');
     	
+    	//must verify 
+    	empty($rec_id)&&$this->ajaxReturn(['status' =>-1, 'msg' => "订单商品rec_id未传递"]);
+    	empty($order_id)&&$this->ajaxReturn(['status' =>-1, 'msg' => "订单id未传递"]);
+    	empty($goods_id)&&$this->ajaxReturn(['status' =>-1, 'msg' => "订单商品id未传递"]);
+    	$type = I("is_ajax","0");
     	//判断是否重复提交申请售后
     	if($order_id && $goods_id){
     	    $return_goods = M('return_goods')
@@ -265,7 +301,7 @@ class Order extends Base
     	}
     	   
     	
-    	if(IS_POST){
+    	if(IS_POST&&$type){
     		$model = new OrderLogic();
     		$res = $model->addReturnGoods($rec_id,$order);  //申请售后
     		$this->ajaxReturn($res);
@@ -290,13 +326,139 @@ class Order extends Base
     	    'order_id' => $order['order_id'],
     	    'order_sn' => $order['order_sn'],
     	    'store_name'=> $store['store_name'],
-    	    'store_address'=> $region[$store['province_id']].$region[$store['city_id']].$region[$store['district']].$store['store_address'],
-    	    'service_phone'=> $store['store_phone'], //客服电话
-            'return_method' => ['仅退款','退货退款','换货','维修']
+    	    'store_address'=>$region[$store['province_id']].$region[$store['city_id']].$region[$store['district']].$store['store_address'],
+    	    'service_phone'=>$store['store_phone'], //客服电话
+            'return_method' =>['仅退款','退货退款','换货','维修'],
+    	    'store'=>$store,
+    	    'goods_info'=>\think\Db::name("goods")->where("goods_id",$order_goods['goods_id'])->find(),
+    	    'order_state'=>\think\Db::name("order")->where("order_id",$order_goods['order_id'])->value("shipping_status")
     	)]);
-
-    }
+        }
+        
+        //批量性申请退款数据
+        /**
+         * 申请退货
+         */
+        public function getReturngoodslist()
+        {
+            /*$rec_id = I('rec_id/d',0);
+            $order_id = I('order_id/d',0);
+            $goods_id = I('goods_id/d',0);
+            $spec_key = I('spec_key','');
+             
+             */
+            
+            $spec_key = I('spec_key','');
+            $Recid = [];
+            $OrderId = [];
+            $GoodsId = [];
+            $orderInfo = \think\Db::name("order_goods")->where("order_id",$this->request->param("order_id"))->find();
+            foreach ($orderInfo as $k=>$v){
+                $Recid[$v['rec_id']] = $v['rec_id'];
+                $OrderId[$v['rec_id']] = $v['order_id'];
+                $GoodsId[$v['rec_id']] = $v['goods_id'];
+            }
+            
+            foreach ($Recid as $k=>$v){
+                
+                        $type = I("is_ajax","0");
+                        //判断是否重复提交申请售后
+                        if($OrderId[$k] && $GoodsId[$k]){
+                            $return_goods = M('return_goods')
+                            ->where(['order_id'=>$OrderId[$k],'goods_id'=>$GoodsId[$k],'spec_key'=>$spec_key])
+                            ->where('status','in','0,1')->find();
+                            !empty($return_goods) && $this->ajaxReturn(array('status'=>-1,'msg'=>'已经在申请退货中','result'=>''));
+                        }
+                    
+                        $return_goods = M('return_goods')->where(array('rec_id'=>$Recid[$k]))->find();
+                        $order_goods = M('order_goods')->where(array('rec_id'=>$Recid[$k]))->find();
+                        $order = M('order')->where(array('order_id'=>$order_goods['order_id'],'user_id'=>$this->user_id))->find();
+                    
+                        if(!$order){
+                            $this->ajaxReturn(['status' => -1, 'msg' => "参数[$Recid[$k]]无效", 'result' => '']);
+                        }
+                    
+                       
+                        $confirm_time_config = tpCache('shopping.auto_service_date');
+                        $confirm_time = $confirm_time_config * 24 * 60 * 60;
+                        if ((time() - $order['confirm_time']) > $confirm_time && !empty($order['confirm_time'])) {
+                            $this->ajaxReturn(['status' => -1, 'msg' => '已经超过' . $confirm_time_config . "天内退货时间" , 'result' => '']);
+                        }
+                        
+                        //店铺信息
+                        $store = M('store')->where(array('store_id'=>$order['store_id']))->find();
+                        $map['id'] = array('in',array($store['province_id'],$store['city_id'],$store['district']));
+                        $region = M('region')->where($map)->cache(7200)->getField('id,name');
+                    
+                        $rec_order = [
+                            'goods_id'=>$order_goods['goods_id'],
+                            'goods_name'=>$order_goods['goods_name'],
+                            'goods_price' => $order_goods['goods_price'],
+                            'goods_num' => $order_goods['goods_num'],
+                            'spec_key' => $order_goods['spec_key'],
+                            'spec_key_name' => $order_goods['spec_key_name'],
+                            'order_id' => $order['order_id'],
+                            'order_sn' => $order['order_sn'],
+                            'store_name'=> $store['store_name'],
+                            'store_address'=>$region[$store['province_id']].$region[$store['city_id']].$region[$store['district']].$store['store_address'],
+                            'service_phone'=>$store['store_phone'], //客服电话
+                            'return_method' =>['仅退款','退货退款'],
+                            'store'=>$store,
+                            'goods_info'=>\think\Db::name("goods")->where("goods_id",$order_goods['goods_id'])->find(),
+                            'order_state'=>\think\Db::name("order")->where("order_id",$order_goods['order_id'])->value("shipping_status")
+                        ];
+                        
+                      $ReclistOrder['list'][] = $rec_order;
+            }
+            
+            $this->ajaxReturn(['status' => 1, 'msg' => "获取成功", 'result' =>$ReclistOrder]);
+        }
+        
+    //批量退款额外添加
+    //@wroteby jackcsm
     
+    public function return_listgoods()
+    {
+        $order = \think\Db::name("order_goods")->where("order_id",$this->request->param("order_id"))->find();
+        $Recid = [];
+        $goodsId = [];
+        $OrderId = [];
+        $goodsNum =[];
+        
+        foreach($order as $k=>$v){
+            $Recid[$v['rec_id']] = $v['rec_id'];
+            $goodsId[$v['rec_id']] = $v['goods_id'];
+            $OrderId[$v['rec_id']] = $v['order_id'];
+            $goodsNum[$v['rec_id']] = $v['goods_num'];
+        }
+        //退款类型
+        $type   = $this->request->param("type");
+        $reason = $this->request->param("reason");
+        $describe = $this->request->param("describe");
+        $imgs     = $this->request->param("imgs");
+        //$order_sn = \think\Db::name("order")->where("order_id",$this->request->param("order_id"))->value("order_sn");
+        $model = new OrderLogic();
+        //退款的订单数据
+        $order_info = M('order')->where(array('order_id'=>$this->request->param("order_id"),'user_id'=>$this->user_id))->find();
+        
+        foreach ($Recid as $k=>$v){
+            
+            $res = $model->addReturnGoodspatch($v,$order_info,[
+                "rec_id"=>$v,
+                "order_id"=>$OrderId[$k],
+                "goods_id"=>$goodsId[$k],
+                "type"=>$type,
+                "reason"=>$reason,
+                "describe"=>$describe,
+                "imgs"=>$imgs,
+                "order_sn"=>$order_info['order_sn'],
+                "goods_num"=>$goodsNum[$k]
+            ]);  
+        }
+        
+        $this->ajaxReturn(['status' => 1, 'msg' => "批量退款成功"]);
+    }
+     
     /**
      * 退换货列表
      */
@@ -316,7 +478,7 @@ class Order extends Base
                 $data['return_list'][$key]['goods_name'] = $data['goodsList'][$val['goods_id']];
                 $data['return_list'][$key]['status_name'] = $state[$val['status']];
             }
-            $this->ajaxReturn(['status'=>1, 'msg'=>'获取成功', 'result'=>$data['return_list']]);
+            $this->ajaxReturn(['status'=>1, 'msg'=>'获取成功', 'result'=>$this->getreturn_goodsinfo($data)]);
         }
         
         $this->assign('goodsList', $data['goodsList']);
@@ -332,6 +494,43 @@ class Order extends Base
     	return $this->fetch();
     }
     
+    //获取退款订单的商铺信息
+    private function getreturn_goodsinfo($return_list)
+    {
+        $storeId = [];
+        $goodsId = [];
+        $orderId = [];
+        foreach ($return_list['return_list'] as $k=>$v){
+            $storeId[] = $v['store_id'];
+            $goodsId[] = $v['goods_id'];
+            $orderId[] = $v['order_id'];
+        }
+        
+        $storeInfo = \think\Db::name("store")->whereIn("store_id",$storeId)->select();
+        $goodsinfo = \think\Db::name("goods")->whereIn("goods_id",$goodsId)->select();
+        $orderInfo = \think\Db::name("order")->whereIn("order_id",$orderId)->select();
+        
+        $store =[];
+        $goods = [];
+        $order = [];
+        foreach ($storeInfo as $k=>$v){
+            $store[$v['store_id']] = $v;
+        }
+        foreach ($goodsinfo as $k=>$v){
+            $goods[$v['goods_id']] = $v;
+        }
+        foreach ($orderInfo as $k=>$v){
+            $order[$v['order_id']] = $v;
+        }
+        foreach ($return_list['return_list'] as $k=>$v){
+            $return_list['return_list'][$k]['storeinfo'] = $store[$v['store_id']];
+            $return_list['return_list'][$k]['goodsinfo'] = $goods[$v['goods_id']];
+            $return_list['return_list'][$k]['orderinfo'] = $order[$v['order_id']];
+        }
+        unset($return_list['goodsList']);
+        unset($return_list['page']);
+        return $return_list['return_list'];
+    }
     /**
      *  退货详情
      */
@@ -377,6 +576,7 @@ class Order extends Base
                 'result' => [
                     'return_goods' => $return_goods,
                     'goods' => $goods,
+                    'shoplogo'=>$store['store_logo'],
                     'return_method' => ['仅退款','退货退款','换货','维修']
                 ]
             ]);
@@ -755,5 +955,192 @@ class Order extends Base
         $logic = new \app\common\logic\OrderLogic;
         $return = $logic->uploadReturnGoodsImg();
         $this->ajaxReturn($return);
+    }
+
+    //提醒商家快到达结束时间
+    public function crowd_remind(){
+
+        //查出所有众筹商品
+        $list = D('Goods')->where(array('is_crowd_goods'=>'1','is_on_sale'=>'1','remind'=>'0'))->select();
+        foreach ($list as $key => $val) {
+            $time = $val['crowd_end'] - time();
+            if($time <='259200'){
+                //查出订单中的商品总金额
+                $goods = D('OrderGoods')->where(['goods_id'=>$val['goods_id']])->select();
+                $money = 0;
+                foreach ($goods as $k => $v) {
+                    $order = D('Order')->where(['order_id'=>$v['order_id']])->find();
+                    ($order['pay_status'] =='1' && $order['order_status'] =='0') && $money += $order['order_amount'];
+                }
+
+                if($money < $val['crowdfunding_money']){
+                    $phone = D('Store')->where(['store_id'=>$val['store_id']])->getField('store_phone');
+                    //给商家发短信
+                    $msg = '您发布的众筹'.$val['goods_name'].'即将结束，还没有达到众筹目标，请及时处理或延期。';
+                    $this->send_phone_code('13656214541',$msg);
+                } 
+            }
+        }
+    }
+
+    //众筹提醒
+    public function crowdgoods_notice()
+    {
+        //查出所有众筹商品　已结束的众筹商品
+        $list = D('Goods')->where(array('is_crowd_goods'=>'1','is_on_sale'=>'1','remind'=>'0'))->select();
+        $storelist = Db::name("store")->field("store_id,store_phone")->select();
+        $storePhone = [];
+        foreach ($storelist as $k=>$v){
+            $storePhone[$v['store_id']] = $v['store_phone'];
+        }
+        $goodsId = [];
+        $goodsInfo = [];
+        $storeGoods = [];
+        $goodsName = [];
+        $goodsCrowdTime = [];
+        foreach ($list as $k=>$v){
+            $goodsId[]                     = $v['goods_id'];
+            $goodsInfo[$v['goods_id']]     = $v['crowdfunding_money'];
+            $storeGoods[$v['goods_id']]    = $v['store_id'];
+            $goodsName[$v['goods_id']]     = $v['goods_name'];
+            $goodsCrowdTime[$v['goods_id']]= $v['crowd_end'];
+        }
+        //获取已经支持的众筹商品
+        $order_goods = Db::name("order_goods")->whereIn("goods_id",$goodsId)->select();
+        $order_id = [];
+        $orderIds = [];
+        $crowdId  = [];
+        
+        $recid    = [];
+       
+        if($order_goods){
+            //获取已经支持的众筹订单 此商品已经支持的众筹订单
+            foreach ($order_goods as $k=>$v){
+                $order_id[$v['goods_id']][] = $v['order_id'];
+                $orderIds[]                 = $v['order_id'];
+                $crowdId[$v['order_id']]    = $v['goods_id'];
+                $recid[$v['goods_id']]      = $v['rec_id'];
+             
+            }
+        }
+        //获取已经支持众筹的数据
+        $crowd_order = Db::name("order")->whereIn("order_id",$orderIds)->select();
+        $crowd_order_goods = [];
+        foreach ($crowd_order as $k=>$v){
+            $crowd_order_goods[$crowdId[$v['order_id']]][] = $v;
+        }
+        foreach ($crowd_order_goods as $k=>$order){
+            $crowd_money = [];
+            foreach ($order as $kk=>$vv){
+                if($vv['pay_status']==1&&($vv['order_status']==0||$vv['order_status']==1)){
+                    $crowd_money[] = $vv['total_amount'];
+                }
+            }
+            $crowd_diff_time = $goodsCrowdTime[$k]-time();
+            if($crowd_diff_time>0&&$crowd_diff_time<='2592000'){//72小时 
+                if($goodsInfo[$k]>array_sum($crowd_money)){//众筹金额未达到目标
+                    //您在趣喝茶发起的${goods}即将结束，还没有达到${purpose}目标，请及时处理或延期。
+                    $ret = sms_send($storePhone[$storeGoods[$k]],"SMS_136385115",[
+                        "goods"=>"众筹{$goodsName[$k]}",
+                        "purpose"=>"众筹"
+                    ]);
+                    
+                    //已经发送则设置为已提醒
+                    Db::name("goods")->where("goods_id",$k)->setField("remind",1);
+                } 
+            }
+            
+        }
+        
+    }
+
+    //自动退款给用户
+    public function tuikuan(){
+
+        //查出所有众筹商品
+        $list = D('Goods')->where(array('is_crowd_goods'=>'1','is_on_sale'=>'1','crowd_end'=>array('lt',time())))->select();
+        foreach ($list as $key => $val) {
+                //查出订单中的商品总金额
+                $goods = D('OrderGoods')->where(['goods_id'=>$val['goods_id']])->select();
+                $money = 0;
+                foreach ($goods as $k => $v) {
+                    $order = D('Order')->where(['order_id'=>$v['order_id'],'status'=>'1'])->find();
+                    if($order['pay_status'] =='1' && $order['order_status'] =='0'){
+
+                        D('Users')->where(['user_id'=>$order['user_id']])->setInc('user_money',$order['order_amount']);
+                        D('Order')->where(['order_id'=>$order['order_id']])->save(array('pay_status'=>'3'));
+                    }
+                } 
+            
+        }
+    }
+
+    public function send_phone_code($mobile,$msg){
+        $sendUrl = 'http://v.juhe.cn/sms/send'; //短信接口的URL
+            $smsConf = array(
+                'key'   => '399102f1109ffcd4b405650e074e4847', //您申请的APPKEY
+                'mobile'    => $mobile, //接受短信的用户手机号码
+                'tpl_id'    => '74139', //您申请的短信模板ID，根据实际情况修改
+                'tpl_value' =>$msg, //您设置的模板变量，根据实际情况修改
+                'dtype'=>'json'
+            );
+            $content = juhecurl($sendUrl,$smsConf,1); //请求发送短信
+    }
+    
+    //众筹退款
+    public function crowd_refund()
+    {
+        //查出所有众筹商品　已结束的众筹商品
+        $list = D('Goods')->where(array('is_crowd_goods'=>'1','is_on_sale'=>'1','crowd_end'=>array('lt',time())))->select();
+        $goodsId = [];
+        $goodsInfo = [];
+        foreach ($list as $k=>$v){
+            $goodsId[] = $v['goods_id'];
+            $goodsInfo[$v['goods_id']] = $v['crowdfunding_money'];
+        }
+        //获取已经支持的众筹商品
+        $order_goods = Db::name("order_goods")->whereIn("goods_id",$goodsId)->select();
+        $order_id = [];
+        $orderIds = [];
+        $crowdId  = [];
+        
+        $recid    = [];
+        if($order_goods){
+            //获取已经支持的众筹订单 此商品已经支持的众筹订单
+            foreach ($order_goods as $k=>$v){
+                $order_id[$v['goods_id']][] = $v['order_id'];
+                $orderIds[]                 = $v['order_id'];
+                $crowdId[$v['order_id']]    = $v['goods_id'];
+                $recid[$v['goods_id']]      = $v['rec_id'];
+            }
+        }
+        //获取已经支持众筹的数据
+        $crowd_order = Db::name("order")->whereIn("order_id",$orderIds)->select();
+        $crowd_order_goods = [];
+        foreach ($crowd_order as $k=>$v){
+            $crowd_order_goods[$crowdId[$v['order_id']]][] = $v;
+        }
+        //循环处理每个众筹商品所支持的众筹金额是否未达到众筹目标　　方可退款[退回余额]
+        foreach ($crowd_order_goods as $k=>$order){
+            $crowd_money = [];
+            foreach ($order as $kk=>$vv){
+                if($vv['pay_status']==1&&($vv['order_status']==0||$vv['order_status']==1)){
+                    $crowd_money[] = $vv['total_amount'];
+                }
+            }
+            //此商品的众筹目标是否未达到
+            if(array_sum($crowd_money)>0){
+                if($goodsInfo[$k]>array_sum($crowd_money)){
+                    if(updateRefundCrowdGoods($recid[$k],1)){
+                        echo '众筹退款ok';
+                       
+                        
+                    };//退到会员账户余额
+                }
+            }else{
+                echo 'goodsid='.$k.'没有众筹记录'.PHP_EOL;
+            }
+        }
+        
     }
 }

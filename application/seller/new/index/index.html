@@ -65,22 +65,25 @@
 					<li><a href="{:U('Goods/goodsList',array('goods_state'=>1))}" class="num">出售中 <strong id="nc_online">{$count.pass_goods}</strong></a></li>
 					<li><a href="{:U('Goods/goods_offline',array('goods_state'=>0))}" class="num">待审核 <strong id="nc_offline">{$count.verify_goods}</strong></a></li>
 					<li><a href="{:U('Goods/goods_offline',array('is_on_sale'=>2))}" class="num">违规下架 <strong id="nc_lockup">{$count.off_sale_goods}</strong></a></li>
-					<li><a href="{:U('Service/ask_list')}" class="num">待回复咨询 <strong id="nc_consult">{$count.consult}</strong></a></li>
+					<!--
+					<li><a href="{:U('Service/ask_list')}" class="num">待回复咨询 <strong id="nc_consult">{$count.consult}</strong></a></li>  -->
 		        </ul>
 		      </div>
 		    </div>
 		
 		    <div class="container type-b">
+		    <!-- 
 		      <div class="hd">
 		        <h3>系统公告</h3>
 		        <h5></h5>
-		      </div>
+		      </div> -->
 		      <div class="content">
+		      <!--
 		        <ul>
 		        	<li><a href="{:U('Home/Article/detail',['article_id'=>30])}" target="_blank" >罚款制度公告</a></li>
 		        	<li><a href="{:U('Home/Article/detail',['article_id'=>29])}" target="_blank" >关于举报罚款制度公告</a></li>
 		        	<li><a href="{:U('Home/Article/detail',['article_id'=>28])}" target="_blank" >关于伪劣货品举报说明</a></li>
-		        </ul>
+		        </ul>  -->
 		        <dl>
 		          <dt>平台联系方式</dt>
                     <dd>QQ1：{$tpshop_config.shop_info_qq}</dd>
@@ -107,8 +110,9 @@
 		          <!--<li><a href="{:U('Seller/Order/index',array('order_status'=>1))}" class="num">待发货 <strong id="nc_delivery">{$count.wait_shipping}</strong></a></li>-->
                     <li><a href="{:U('Seller/Order/delivery_list')}" class="num">待发货 <strong id="nc_delivery">{$count.wait_shipping}</strong></a></li>
 		          <li><a href="{:U('Seller/Service/refund_list')}" class="num"> 退货申请 <strong id="nc_refund_lock">{$count.refund_pay}</strong></a></li>
+		          <!-- 
 		          <li><a href="{:U('Seller/Service/return_list')}" class="num"> 换货/维修申请 <strong id="nc_return_lock">{$count.refund_goods}</strong></a></li>
-		          <li><a href="{:U('Seller/Order/delivery_list',array('shipping_status'=>2))}" class="num"> 部分发货订单 <strong id="nc_return">{$count.part_shipping}</strong></a></li>
+		          <li><a href="{:U('Seller/Order/delivery_list',array('shipping_status'=>2))}" class="num"> 部分发货订单 <strong id="nc_return">{$count.part_shipping}</strong></a></li> -->
 		          <li><a href="{:U('Seller/Order/index',array('order_status'=>0))}" class="num"> 待确认订单 <strong id="nc_bill_confirm">{$count.wait_confirm}</strong></a></li>
 		        </ul>
 		      </div>

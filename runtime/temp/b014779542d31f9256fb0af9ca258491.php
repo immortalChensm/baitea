@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:4:{s:49:"./application/seller/new/store\store_setting.html";i:1522748827;s:41:"./application/seller/new/public\head.html";i:1522050654;s:41:"./application/seller/new/public\left.html";i:1517208469;s:41:"./application/seller/new/public\foot.html";i:1517208469;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:4:{s:49:"./application/seller/new/store\store_setting.html";i:1522748827;s:41:"./application/seller/new/public\head.html";i:1528699444;s:41:"./application/seller/new/public\left.html";i:1517208469;s:41:"./application/seller/new/public\foot.html";i:1525943636;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -22,6 +22,8 @@
 <script type="text/javascript" src="__PUBLIC__/js/myAjax.js"></script>
 <script type="text/javascript" src="__PUBLIC__/js/myFormValidate.js"></script>
 <script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate.js"></script>
+<script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate_new.js"></script>
+<script type="text/javascript" src="__ROOT__/public/static/js/layer/laydate/laydate_hoursmin.js"></script>
 <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!--[if lt IE 9]>
       <script src="__PUBLIC__/static/js/html5shiv.js"></script>
@@ -358,6 +360,7 @@ function callback3(img_str){
 </div>
 
 <div id="footer">
+<!-- 
   <p><a href="/">首页</a>
                 | <a  href="#">招聘英才</a>
                 | <a  href="#">合作及洽谈</a>
@@ -366,8 +369,9 @@ function callback3(img_str){
                 | <a  href="#">物流自取</a>
                 | <a  href="#">友情链接</a>
   </p>
-  Copyright 2017 <a href="" target="_blank">掌心商城</a> All rights reserved.<br />本演示来源于
-  <a href="#" target="_blank">掌心商城</a>  
+   -->
+  Copyright 2017 <a href="" target="_blank">趣喝茶</a> All rights reserved.<br />
+  <a href="#" target="_blank">趣喝茶</a>  
 </div>
 <script type="text/javascript" src="__PUBLIC__/static/js/jquery.cookie.js"></script>
 <link href="__PUBLIC__/static/js/perfect-scrollbar.min.css" rel="stylesheet" type="text/css">

@@ -739,8 +739,8 @@
     }
   ]
 }
-         */
-         
+
+ 
          //领取优惠卷接口  本项目只是免费领取优惠卷　　默认是全店使用的优惠卷
         
          //优惠卷使用流程：１商家发布　　２调用优惠卷列表接口获取优惠卷　３用户选择优惠卷时调用领取优惠卷接口完成领取　４下单时调用我的优惠卷接口获取优惠卷　　５下单时传递店铺对应我的优惠卷id
@@ -750,10 +750,166 @@
          $data = [
                 'coupon_id'=>32,//要领取的优惠卷id
          ];
+         //密码修改
+         $token = 'ac4b4a08a60bf77e1742902bc2acabf4';
+         $url = "http://www.liketea.com/index.php/api/User/password?token={$token}";
+         $data = [
+             'new_password'=>'654321',
+             'old_password'=>'123456'
+         ];
+         //忘记密码
+         $token = 'ac4b4a08a60bf77e1742902bc2acabf4';
+         $url = "http://www.liketea.com/index.php/api/User/forgotpwd";
+         $data = [
+             'username'=>'18896871476',
+             'code'=>'1234',
+             'password'=>'abcd123',
+             'password2'=>'abcd123'
+         ];
+         //账户资金
+         $token = 'ac4b4a08a60bf77e1742902bc2acabf4';
+         $url = "http://www.liketea.com/index.php/api/User/userInfo?token={$token}";
+         $data = [
+             
+         ];
+         $result = $this->get_api_data($url,'post',$data);
+         
+         //绑定银行卡
+         $token = 'ac4b4a08a60bf77e1742902bc2acabf4';
+         $url = "http://www.liketea.com/index.php/api/User/bindbank?token={$token}";
+         $data = [
+             'username'=>'老油条',
+             'bank'=>'中国农业银行',
+             'cardnum'=>'6230520400028265874',
+         ];
+         
+             //银行卡列表接口
+         $token = 'ac4b4a08a60bf77e1742902bc2acabf4';
+         $url = "http://www.liketea.com/index.php/api/User/banklist?token={$token}";
+         $data = [
+         ];
+         
+            
+         $token = "f5604f8b2102befa1d026b52d2139880";
+         $url = "http://www.liketea.com/index.php/api/User/teart_list?token={$token}";
+         $data = [
+             'p'=>1,//分页码
+             'sort'=>'distance',//distance 距离排序　　score评分排序
+             'longitude'=>'120.235235',
+             'latitude'=>'31.325235'
+         ];
+         
+            
+         $token = "f5604f8b2102befa1d026b52d2139880";
+         $url = "http://www.liketea.com/index.php/api/Article/articlelist?token={$token}";
+         $data = [
+                //'article_id'=>1
+         ];
+         $token = "c0711dfd6496199f9e840d45ac6fbb89";
+         // gethotsearch clear_searchlog
+         $url = "http://www.liketea.com/index.php/api/Store/getshop_list?token={$token}";
+         $data = [
+             'longitude'=>'120.73815',
+             'latitude'=>'31.25812',
+             'sort'=>'distance'
+         ];
          
          $result = $this->get_api_data($url,'post',$data);
 
          print_r($result);
+         
+         
+         /*$token = "2ac92983c9c5e00bf878a8fc5d9e7284";
+         $url = "www.liketea.com/index.php/api/Cart/cart3?token={$token}";
+         
+         
+         $cart_from_data = [
+             'user_note'=>['1'=>'茶叶给我包好点不然不要2','2'=>'包好2点'],//留言内容
+             'coupon_id'=>['1'=>'65','2'=>'32'],//优惠卷id
+         ];
+         
+         $data = [
+             'address_id'=>'39',//收货地址
+             'act'=>'submit_order',//此参数表示添加订单
+             'cart_form_data'=>json_encode($cart_from_data)
+         ];
+         
+         
+         $token = "2dddc03d9994aaf210efae232fdc04e4";
+         $url = "http://118.190.204.122/index.php/api/Cart/cart2?token={$token}";
+         $data = [
+             
+         ];
+          $url = "http://118.190.204.122/index.php/api/Cart/addCart?token={$token}";
+         $data= [
+             'goods_id'=>170,
+             'goods_num'=>1,
+         ];
+          $token = "2dddc03d9994aaf210efae232fdc04e4";
+         $url = "http://118.190.204.122/index.php/api/Cart/cart2?token={$token}";
+         $data = [
+              
+         ];
+         
+         
+          $token = "623ae7bfc3f9dc705bdf582cc8429b00";
+          $url = "http://118.190.204.122/index.php/api/Cart/cart3?token={$token}";
+         
+         
+         $cart_from_data = [
+             'user_note'=>['1'=>'茶叶给我包好点不然不要2','13'=>'包好2点'],//留言内容
+             'coupon_id'=>['1'=>'65','13'=>'32'],//优惠卷id
+         ];
+         
+         $data = [
+             'address_id'=>'39',//收货地址
+             'act'=>'submit_order',//此参数表示添加订单
+             'cart_form_data'=>json_encode($cart_from_data)
+         ];
+         
+         $token = "69185555cae128da972218f336081a3d";
+         $url = "http://118.190.204.122/index.php/api/Cart/cart2?token={$token}";
+         $data = [
+         
+         ];
+          //提现
+         $token = "b94a6081dcb9ac81a78c0034b41c676f";
+         $url = "http://118.190.204.122/index.php/api/User/withdrawals?toke={$token}";
+         $data = [
+              'bankid'=>1
+         ];
+          
+         $result = $this->get_api_data($url,'post',$data);
+
+         print_r($result);
+         */
+         
+        
+ 
+        
+         //身份识别接口  实名认证
+         
+         $idcard_f = "./public/upload/idcard/hjkidcardf.jpg";
+         $idcard_g = "./public/upload/idcard/cxcidcard2.jpg";
+          
+         $idcard_source_f = base64_encode(file_get_contents($idcard_f));
+         $idcard_source_g = base64_encode(file_get_contents($idcard_g));
+          /*
+         $token = '31a5237ac4839e6702746ba7b0b2fc15';
+         $url = "118.190.204.122/index.php/api/User/idcard_recognize?token={$token}";
+         $data = [
+             'realname'=>'曹晓晨',
+             'sex'=>'1',
+             'idcard'=>'320581199502271910',
+             'idcard_f'=>$idcard_source_f,
+             'idcard_b'=>$idcard_source_g
+         ];
+         
+         $result = $this->get_api_data($url,'post',$data);
+         
+         print_r($result);
+         */
+         echo $idcard_source_f;
      }
      
       

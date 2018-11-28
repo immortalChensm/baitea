@@ -31,12 +31,7 @@
 	  <form class="navbar-form form-inline" action="{:U('Admin/Article/articleList')}" method="post">      
       <div class="sDiv">
         <div class="sDiv2">
-          <select  name="cat_id" class="select">
-            <option value="">选择文章类别</option>
-            <foreach name="cats" item="vo">
-            <option value="{$vo.cat_id}" <if condition="$vo[cat_id] eq $cat_id">selected</if>>{$vo.cat_name}</option>
-            </foreach>            
-          </select>
+          
           <input type="text" size="30" name="keywords" class="qsbox" placeholder="搜索相关数据...">
           <input type="submit" class="btn" value="搜索">
         </div>
@@ -54,9 +49,11 @@
               <th align="left" abbr="article_title" axis="col3" class="">
                 <div style="text-align: left; width: 240px;" class="">标题</div>
               </th>
+              <!--
               <th align="left" abbr="ac_id" axis="col4" class="">
                 <div style="text-align: left; width: 150px;" class="">文章分类</div>
               </th>
+                -->
               <th align="center" abbr="article_show" axis="col5" class="">
                 <div style="text-align: center; width: 80px;" class="">显示</div>
               </th>
@@ -76,9 +73,10 @@
     </div>
     <div class="tDiv">
       <div class="tDiv2">
+      <!-- 
           <div class="fbutton"> 
         	<a href="{:U('Admin/Article/article')}"><div class="add" title="新增文章"><span><i class="fa fa-plus"></i>新增文章</span></div></a> 
-          </div>
+          </div> -->
           <!-- <div class="fbutton"><div class="del" title="将选定行数据批量删除"><span><i class="fa fa-trash"></i>批量删除</span></div></div>-->
       </div>
       <div style="clear:both"></div>
@@ -95,9 +93,10 @@
                 <td align="left" class="">
                   <div style="text-align: left; width: 240px;">{$vo.title|getSubstr=0,33}</div>
                 </td>
+                <!-- 
                 <td align="left" class="">
                   <div style="text-align: left; width: 150px;">{$vo.category}</div>
-                </td>
+                </td> -->
                 <td align="center" class="">
                   <div style="text-align: center; width: 80px;">
                     <if condition='$vo[is_open] eq 1'>
@@ -111,9 +110,11 @@
                   <div style="text-align: center; width: 160px;">{$vo.add_time}</div>
                 </td>
                 <td align="center" class="handle">
+                <!-- 
                   <div style="text-align: center; width: 170px; max-width:170px;"> <a class="btn blue" target="_blank" href="{:U('Home/Article/detail',array('article_id'=>$vo['article_id']))}"><i class="fa fa-search"></i>查看</a>
+                   
                     <notin name="vo.article_id" value="$article_able_id"> <a class="btn red"  href="javascript:void(0)" data-url="{:U('Article/aticleHandle')}" data-id="{$vo.article_id}" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a> </notin>
-                    <in name="vo.article_id" value="$article_able_id"> <a class="btn red"  href="javascript:;" onclick="layer.alert('系统文章不得删除!',{icon:2});"><i class="fa fa-trash-o"></i>删除</a> </in>
+                    <in name="vo.article_id" value="$article_able_id"> <a class="btn red"  href="javascript:;" onclick="layer.alert('系统文章不得删除!',{icon:2});"><i class="fa fa-trash-o"></i>删除</a> </in>-->
                     <a href="{:U('Article/article',array('act'=>'edit','article_id'=>$vo['article_id']))}" class="btn blue"><i class="fa fa-pencil-square-o"></i>编辑</a> 
                   </div>
                 </td>

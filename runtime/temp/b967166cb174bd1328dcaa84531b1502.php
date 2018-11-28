@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:52:"./application/admin/view2/community\articleList.html";i:1523442968;s:44:"./application/admin/view2/public\layout.html";i:1517208468;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:52:"./application/admin/view2/community\articleList.html";i:1524986671;s:44:"./application/admin/view2/public\layout.html";i:1525742439;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -129,7 +129,7 @@ function selectAll(name,obj){
 
 function get_help(obj){
 	
-	window.open("http://www.tp-shop.cn/");
+	
 	return false;
 	
     layer.open({
@@ -240,7 +240,7 @@ function publicHandle(ids,handle_type){
         <h5>(共<?php echo $pager->totalRows; ?>条记录)</h5>
       </div>
       <div title="刷新数据" class="pReload"><i class="fa fa-refresh"></i></div>
-	  <form class="navbar-form form-inline" action="<?php echo U('Admin/Article/articleList'); ?>" method="post">      
+	  <form class="navbar-form form-inline" action="<?php echo U('Admin/Community/articleList'); ?>" method="post">      
       <div class="sDiv">
         <div class="sDiv2">
         <!--
@@ -278,8 +278,14 @@ function publicHandle(ids,handle_type){
               <th align="center" abbr="article_time" axis="col6" class="">
                 <div style="text-align: center; width: 120px;" class="">发布时间</div>
               </th>
+              
               <th align="center" axis="col1" class="handle">
-                <div style="text-align: center; width: 150px;">操作</div>
+                <div style="text-align: center; width: 120px;">发布者</div>
+              </th>
+              
+              
+              <th align="center" axis="col1" class="handle">
+                <div style="text-align: center; width: 200px;">操作</div>
               </th>
               <th style="width:100%" axis="col7">
                 <div></div>
@@ -291,11 +297,11 @@ function publicHandle(ids,handle_type){
     </div>
     <div class="tDiv">
       <div class="tDiv2">
-      <!-- 
+      
           <div class="fbutton"> 
-        	<a href="<?php echo U('Admin/Article/article'); ?>"><div class="add" title="新增文章"><span><i class="fa fa-plus"></i>新增文章</span></div></a> 
+        	<a href="<?php echo U('Admin/Community/add_articletea',['act'=>'add']); ?>"><div class="add" title="添加社区公告"><span><i class="fa fa-plus"></i>添加公告</span></div></a> 
           </div>
-          -->
+          
           <!-- <div class="fbutton"><div class="del" title="将选定行数据批量删除"><span><i class="fa fa-trash"></i>批量删除</span></div></div>-->
       </div>
       <div style="clear:both"></div>
@@ -324,10 +330,19 @@ function publicHandle(ids,handle_type){
                   <div style="text-align: center; width: 120px;"><?php echo $vo['add_time']; ?></div>
                 </td>
                 
+                <td align="center" class="">
+                  <div style="text-align: center; width: 120px;"><?php echo $vo['user']; ?></div>
+                </td>
+                
                  <td align="center" class="handle">
-                  <div style="text-align: center; width: 170px; max-width:170px;"> <a class="btn blue" target="_blank" href="<?php echo U('Home/Article/detail',array('article_id'=>$vo['id'])); ?>"><i class="fa fa-search"></i>查看</a>
-                   <a class="btn red"  href="javascript:void(0)" data-url="<?php echo U('Article/aticleHandle'); ?>" data-id="<?php echo $vo['id']; ?>" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a>
-
+                  <div style="text-align: center; width: 200px; max-width:200px;">
+                 
+                   <a class="btn blue" target="_self" href="<?php echo U('Admin/Community/detail',array('article_id'=>$vo['id'])); ?>"><i class="fa fa-search"></i>查看</a>
+                   
+                   <?php if($vo['type'] == 1): ?>
+                   			<a class="btn red"  href="javascript:void(0)" data-url="<?php echo U('Community/aticleHandle'); ?>" data-id="<?php echo $vo['id']; ?>" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a>
+                   			<a href="<?php echo U('Community/add_articletea',array('act'=>'edit','article_id'=>$vo['id'])); ?>" class="btn blue"><i class="fa fa-pencil-square-o"></i>编辑</a> 
+ 					<?php endif; ?>
                   </div>
                 </td>
                 

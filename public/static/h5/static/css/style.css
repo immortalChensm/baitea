@@ -1,0 +1,296 @@
+
+body,td,th {  font-family: "楷体";   padding:0;margin:0; }
+.weui-bg-fa{
+    background-color: #fafafa;
+}
+.weui-fcolor{
+    color: #333;
+}
+.weui-fcolor2{
+    color: #ffffff;
+}
+.weui-bg-fff{
+    background-color: #ffffff;
+}
+.placeholder{
+    margin: 5px;
+    padding: 0 10px;
+    background-color: #ebebeb;
+    height: 2.3em;
+    line-height: 2.3em;
+    text-align: center;
+    color: #cfcfcf;
+}
+.placeholders{
+    height: 2.3em;
+    line-height: 2.3em;
+    text-align: center;
+    color: #cfcfcf;
+}
+.weui-paddding-space{
+
+}
+.page__bd_spacing{
+
+    line-height: 45px;
+    border-bottom: 1px solid #e5e5e5;
+    background-color: #fff;
+    position: fixed;
+    height: 45px;
+    width: 90%;
+    padding: 0px 5% 0px 5%;
+    top: 0;
+    z-index: 99999;
+}
+.page__bd_spacings{
+    line-height: 45px;
+    border-bottom: 1px solid #e5e5e5;
+    background-color: #fff;
+    height: 45px;
+    width: 90%;
+    padding: 0px 5%;
+}
+.weui-title{
+    text-align: center;
+    font-size: 1.1rem;
+}
+.weui-title-right{
+    font-size: 0.9rem;
+}
+.page__bd_space15{
+    padding: 0px 15px;
+}
+.weui-tab-qh{
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    background-color: #fff;
+    position: fixed;
+    top: 46px;
+    z-index: 99999;
+    width: 90%;
+    padding: 0 5% 0 5%;
+}
+.weui-show{
+    color:#92C960;
+    font-size: 1.15em;
+    border-bottom: 2px solid #92C960;
+}
+.weui-contents-padding{
+    padding: 0px 20px;
+    margin-top: 86px;
+    margin-bottom: 4rem;
+}
+.weui-flex-times{
+    text-align: center;
+    font-size: 13px;
+    color: #818181;
+    padding: 20px 0px 20px 0px;
+}
+.weui-list-data{
+    margin-bottom: 1rem;
+}
+.weui-form-preview__hd:after{
+    border-bottom:  none !important;
+}
+.weui-form-preview:before{
+    border:none;
+}
+.weui-form-preview:after{
+    border:none;
+}
+.weui-form-fw{
+    color: #333;
+    font-weight: 600;
+}
+.weui-icon-ys{
+    color:#85C34D;
+    font-size: 11px;
+    margin-right: 2px;
+}
+.weui-money-time{
+    color:#85C34D;
+    font-size: 14px;
+}
+.weui-form-preview__label{
+     margin-right: 0;
+     min-width: 0;
+}
+.weui-btns{
+    width: 55px;
+    float: right;
+    height: 15px;
+    border-radius: 25px;
+    line-height: 15px;
+    padding: 5px 8px;
+    margin-left: 0.4rem;
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+
+}
+.weui-btn-xz{
+    color:#85C34D;
+    border: 1px solid #85C34D;
+}
+.weui-form-preview{
+ border-radius: 5px;
+}
+.weui-over{
+    color: red;
+}
+.weui-tab-one{
+    display: none;
+}
+
+/*预约详情 start*/
+.weui-yuy-contents{
+    margin-top: 45px;
+}
+.weui-gps-icon{
+    padding: 2rem 0 2rem 0.5rem;
+}
+.weui-yuy-top{
+    height: .4em;
+    background-color: #fafafa;
+}
+.weui-server-price{
+    color: red;
+    font-size: 1em !important;
+}
+.weui-fy-height{
+    padding: 0px 15px;
+
+}
+.weui-xhx{
+    border-bottom: 1px solid #e5e5e5;
+}
+.weui-top-border:before{
+    border-top: none ;
+}
+.weui-footer-ys{
+    position: fixed;
+    bottom: 0;
+    width: 90%;
+    z-index: 999999;
+    padding: 0 5%;
+}
+.layui-ys{
+    width: 100%;
+    border-radius: 25px;
+    margin-bottom: .5em;
+}
+.layui-jd-ys{
+    border:1px solid #85C34D ;
+    background-color: #85C34D;
+}
+.layui-jd-zs{
+    border:1px solid #525252 ;
+    background-color: #525252;
+}
+.layui-btn+.layui-btn{
+     margin-left: 0px;
+}
+.layui-t{
+    width: 40%;
+    border-radius: 25px;
+    margin-bottom: .5em;
+    background-color:#85C34D ;
+}
+/*预约详情 end*/
+
+/*拒绝原因 start*/
+.weui-refuse{
+    border-radius: 5px;
+    background-color: #fafafa;
+    width: 100%;
+    height: 175px;
+    font-size: 14px;
+    border:1px solid #F6F6F6;
+}
+/*拒绝原因 end*/
+/*订单详情 start*/
+.weui-ly-icons{
+    padding: 1rem 0 1rem 0.5rem;
+}
+.weui-liu-yan{
+    padding: 5px 15px;
+    line-height: 2;
+}
+.weui-left-space{
+    width: 2rem;
+    padding: 2rem 0 2rem 0.5rem;
+}
+.weui-pay-bg1{
+    background-color:#FEBF2E ;
+}
+.weui-pay-bg2{
+    background-color:#56B771 ;
+}
+
+
+.weui-pay-color{
+  color: #ffffff;
+}
+.weui-yuy-h{
+    line-height: 25px;
+}
+.weui-bg-fafa{
+    background-color: #FAFAFA;
+}
+.weui-tx-icon{
+    padding: 0.5rem 0 0.5rem 0.5rem;
+}
+.weui-fq-left{
+    padding: 10px;
+}
+.weui-price-height{
+    line-height: 40px;
+}
+.weui-title-height{
+    line-height: 30px;
+}
+.weui-xj-price{
+    font-size: 1em !important;
+}
+.pay-btn{
+    border-radius: 25px;
+    height: 30px;
+    line-height: 30px;
+    padding: 7px 15px;
+    font-size: 12px;
+    border: 1px solid #e5e5e5;
+    background-color: #ffffff;
+}
+.weui-order-hg{
+    line-height: 50px;
+    border-top:1px solid #e5e5e5;
+    background-color: #ffffff;
+}
+.pay-sy{
+ color:#8FC85C ;
+    border:1px solid #8FC85C;
+}
+.weui-padding-tb{
+    padding: 10px 0;
+}
+.weui-bottom{
+    margin-bottom: 4rem;
+}
+/*订单详情 end*/
+/*预约详情 start*/
+.weui-left-jl{
+    text-align: left;
+    padding-left: 0.5em;
+}
+.weui-cancel-yy{
+    border-top: 1px solid #e5e5e5;
+}
+.weui-text-yy{
+    width: 99%;
+    height: 80px;
+    border-radius: 5px;
+    border: 1px solid #e5e5e5;
+    background-color: #f6f6f6;
+}
+/*预约详情  end*/
+

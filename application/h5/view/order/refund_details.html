@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>去喝茶</title>
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/aui.css">
+    <link rel="stylesheet" href="/public/__STATIC__/h5/css/mobile.css">
+    <script src="/public/__STATIC__/h5/js/jquery.min.js"></script>
+</head>
+<body>
+<!--
+<header>
+    <a class="head-icon">
+        <div class="icon-return"></div>
+    </a>
+    <div class="head-words">
+        订单详情
+    </div>
+    <a class="head-empty"></a>
+</header>
+ -->
+  
+  
+  
+<div class="main main-fill-bottom">
+    <div class="f-order-nopay">
+    
+        <div class="m-top">
+            <div class="a-content">
+                <div class="a-t">{$info.return_goods.status_name}</div>
+                
+                <div class="a-b">
+                <notempty name="info.info.return_goods.refund_time">
+                {:date('Y-m-d H:i',$info.return_goods.refund_time)}
+                
+                </notempty>
+                
+                </div>
+                
+                
+            </div>
+            <div class="a-icon"></div>
+        </div>
+        
+        
+        <div class="m-info">
+            <div class="a-nav">
+                <div class="a-l" style="background-image: url({$info.shoplogo})"></div>
+                <span>{$info.return_goods.store_name}</span>
+                <div class="a-icon"></div>
+            </div>
+            <div class="a-top">
+                <div class="a-img" style="background-image: url({$info.goods.original_img})"></div>
+                <div class="a-right">
+                    {$info.goods.goods_name}
+                    <span>¥{$info.goods.shop_price}</span>
+                    <i>×{$info.return_goods.goods_num}</i>
+                </div>
+            </div>
+            
+        </div>
+        <div class="m-order-info">
+            <div class="a-text"><span>退款原因：</span>{$info.return_goods.reason}</div>
+            <div class="a-text"><span>退款金额：</span>{$info.return_goods.refund_money}</div>
+            <div class="a-text"><span>申请时间：</span>{:date('Y-m-d H:i',$info.return_goods.addtime)}</div>
+            <div class="a-text"><span>退款编号：</span>{$info.return_goods.order_sn}</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function(){
+
+    })
+</script>
+</body>
+</html>

@@ -97,7 +97,7 @@ class Cart extends Base {
             unset($where);
             $where['user_id'] = $this->user_id;
             $store_where  = "user_id = ".$this->user_id;
-        } 
+        }
         $cartList = M('Cart')->where($where)->getField("id,goods_num,selected"); 
         
         $cartLogic = new CartLogic();
@@ -156,11 +156,41 @@ class Cart extends Base {
             }
             $result['storeList'][] = $store;
         }
-         
+        //$this->getcartgoods($result);
         $result['total_price']['num'] = $cart_count;
-        $this->ajaxReturn(['status' => 1, 'msg' => '获取成功', 'result' => $result]);
+        if($result){
+            $this->ajaxReturn(['status' => 1, 'msg' => '购物车啥也没有', 'result' => $this->getcartgoods($result)]);
+        }else{
+            $this->ajaxReturn(['status' => 1, 'msg' => '获取成功', 'result' => $this->getcartgoods($result)]);
+        }
+        
     }
 
+    //@wroteby jackcsm 获取购物车列表商品信息
+    private function getcartgoods($cartlist)
+    {
+        if(!isset($cartlist['storeList']))return false;
+        $goodsId = [];
+        foreach ($cartlist['storeList'] as $k=>$v){
+            foreach ($v['cartList'] as $kv=>$v){
+                
+                $goodsId[] = $v['goods_id'];
+            }   
+        }
+        
+        $goodsinfo = \think\Db::name("goods")->whereIn("goods_id",$goodsId)->select();
+        foreach ($goodsinfo as $k=>$v){
+            $goodsinfo[$v['goods_id']] = $v['original_img'];
+        }
+        
+        foreach ($cartlist['storeList'] as $k=>$v){
+            foreach ($v['cartList'] as $kv=>$v){
+        
+                $cartlist['storeList'][$k]['cartList'][$kv]['img'] = $goodsinfo[$v['goods_id']];
+            }
+        }
+        return $cartlist;
+    }
     /**
      * 购物车第二步确定页面
      * 此方法是点击立即购买或是去购物车结算时要显示的页面
@@ -170,9 +200,9 @@ class Cart extends Base {
         $goods_num = input("goods_num/d");// 商品数量
         $item_id = input("item_id/d"); // 商品规格id
         $action = input("action"); // 行为
-        if ($this->user_id == 0){
-            $this->ajaxReturn(array('status'=>-1,'msg'=>'用户user_id不能为空','result'=>''));
-        }
+        //if ($this->user_id == 0){
+        //    $this->ajaxReturn(array('status'=>-1,'msg'=>'用户user_id不能为空','result'=>''));
+        //}
         $address_id = I('address_id/d');
         //获取地址
         if ($address_id) {
@@ -235,15 +265,15 @@ class Cart extends Base {
         $storeShippingCartList = $cartLogic->getShippingCartList($storeCartList);//转换成带物流数据的购物车商品
         $userCouponList = $couponLogic->getUserAbleCouponList($this->user_id, $cartGoodsId, $cartGoodsCatId);//用户可用的优惠券列表
         $userCartCouponList = $cartLogic->getCouponCartList($storeCartList, $userCouponList);
-        $UserStoreCouponNum = $cartLogic->getUserStoreCouponNumArr();
-        $couponNum = !empty($UserStoreCouponNum) ? $UserStoreCouponNum : [];
+        //$UserStoreCouponNum = $cartLogic->getUserStoreCouponNumArr();
+        //$couponNum = !empty($UserStoreCouponNum) ? $UserStoreCouponNum : [];
         $json_arr = array(
             'status'=>1,
             'msg'=>'获取成功',
             'result'=>array(
                 'addressList' =>$userAddress, // 收货地址
                 'userCartCouponList'=>$userCartCouponList,  //用户可用的优惠券列表
-                'couponNum'=>$couponNum,  //用户可用的优惠券列表
+                'couponNum'=>'0',  //用户可用的优惠券列表
                 'cartGoodsTotalNum'=>$cartGoodsTotalNum,   //购物车购买的商品总数
                 'storeShippingCartList'=>$storeShippingCartList,//购物车列表
                 'storeCartTotalPrice'=>$storeCartTotalPrice,//商品总价
@@ -284,16 +314,16 @@ class Cart extends Base {
         $pay_points =  I("pay_points/d",0); //  使用积分
         $user_money =  I("user_money/f",0); //  使用余额
         $user_money = $user_money ? $user_money : 0;
-
+        
         $cart_form_data = $_POST["cart_form_data"]; // goods_num 购物车商品数量
         $cart_form_data = json_decode($cart_form_data,true); //app 端 json 形式传输过来
         //$shipping_code    = $cart_form_data['shipping_code']; // $shipping_code =  I("shipping_code"); //  物流编号  数组形式
         $user_note        = $cart_form_data['user_note'] ?: ''; // $user_note = I('user_note'); // 给卖家留言      数组形式
         $coupon_id        = $cart_form_data['coupon_id'] ?: 0; // $coupon_id =  I("coupon_id/d",0); //  优惠券id  数组形式
-//print_r($cart_form_data);
+
         $user_money = $user_money ? $user_money : 0;
         $cartLogic = new CartLogic();
-
+        //print_r($cart_form_data);
         $cartLogic->setUserId($this->user_id);
         if($action == 'buy_now'){
             $cartLogic->setGoodsModel($goods_id);
@@ -328,6 +358,8 @@ class Cart extends Base {
         //}
         
         $address = M('UserAddress')->where("address_id", $address_id)->find();
+        //print_r($order_goods);
+        //print_r($coupon_id);
         $result = calculate_price($this->user_id, $order_goods, $shipping_code, $address['province'], $address['city'], $address['district'], $pay_points, $user_money, $coupon_id);
         if ($result['status'] < 0){
             exit(json_encode($result));
@@ -340,7 +372,6 @@ class Cart extends Base {
             'payables' => number_format(array_sum($result['result']['store_order_amount']), 2, '.', ''), // 订单总额 减去 积分 减去余额 减去优惠券 优惠活动
             'goodsFee' => $result['result']['goods_price'],// 总商品价格
             'order_prom_amount' => array_sum($result['result']['store_order_prom_amount']), // 总订单优惠活动优惠了多少钱
-
             'store_order_prom_id' => $result['result']['store_order_prom_id'], // 每个商家订单优惠活动的id号
             'store_order_prom_amount' => $result['result']['store_order_prom_amount'], // 每个商家订单活动优惠了多少钱
             'store_order_prom_money' => $result['result']['store_order_prom_money'], // 每个商家订单活动优惠需满足的金额
@@ -406,8 +437,75 @@ class Cart extends Base {
         if (!is_numeric($sum_order_amount)) {
             $this->ajaxReturn(['status'=>-1, 'msg'=>'订单不存在']);
         }
-        $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result' => $sum_order_amount]);
-    }    
+        
+        //@wroteby jackcsm 2018 04 24
+        $orderInfo['sum_order_amount'] = $sum_order_amount;
+        //$orderInfo['order']            = M('order')->where("order_sn|master_order_sn|order_id", $select_order_where)->find();
+        //$orderInfodetails = array_merge($orderInfo,$this->getorderGoods_store(M('order')->where("order_sn|master_order_sn|order_id", $select_order_where)->find()));
+        
+        //这个订单可能含有多个子订单
+        $storeId = [];
+        $orderId = [];
+        if(!empty($master_order_sn)){
+            //多个子订单的情况
+            $orderinfo = M('order')->where("master_order_sn", $select_order_where)->select();
+            //$store_goods_Id = [];
+            
+            foreach ($orderinfo as $k=>$v){
+               /*$orderInfo['cart'][] = $v;
+               $orderInfo['store'][] = \think\Db::name("store")
+                                        ->where("store_id",$v['store_id'])
+                                        ->find();
+               $orderInfo['goods'][] = \think\Db::name("order_goods")
+                                                    ->alias("o")
+                                                    ->field("o.*,g.original_img")
+                                                    ->whereIn("o.order_id",$v['order_id'])
+                                                    ->join("__GOODS__ g","g.goods_id=o.goods_id","LEFT")
+                                                    ->select();
+               
+               */
+               $temp['order'] = $v;
+               $temp['store'] = \think\Db::name("store")
+                                        ->where("store_id",$v['store_id'])
+                                        ->find();;
+               $temp['goods'] = \think\Db::name("order_goods")
+                                                    ->alias("o")
+                                                    ->field("o.*,g.original_img")
+                                                    ->whereIn("o.order_id",$v['order_id'])
+                                                    ->join("__GOODS__ g","g.goods_id=o.goods_id","LEFT")
+                                                    ->select();
+               
+               //$orderInfo[] = $temp;
+               $orderInfo['cart'][] = $temp;
+               
+            }
+            
+        }else{
+            $orderinfo = M('order')->where("order_sn|order_id", $select_order_where)->find();
+            $orderInfo['store'] = \think\Db::name("store")
+                                                ->where("store_id",$orderinfo['store_id'])
+                                                ->find();
+            $orderInfo['goods'] = \think\Db::name("order_goods")
+                                                ->alias("o")
+                                                ->field("o.*,g.original_img")
+                                                ->whereIn("o.order_id",$orderinfo['order_id'])
+                                                ->join("__GOODS__ g","g.goods_id=o.goods_id","LEFT")
+                                                ->select();
+            $orderInfo['order'] = $orderinfo;
+        }
+        //$all['cart'] = $orderInfo;
+        //print_r($orderInfo);
+        $this->ajaxReturn(['status'=>1,'msg'=>'获取成功','result' => $orderInfo]);
+       
+    }
+
+    //获取此订单的店铺信息和商品信息
+    public function getorderGoods_store($storeid,$orderid)
+    {
+        $store = \think\Db::name("store")->whereIn("store_id",$storeid)->select();
+        $goods = \think\Db::name("order_goods")->whereIn("order_id",$orderid)->select();
+        
+    }
     
     /**
      * 优惠券兑换

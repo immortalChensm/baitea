@@ -67,7 +67,7 @@ class ActivityLogic extends Model
      * @param type $atype 排序类型 1:默认id排序，2:即将过期，3:面值最大
      * @param type $p 第几页
      */
-    public function getCouponList($atype, $user_id, $p = 1)
+    public function getCouponList($atype, $user_id, $p = 1,$store_id)
     {
         $time = time();
         $where = array('type' => 2,'status'=>1,'send_start_time'=>['elt', $time],'send_end_time'=>['egt', $time]);
@@ -80,9 +80,15 @@ class ActivityLogic extends Model
             //面值最大
             $order = ['money' => 'desc'];
         }
-
+        
+        $where["store_id"] = $store_id;
+        /*
         $coupon_list = M('coupon')->field("*,send_end_time-'$time' as spacing_time")
-                ->where($where)->page($p, 15)->order($order)->fetchSql(false)->select();
+        ->where($where)->page($p, 15)->order($order)->fetchSql(false)->select();
+        */
+        
+        $coupon_list = M('coupon')->field("*,send_end_time-'$time' as spacing_time")
+                ->where($where)->order($order)->fetchSql(false)->select();
 
         if (is_array($coupon_list) && count($coupon_list) > 0) {
             $store_id_arr = get_arr_column($coupon_list, 'store_id');
@@ -109,6 +115,55 @@ class ActivityLogic extends Model
         ];
     }
 
+    
+    /**
+     * 优惠券列表  获取指定店铺的优惠卷列表
+     * @param type $atype 排序类型 1:默认id排序，2:即将过期，3:面值最大
+     * @param type $p 第几页
+     */
+    public function getCouponListbystoreid($atype, $user_id, $store_id,$p = 1)
+    {
+        $time = time();
+        $where = array('type' => 2,'status'=>1,'send_start_time'=>['elt', $time],'send_end_time'=>['egt', $time]);
+        $order = array('id' => 'desc');
+        if ($atype == 2) {
+            //即将过期
+            $order = ['spacing_time' => 'asc'];
+            $where["send_end_time-'$time'"] = ['egt', 0];
+        } elseif ($atype == 3) {
+            //面值最大
+            $order = ['money' => 'desc'];
+        }
+    
+        $where["store_id"] = $store_id;
+        
+        $coupon_list = M('coupon')->field("*,send_end_time-'$time' as spacing_time")
+        ->where($where)->page($p, 15)->order($order)->fetchSql(false)->select();
+    
+        if (is_array($coupon_list) && count($coupon_list) > 0) {
+            $store_id_arr = get_arr_column($coupon_list, 'store_id');
+            $store_arr = M('store')->where("store_id in (" . implode(',', $store_id_arr) . ")")->getField('store_id,store_name,store_logo');
+            if ($user_id) {
+                $user_coupon = M('coupon_list')->where(['uid' => $user_id, 'type' => 2])->getField('cid',true);
+            }
+            if (!empty($user_coupon)) {
+                foreach ($coupon_list as $k => $val) {
+                    $coupon_list[$k]['isget'] = 0;
+                    if (in_array($val['id'],$user_coupon)) {
+                        $coupon_list[$k]['isget'] = 1;
+                    }
+                    if($coupon_list[$k]['use_type'] == 0)$coupon_list[$k]['use_scope'] = '全店通用';
+                    if($coupon_list[$k]['use_type'] == 1)$coupon_list[$k]['use_scope'] = '指定商品';
+                    if($coupon_list[$k]['use_type'] == 2)$coupon_list[$k]['use_scope'] = '指定分类';
+                }
+            }
+        }
+         
+        return [
+            'store_arr' => $store_arr ?: [],
+            'coupon_list' => $coupon_list,
+        ];
+    }
     /**
      * 获取优惠券查询对象
      * @param int $queryType 0:count 1:select

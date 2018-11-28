@@ -66,16 +66,37 @@ class CouponLogic extends Model
      * @param $store_id|商家id
      * @return int|mixed
      */
-    public function getCouponMoney($user_id, $coupon_id, $store_id)
+    public function getCouponMoney($user_id, $coupon_id, $store_id,$order_goods)
     {
+        
+        
         if ($coupon_id == 0) {
             return 0;
         }
-        $couponList = M('CouponList')->where("store_id = $store_id and uid = $user_id and id = $coupon_id")->find(); // 获取用户的优惠券
+        //在此　获取用户已领取的优惠卷
+        $coupon_id_new = M('CouponList')->where("store_id = $store_id and uid = $user_id and cid = $coupon_id")->find();
+        
+        $couponList = M('CouponList')->where("store_id = $store_id and uid = $user_id and id = {$coupon_id_new['id']}")->find(); // 获取用户的优惠券
+       
         if (empty($couponList)) {
             return 0;
         }
+       
         $coupon = M('Coupon')->where("id", $couponList['cid'])->find(); // 获取 优惠券类型表
+        /*
+        foreach ($order_goods as $key => $val) {
+        
+            //$order_goods[$key]['goods_fee'] = $val['goods_num'] * $val['member_goods_price'];    // 小计
+            $money = $val['goods_num'] * $val['member_goods_price'];
+            if($money<=$coupon['condition']){
+                return [
+                    "status"=>-1,
+                    "msg"=>"优惠券使用条件不允许"
+                ];
+            }
+              
+        }
+        */
         $coupon['money'] = $coupon['money'] ? $coupon['money'] : 0;
         return $coupon['money'];
     }

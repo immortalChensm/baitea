@@ -56,11 +56,11 @@ return [
     // +----------------------------------------------------------------------
 
     // 默认模块名
-    'default_module'         => 'home',
+    'default_module'         => 'admin',
     // 禁止访问模块
-    'deny_module_list'       => ['common'],
+    'deny_module_list'       => ['common','mobile'],
     // 默认控制器名
-    'default_controller'     => 'Index',
+    'default_controller'     => 'Admin',
     // 默认操作名
     'default_action'         => 'index',
     // 默认验证器
@@ -315,6 +315,20 @@ return [
     	'CANCELLED'=> '已作废',
         'OTHER' => '未知',
     ),
+    
+
+    'CROWD_ORDER_STATUS_DESC' => array(
+        'WAITPAY' => '待支付',
+        'WAITSEND'=>'待发货',
+        'WAITRECEIVE'=>'待收货',
+        'WAITCCOMMENT'=> '待评价',
+        'CANCEL'=> '已取消',
+        'CANCEL_REFUND'=> '已取消(已退款)',
+        'FINISH'=> '已完成', //
+        'CANCELLED'=> '已作废',
+        'OTHER' => '未知',
+    ),
+    
     'REFUND_STATUS'=>array(
     		-2 => '服务单取消',//会员取消
     		-1 => '审核失败',//不同意
@@ -445,5 +459,26 @@ return [
     //身份证识别apikey
     'IDCARD_RECOGNIZE_API_KEY'=>'39bc7d8317d8f755440f5246781c4b77',
     //身份证认证apikey
-    'IDCARD_QUERY_API_KEY'=>'9703d88eebb518204edb045be7c5aef4'
+    'IDCARD_QUERY_API_KEY'=>'9703d88eebb518204edb045be7c5aef4',
+    
+    //直播防盗key
+    'RMPT_STEAL_KEY'=>'dcb5a3bea13d78c086c9746d91e851a9',
+    
+    //生成推流地址的bizid 24289
+    'BIZID'=>'24289',
+    
+    //腾迅ＩＭ云sdkKey
+    'IM_SDKAPPID'=>'1400093730',
+    
+    //Im账号类型
+    'accountType'=>'27364',
+    
+    //账号管理员
+    'imadmin'=>'quhecha',
+    
+    //直播appid
+    'liveappid'=>'1256771408',
+    
+    //直播码模式接口鉴权key
+    'LIVE_API_KEY'=>'cfe03046d4e659eb459b6b0710c426ab',
 ];
